@@ -2,7 +2,6 @@
 #include "anh/service/service_manager.h"
 
 #include <algorithm>
-#include <regex>
 #include <string>
 #include <stdexcept>
 
@@ -10,6 +9,16 @@
 
 #include "anh/plugin/plugin_manager.h"
 #include "anh/service/service_interface.h"
+
+#ifndef WIN32
+#include <boost/regex.hpp>
+    using boost::regex;
+    using boost::regex_search;
+#else
+    #include <regex>
+    using std::regex;
+    using std::regex_search;
+#endif
 
 //using namespace anh::plugin;
 using namespace anh::service;
@@ -29,8 +38,6 @@ shared_ptr<ServiceInterface> ServiceManager::GetService(string name) {
     auto service = plugin_manager_->CreateObject<ServiceInterface>(name);
 
     if (!service) {
-        // throw exception here, service already exists
-        throw std::runtime_error("Unknown service requested: " + name);
         return nullptr;
     }
 
@@ -49,19 +56,18 @@ void ServiceManager::AddService(string name, shared_ptr<ServiceInterface> servic
     services_[name] = service;
 }
 
-void ServiceManager::Initialize(ServiceConfig& service_config) {
+void ServiceManager::Initialize() {
     auto registration_map = plugin_manager_->registration_map();
 
-    std::regex rx("Service");
-    
-    for_each(registration_map.begin(), registration_map.end(), [this, &rx, &service_config] (RegistrationMap::value_type& entry) {
+    regex rx("Service");
+
+    for_each(registration_map.begin(), registration_map.end(), [this, &rx] (RegistrationMap::value_type& entry) {
         std::string name = entry.first;
 
-        if (entry.first.length() > 7 && std::regex_search(name.begin(), name.end(), rx)) {
+        if (entry.first.length() > 7 && regex_search(name.begin(), name.end(), rx)) {
             auto service = GetService(entry.first);
 
             if (service) {
-                service->DescribeConfigOptions(service_config.first);
                 services_.insert(make_pair(entry.first, service));
             }
         }
