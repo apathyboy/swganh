@@ -6,6 +6,9 @@ vendor/*
 # ignore configuration files
 data/sql/setup.cg
 
+# ignore generated installers
+tools/windows/installer/*.exe
+
 # ignore OS generated files
 .DS_Store
 .redcar
