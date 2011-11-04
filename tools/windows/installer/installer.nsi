@@ -5,6 +5,7 @@
 ;Variables
 
 Var StartMenuFolder
+Var errorsrc
   
 ;--------------------------------
 ;Includes
@@ -45,7 +46,6 @@ Function LaunchServer
   SetOutPath "$INSTDIR"
   Exec "$INSTDIR\swganh.exe"
 FunctionEnd
-
 
 ;--------------------------------
 ;Interface Settings
@@ -100,26 +100,26 @@ FunctionEnd
 ;Installer Sections
 
 Section "SWGANH Server" SecServer
-  SetOutPath $INSTDIR
+    SetOutPath $INSTDIR
   
-  ;Install the client files
-  SetOverwrite on
-  File "..\..\..\bin\Release\swganh.exe"
-  File "..\..\..\bin\Release\*.dll"
-  File "..\..\..\README.markdown"
-  File /r "..\..\..\bin\Release\*.*"
+    ;Install the client files
+    SetOverwrite on
+    File "..\..\..\bin\Release\swganh.exe"
+    File "..\..\..\bin\Release\*.dll"
+    File "..\..\..\README.markdown"
+    File /r "..\..\..\data\*.*"
     
-  ;Store installation folder
-  WriteRegStr HKCU "Software\SWGANH Server" "" $INSTDIR
+    ;Store installation folder
+    WriteRegStr HKCU "Software\SWGANH Server" "" $INSTDIR
 
-  ;Create uninstaller
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SWGANH Server" "DisplayName" "SWGANH Server"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SWGANH Server" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SWGANH Server" "NoModify" 1
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SWGANH Server" "NoRepair" 1
-  WriteUninstaller "$INSTDIR\uninstall.exe"
+    ;Create uninstaller
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SWGANH Server" "DisplayName" "SWGANH Server"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SWGANH Server" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SWGANH Server" "NoModify" 1
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SWGANH Server" "NoRepair" 1
+    WriteUninstaller "$INSTDIR\uninstall.exe"
   
-  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+    !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     
     CreateShortCut "$DESKTOP\SWGANH Server.lnk" "$INSTDIR\swganh.exe"
   
@@ -128,32 +128,43 @@ Section "SWGANH Server" SecServer
     CreateShortCut "$SMPROGRAMS\$StartMenuFolder\SWGANH Server.lnk" "$INSTDIR\swganh.exe"
     CreateShortCut "$SMPROGRAMS\$StartMenuFolder\README.lnk" "$INSTDIR\README.markdown"
     
-  !insertmacro MUI_STARTMENU_WRITE_END
+    !insertmacro MUI_STARTMENU_WRITE_END
 
 SectionEnd
 
-;Section "Database" SecGuide
-; @todo
-;SectionEnd
+Section "Database" SecDatabase 
+    DetailPrint "Running import"
+    
+    ExecWait '"$INSTDIR\sql\setup-alt.bat" /user root /pass ""' $0
+    StrCmp $0 1 0 endinst
+    StrCpy $errorsrc "Wrong login or password"
+    Goto abortinst
+  
+    abortinst:
+    DetailPrint "                         "  
+    DetailPrint "$\n An error occured ! $\n"
+    DetailPrint "  $errorsrc              "
+    DetailPrint "                         "
+    
+    endinst:
+SectionEnd
 
 ;--------------------------------
 ;Uninstaller Section
 
 Section "Uninstall"
-
-  ;Delete any desktop shortcuts that may still exist
-  Delete "$DESKTOP\SWGANH Server.lnk"
+    ;Delete any desktop shortcuts that may still exist
+    Delete "$DESKTOP\SWGANH Server.lnk"
  
-  ;Delete the start menu items and the application installation directory
-  !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
+    ;Delete the start menu items and the application installation directory
+    !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
  
-  RMDir /r "$SMPROGRAMS\$StartMenuFolder"  
-  RMDir /r "$INSTDIR"
+    RMDir /r "$SMPROGRAMS\$StartMenuFolder"  
+    RMDir /r "$INSTDIR"
   
-  ;Clean up the registry
-  DeleteRegKey /ifempty HKCU "Software\SWGANH Server"
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SWGANH Server"
-
+    ;Clean up the registry
+    DeleteRegKey /ifempty HKCU "Software\SWGANH Server"
+    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SWGANH Server"
 SectionEnd
 
 ;--------------------------------
@@ -161,8 +172,10 @@ SectionEnd
 
 ;Language strings
 LangString DESC_SecServer ${LANG_ENGLISH} "The SWG:ANH Server is used to host to SWG:ANH based game clients."
+LangString DESC_SecDatabase ${LANG_ENGLISH} "The SWG:ANH database contains all of the required data to run a server instance."
 
 ;Assign language strings to sections
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecServer} $(DESC_SecServer)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecServer} $(DESC_SecServer)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDatabase} $(DESC_SecDatabase)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
