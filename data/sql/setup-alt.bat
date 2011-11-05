@@ -11,8 +11,8 @@
 set "PROJECT_BASE=%~dp0"
 set MYSQL=mysql
 set DBHOST=localhost
-set DBUSER=swganh
-set DBPASS=pass
+set DBUSER=
+set DBPASS=
 
 goto :PROCESS_ARGUMENTS
 :CONTINUE_FROM_PROCESS_ARGUMENTS
