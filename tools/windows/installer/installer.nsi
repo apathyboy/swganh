@@ -6,19 +6,21 @@
 
 Var StartMenuFolder
 Var errorsrc
-  
+
 ;--------------------------------
 ;Includes
 
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
+!include "TextFunc.nsh"
+!include "includes\Configuration.nsh"
 
 ;--------------------------------
 ;General
 
 ;Name and file
 Name "SWGANH Server"
-OutFile "swganh_server_installer.exe"
+OutFile "installer.exe"
 ShowInstDetails show
 BrandingText " "
  
@@ -74,6 +76,8 @@ FunctionEnd
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 
+Page custom Configuration ConfigurationValidate
+
 ;Start Menu Folder Page Configuration
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU" 
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\SWGANH Server" 
@@ -107,8 +111,20 @@ Section "SWGANH Server" SecServer
     File "..\..\..\bin\Release\swganh.exe"
     File "..\..\..\bin\Release\*.dll"
     File "..\..\..\README.markdown"
+    SetOverwrite off
     File /r "..\..\..\data\*.*"
     
+    ;Update the configuration
+    ${ConfigWrite} "$INSTDIR\config\swganh.cfg" "galaxy_name = " "$GalaxyName" $R0
+    ${ConfigWrite} "$INSTDIR\config\swganh.cfg" "connection.address = " "$GalaxyAddress" $R1
+    ${ConfigWrite} "$INSTDIR\config\swganh.cfg" "login.address = " "$GalaxyAddress" $R2
+    ${ConfigWrite} "$INSTDIR\config\swganh.cfg" "galaxy_manager.host = " "$DbHost" $R3
+    ${ConfigWrite} "$INSTDIR\config\swganh.cfg" "galaxy.host = " "$DbHost" $R4
+    ${ConfigWrite} "$INSTDIR\config\swganh.cfg" "galaxy_manager.username = " "$DbUser" $R5
+    ${ConfigWrite} "$INSTDIR\config\swganh.cfg" "galaxy.username = " "$DbUser" $R6
+    ${ConfigWrite} "$INSTDIR\config\swganh.cfg" "galaxy_manager.password = " "$DbPass" $R7
+    ${ConfigWrite} "$INSTDIR\config\swganh.cfg" "galaxy.password = " "$DbPass" $R8
+
     ;Store installation folder
     WriteRegStr HKCU "Software\SWGANH Server" "" $INSTDIR
 
@@ -135,7 +151,7 @@ SectionEnd
 Section "Database" SecDatabase 
     DetailPrint "Running import"
     
-    ExecWait '"$INSTDIR\sql\setup-alt.bat" /user root /pass ""' $0
+    ExecWait '"$INSTDIR\sql\setup-alt.bat" /host $DbHost /user $DbUser /pass $DbPass' $0
     StrCmp $0 1 0 endinst
     StrCpy $errorsrc "Wrong login or password"
     Goto abortinst
