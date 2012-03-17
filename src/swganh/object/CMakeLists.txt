@@ -1,9 +1,11 @@
-#python bindings
-add_subdirectory(utilities)
+include(ANHPythonBinding)
 
-include(ANHLibrary)
-
-AddANHLibrary(anh
+AddANHPythonBinding(object
+	PREFIX_NAME swgpy
+	POSTFIX_NAME binding
+    DEPENDS 
+		anh_lib
+        swganh_lib
     ADDITIONAL_INCLUDE_DIRS
         ${Boost_INCLUDE_DIR}
         ${GLM_INCLUDE_DIR}
@@ -19,13 +21,14 @@ AddANHLibrary(anh
         ${Boost_DATE_TIME_LIBRARY_DEBUG}
         ${Boost_LOG_LIBRARY_DEBUG}
         ${Boost_FILESYSTEM_LIBRARY_DEBUG}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY_DEBUG}
         ${Boost_PYTHON3_LIBRARY_DEBUG}
         ${Boost_REGEX_LIBRARY_DEBUG}
         ${Boost_SYSTEM_LIBRARY_DEBUG}
         ${Boost_THREAD_LIBRARY_DEBUG}
         ${MYSQL_LIBRARY_DEBUG}
         ${MYSQLCONNECTORCPP_LIBRARY_DEBUG}
-        ${PYTHON_LIBRARIES}
+        ${PYTHON_LIBRARY}
         ${TBB_DEBUG_LIBRARIES}
         ${ZLIB_LIBRARY_DEBUG}
     OPTIMIZED_LIBRARIES 
@@ -33,13 +36,14 @@ AddANHLibrary(anh
         ${Boost_DATE_TIME_LIBRARY_RELEASE}
         ${Boost_LOG_LIBRARY_RELEASE}
         ${Boost_FILESYSTEM_LIBRARY_RELEASE}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE}
         ${Boost_PYTHON3_LIBRARY_RELEASE}
         ${Boost_REGEX_LIBRARY_RELEASE}
         ${Boost_SYSTEM_LIBRARY_RELEASE}
         ${Boost_THREAD_LIBRARY_RELEASE}
         ${MYSQL_LIBRARY_RELEASE}
         ${MYSQLCONNECTORCPP_LIBRARY_RELEASE}
-        ${PYTHON_LIBRARIES}
+        ${PYTHON_LIBRARY}
         ${TBB_LIBRARIES}
         ${ZLIB_LIBRARY_RELEASE}
 )
