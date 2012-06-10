@@ -155,7 +155,7 @@ find_package(Boost 1.49.0 COMPONENTS date_time filesystem log log_setup program_
 find_package(Glm REQUIRED)
 find_package(MysqlConnectorC REQUIRED)
 find_package(MysqlConnectorCpp REQUIRED)
-find_package(OpenSceneGraph 3.0.0 REQUIRED osgAnimation osgViewer osgText osgDB osgGA)
+find_package(OpenSceneGraph 3.0.0 REQUIRED osgAnimation osgViewer osgText osgDB osgGA osgUtil)
 find_package(PythonLibs REQUIRED)
 find_package(Turtle REQUIRED)
 find_package(ZLib REQUIRED)
