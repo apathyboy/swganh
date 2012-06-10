@@ -16,7 +16,11 @@ add_definitions(-D_AFXDLL)
 set(CMAKE_MFC_FLAG 2)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clr /AI\"${CMAKE_CURRENT_SOURCE_DIR}/References\"")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${Boost_INCLUDE_DIR}
+    ${OSG_INCLUDE_DIR}
+    ${ZLIB_INCLUDE_DIR})
 
 add_executable(swged WIN32
     ${SOURCES}
@@ -26,7 +30,10 @@ add_executable(swged WIN32
 target_link_libraries(swged
     swganh_lib
     anh_lib
+    treLib
+    meshLib
     ${Boost_LIBRARIES}
+    ${OPENSCENEGRAPH_LIBRARIES}
     debug ${ZLIB_LIBRARY_DEBUG}
     optimized ${ZLIB_LIBRARY_RELEASE}
 )

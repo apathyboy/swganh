@@ -40,6 +40,15 @@ add_custom_command(
     VERBATIM
 )
 
+get_filename_component(OSG_DLL_PATH ${OSG_LIBRARY} PATH)
+string(REPLACE "/" "\\" OSG_DLL_PATH "${OSG_DLL_PATH}\\..\\bin")
+add_custom_command(
+    TARGET DEPS
+    POST_BUILD
+    COMMAND xcopy "${OSG_DLL_PATH}\\*.dll" "${WIN_PROJECT_BINARY_DIR}\\bin\\$\(Configuration\)" /D /I /Y /s
+    VERBATIM
+)
+
 get_filename_component(PYTHON_DLL_PATH ${PYTHON_LIBRARY} PATH)
 string(REPLACE "/" "\\" PYTHON_DLL_PATH "${PYTHON_DLL_PATH}")
 add_custom_command(
