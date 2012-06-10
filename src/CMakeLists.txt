@@ -18,6 +18,7 @@ include_directories(
 add_subdirectory(anh)
 add_subdirectory(meshlib)
 add_subdirectory(trelib)
+add_subdirectory(osgswg)
 
 ## project executables
 add_subdirectory(swganh)

@@ -4,3 +4,6 @@
 [submodule "src/trelib"]
 	path = src/trelib
 	url = git://github.com/apathyboy/trelib.git
+[submodule "src/osgswg"]
+	path = src/osgswg
+	url = git://github.com/apathyboy/osgswg.git
