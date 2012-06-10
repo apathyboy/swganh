@@ -10,8 +10,14 @@ else()
     include(PosixPostBuild)
 endif()
 
+include_directories(
+   ${CMAKE_CURRENT_SOURCE_DIR}/meshlib ${CMAKE_CURRENT_SOURCE_DIR}/trelib ${PROJECT_SOURCE_DIR}/swgOSG
+)
+
 ## project libraries
 add_subdirectory(anh)
+add_subdirectory(meshlib)
+add_subdirectory(trelib)
 
 ## project executables
 add_subdirectory(swganh)

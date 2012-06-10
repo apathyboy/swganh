@@ -1,0 +1,6 @@
+[submodule "src/meshlib"]
+	path = src/meshlib
+	url = git://github.com/apathyboy/meshlib.git
+[submodule "src/trelib"]
+	path = src/trelib
+	url = git://github.com/apathyboy/trelib.git
