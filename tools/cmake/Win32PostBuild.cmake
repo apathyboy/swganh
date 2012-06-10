@@ -26,7 +26,7 @@ string(REPLACE "/" "\\" MYSQL_CONNECTOR_C_DLL_PATH "${MYSQL_CONNECTOR_C_DLL_PATH
 add_custom_command(
     TARGET DEPS
     POST_BUILD
-    COMMAND xcopy "${MYSQL_CONNECTOR_C_DLL_PATH}\\Debug\\*.dll" "${WIN_PROJECT_BINARY_DIR}\\bin\\$\(Configuration\)" /D /I /Y /s
+    COMMAND xcopy "${MYSQL_CONNECTOR_C_DLL_PATH}\\debug\\*.dll" "${WIN_PROJECT_BINARY_DIR}\\bin\\$\(Configuration\)" /D /I /Y /s
     COMMAND xcopy "${MYSQL_CONNECTOR_C_DLL_PATH}\\opt\\*.dll" "${WIN_PROJECT_BINARY_DIR}\\bin\\$\(Configuration\)" /D /I /Y /s
     VERBATIM
 )
@@ -50,11 +50,11 @@ add_custom_command(
 )
 
 get_filename_component(PYTHON_DLL_PATH ${PYTHON_LIBRARY} PATH)
-string(REPLACE "/" "\\" PYTHON_DLL_PATH "${PYTHON_DLL_PATH}")
+string(REPLACE "/" "\\" PYTHON_DLL_PATH "${PYTHON_DLL_PATH}\\..\\DLLs")
 add_custom_command(
     TARGET DEPS
     POST_BUILD
-    COMMAND xcopy "${PYTHON_DLL_PATH}\\*.dll" "${WIN_PROJECT_BINARY_DIR}\\bin\\$\(Configuration\)" /D /I /Y /s
+    COMMAND xcopy "${PYTHON_DLL_PATH}\\python3.dll" "${WIN_PROJECT_BINARY_DIR}\\bin\\$\(Configuration\)" /D /I /Y /s
     VERBATIM
 )
 
