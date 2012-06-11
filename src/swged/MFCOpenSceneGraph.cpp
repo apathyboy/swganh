@@ -2,10 +2,12 @@
 //
 #include "stdafx.h"
 #include "MFCOpenSceneGraph.h"
+#include "osgswg/swg_repository.h"
+#include "MainFrm.h"
 
-
-CMFCOpenSceneGraph::CMFCOpenSceneGraph(HWND hWnd) :
-   m_hWnd(hWnd) 
+CMFCOpenSceneGraph::CMFCOpenSceneGraph(HWND hWnd, swgRepository* osg_repo) 
+    : m_hWnd(hWnd) 
+    , osg_repo_(osg_repo)
 {
 }
 
@@ -51,7 +53,7 @@ void CMFCOpenSceneGraph::InitSceneGraph(void)
     mRoot  = new osg::Group;
 
     // Load the Model from the model name
-    mModel = osgDB::readNodeFile(m_ModelName);
+    mModel = osg_repo_->loadFile(m_ModelName);
     if (!mModel) return;
 
     // Optimize the model
@@ -142,9 +144,9 @@ void CMFCOpenSceneGraph::PostFrameUpdate()
     // Due any postframe updates in this routine
 }
 
-/*void cOSG::Render(void* ptr)
+void CMFCOpenSceneGraph::Render(void* ptr)
 {
-    cOSG* osg = (cOSG*)ptr;
+    CMFCOpenSceneGraph* osg = (CMFCOpenSceneGraph*)ptr;
 
     osgViewer::Viewer* viewer = osg->getViewer();
 
@@ -167,7 +169,7 @@ void CMFCOpenSceneGraph::PostFrameUpdate()
     AfxMessageBox("Exit Rendering Thread");
 
     _endthread();
-}*/
+}
 
 CRenderingThread::CRenderingThread( CMFCOpenSceneGraph* ptr )
 :   OpenThreads::Thread(), _ptr(ptr), _done(false)

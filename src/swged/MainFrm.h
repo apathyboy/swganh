@@ -6,7 +6,9 @@
 #include "FileView.h"
 #include <string>
 #include <memory>
-#include "swganh/tre/tre_archive.h"
+#include "treLib/tre_archive.h"
+
+class swgRepository;
 
 class CMainFrame : public CMDIFrameWndEx
 {
@@ -20,7 +22,8 @@ public:
 // Operations
 public:
     void SetSwgLiveFile(std::wstring live_file);
-    swganh::tre::TreArchive* GetTreArchive() const;
+    treLib::TreArchive* GetTreArchive() const;
+    swgRepository* GetOpenSceneGraphRepository() const;
 
 // Overrides
 public:
@@ -54,7 +57,8 @@ protected:
 	void SetDockingWindowIcons(BOOL bHiColorIcons);
 
 private:
-    std::unique_ptr<swganh::tre::TreArchive> archive_;
+    std::shared_ptr<treLib::TreArchive> archive_;
+    std::unique_ptr<swgRepository> swg_osg_repo_;
 };
 
 

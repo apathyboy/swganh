@@ -55,7 +55,7 @@ void CViewTree::OpenItem(CString item)
     }
     else
     {
-        static_cast<CSWGEdApp*>(AfxGetApp())->GetHexDocTemplate()->OpenDocumentFile(item);
+        static_cast<CSWGEdApp*>(AfxGetApp())->GetOSGDocTemplate()->OpenDocumentFile(item);
     }
 }
     

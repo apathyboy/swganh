@@ -3,6 +3,8 @@
 //
 
 #include "stdafx.h"
+
+#include "osgswg/swg_repository.h"
 #include "SWGEd.h"
 
 #include "MainFrm.h"
@@ -229,7 +231,8 @@ void CMainFrame::OnOpenEnvironment()
     if (file_dialog.DoModal() == IDOK)
     {
         std::string path(file_dialog.GetPathName().GetString());
-        archive_.reset(new swganh::tre::TreArchive(path));
+        archive_ = std::make_shared<treLib::TreArchive>(path);
+        swg_osg_repo_.reset(new swgRepository(archive_));
 
         m_wndFileView.SetTreArchive(archive_.get());
     }
@@ -285,7 +288,12 @@ BOOL CMainFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWnd* pParent
 }
 
 
-swganh::tre::TreArchive* CMainFrame::GetTreArchive() const
+treLib::TreArchive* CMainFrame::GetTreArchive() const
 {
     return archive_.get();
+}
+
+swgRepository* CMainFrame::GetOpenSceneGraphRepository() const
+{
+    return swg_osg_repo_.get();
 }

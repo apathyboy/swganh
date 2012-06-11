@@ -13,6 +13,7 @@
 #include "HexView.h"
 #include "TreDocManager.h"
 #include "Views/DatatableView.h"
+#include "Views/OpenSceneGraphView.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -110,6 +111,15 @@ BOOL CSWGEdApp::InitInstance()
 		RUNTIME_CLASS(CMFCToolTipCtrl), &ttParams);
 
     m_pDocManager = new CTreDocManager;
+    
+    osg_doc_template_ = new CMultiDocTemplate(
+		IDR_MAINFRAME,
+		RUNTIME_CLASS(CTreDoc),
+		RUNTIME_CLASS(CChildFrame),       // main SDI frame window
+		RUNTIME_CLASS(COpenSceneGraphView));
+    if (!osg_doc_template_)
+        return FALSE;
+	AddDocTemplate(osg_doc_template_);
 
     datatable_doc_template_ = new CMultiDocTemplate(
 		IDR_MAINFRAME,
@@ -232,6 +242,11 @@ CMultiDocTemplate* CSWGEdApp::GetHexDocTemplate()
 CMultiDocTemplate* CSWGEdApp::GetDatatableDocTemplate()
 {
     return datatable_doc_template_;
+}
+
+CMultiDocTemplate* CSWGEdApp::GetOSGDocTemplate()
+{
+    return osg_doc_template_;
 }
 
 // CSWGEdApp message handlers

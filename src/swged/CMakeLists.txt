@@ -30,6 +30,7 @@ add_executable(swged WIN32
 target_link_libraries(swged
     swganh_lib
     anh_lib
+    osgswg
     treLib
     meshLib
     ${Boost_LIBRARIES}

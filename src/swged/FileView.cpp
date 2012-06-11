@@ -290,7 +290,7 @@ void CFileView::OnChangeVisualStyle()
 	m_wndFileView.SetImageList(&m_FileViewImages, TVSIL_NORMAL);
 }
 
-void CFileView::SetTreArchive(swganh::tre::TreArchive* archive)
+void CFileView::SetTreArchive(treLib::TreArchive* archive)
 {
     archive_ = archive;
     

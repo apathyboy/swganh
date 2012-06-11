@@ -11,7 +11,7 @@ else()
 endif()
 
 include_directories(
-   ${CMAKE_CURRENT_SOURCE_DIR}/meshlib ${CMAKE_CURRENT_SOURCE_DIR}/trelib ${PROJECT_SOURCE_DIR}/swgOSG
+   ${CMAKE_CURRENT_SOURCE_DIR}/meshlib ${CMAKE_CURRENT_SOURCE_DIR}/trelib ${CMAKE_CURRENT_SOURCE_DIR}/osgswg
 )
 
 ## project libraries

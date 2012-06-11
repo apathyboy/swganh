@@ -21,10 +21,12 @@
 #pragma warning( pop )
 #endif
 
+class swgRepository;
+
 class CMFCOpenSceneGraph
 {
 public:
-    CMFCOpenSceneGraph(HWND hWnd);
+    CMFCOpenSceneGraph(HWND hWnd, swgRepository* osg_repo);
     ~CMFCOpenSceneGraph();
 
     void InitOSG(std::string filename);
@@ -37,7 +39,7 @@ public:
     void PostFrameUpdate(void);
     void Done(bool value) { mDone = value; }
     bool Done(void) { return mDone; }
-    //static void Render(void* ptr);
+    static void Render(void* ptr);
 
     osgViewer::Viewer* getViewer() { return mViewer; }
 
@@ -45,6 +47,7 @@ private:
     bool mDone;
     std::string m_ModelName;
     HWND m_hWnd;
+    swgRepository* osg_repo_;
     osgViewer::Viewer* mViewer;
     osg::ref_ptr<osg::Group> mRoot;
     osg::ref_ptr<osg::Node> mModel;

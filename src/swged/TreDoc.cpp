@@ -18,7 +18,9 @@ CTreDoc::~CTreDoc()
 {}
 
 BOOL CTreDoc::OnOpenDocument(LPCTSTR lpszPathName)
-{
+{    
+    m_csFileName = lpszPathName;
+
     auto tre_archive = static_cast<CMainFrame*>(AfxGetApp()->GetMainWnd())->GetTreArchive();
     if (tre_archive)
     {
@@ -33,6 +35,7 @@ void CTreDoc::Serialize(CArchive& archive)
 
 uint32_t CTreDoc::GetLength() const
 {
+
     return file_data_.size();
 }
     

@@ -21,10 +21,12 @@ protected:
 	void Serialize(CArchive& archive);
 	//}}AFX_VIRTUAL
     
+    CString m_csFileName;
     std::vector<unsigned char> file_data_;
 public:
     uint32_t GetLength() const;
     const std::vector<unsigned char>& GetData() const;
+    CString GetFileName() const { return m_csFileName; }
 
     DECLARE_MESSAGE_MAP()
 };

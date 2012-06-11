@@ -5,6 +5,7 @@
 #include "SWGEd.h"
 #include "TreDoc.h"
 #include "OpenSceneGraphView.h"
+#include "MainFrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,7 +69,7 @@ int COpenSceneGraphView::OnCreate(LPCREATESTRUCT lpCreateStruct)
         return -1;
 
     // Now that the window is created setup OSG
-    mOSG = new CMFCOpenSceneGraph(m_hWnd);
+    mOSG = new CMFCOpenSceneGraph(m_hWnd, static_cast<CMainFrame*>(AfxGetMainWnd())->GetOpenSceneGraphRepository());
 
     return 1;
 }
@@ -88,13 +89,13 @@ void COpenSceneGraphView::OnInitialUpdate()
     CView::OnInitialUpdate();
 
     // Get Filename from DocumentOpen Dialog
-    //CString csFileName = GetDocument()->GetFileName();
+    CString csFileName = GetDocument()->GetFileName();
     //
     //// Init the osg class
-    //mOSG->InitOSG(csFileName.GetString());
+    mOSG->InitOSG(csFileName.GetString());
 
     // Start the thread to do OSG Rendering
-    //mThreadHandle = (HANDLE)_beginthread(&cOSG::Render, 0, mOSG); 
+    //mThreadHandle = (HANDLE)_beginthread(&CMFCOpenSceneGraph::Render, 0, mOSG); 
     mThreadHandle = new CRenderingThread(mOSG);
     mThreadHandle->start();
 }
@@ -102,7 +103,7 @@ void COpenSceneGraphView::OnInitialUpdate()
 void COpenSceneGraphView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
     // Pass Key Presses into OSG
-    //mOSG->getViewer()->getEventQueue()->keyPress(nChar);
+    mOSG->getViewer()->getEventQueue()->keyPress(nChar);
 
     // Close Window on Escape Key
     if(nChar == VK_ESCAPE)

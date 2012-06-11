@@ -21,6 +21,7 @@ public:
 
     CMultiDocTemplate* GetHexDocTemplate();
     CMultiDocTemplate* GetDatatableDocTemplate();
+    CMultiDocTemplate* GetOSGDocTemplate();
 
 // Overrides
 public:
@@ -33,6 +34,7 @@ protected:
 	HACCEL m_hMDIAccel;
     CMultiDocTemplate* hex_doc_template_;
     CMultiDocTemplate* datatable_doc_template_;
+    CMultiDocTemplate* osg_doc_template_;
 
 public:
 	BOOL  m_bHiColorIcons;
