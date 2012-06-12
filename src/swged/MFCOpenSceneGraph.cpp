@@ -50,7 +50,12 @@ void CMFCOpenSceneGraph::InitManipulators(void)
 void CMFCOpenSceneGraph::InitSceneGraph(void)
 {
     // Init the main Root Node/Group
-    mRoot  = new osg::Group;
+    mRoot = new osg::MatrixTransform;
+
+    mRoot->setMatrix(
+        osg::Matrix::rotate(
+            osg::DegreesToRadians( 90.0 ),
+            1.0, 0.0, 0.0 ));
 
     // Load the Model from the model name
     mModel = osg_repo_->loadFile(m_ModelName);

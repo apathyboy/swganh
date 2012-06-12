@@ -1,11 +1,14 @@
 
 #pragma once
 
+#include <string>
+
 #ifdef WIN32
 #pragma warning( push )
 #pragma warning( disable : 4250 )
 #endif
 
+#include <osg/MatrixTransform>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osgViewer/api/win32/GraphicsWindowWin32>
@@ -15,7 +18,6 @@
 #include <osgDB/Registry>
 #include <osgDB/ReadFile>
 #include <osgUtil/Optimizer>
-#include <string>
 
 #ifdef WIN32
 #pragma warning( pop )
@@ -49,7 +51,7 @@ private:
     HWND m_hWnd;
     swgRepository* osg_repo_;
     osgViewer::Viewer* mViewer;
-    osg::ref_ptr<osg::Group> mRoot;
+    osg::ref_ptr<osg::MatrixTransform> mRoot;
     osg::ref_ptr<osg::Node> mModel;
     osg::ref_ptr<osgGA::TrackballManipulator> trackball;
     osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> keyswitchManipulator;
