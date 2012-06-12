@@ -3,9 +3,10 @@
 //
 
 #pragma once
-#include "FileView.h"
 #include <string>
 #include <memory>
+#include "FileView.h"
+#include "PropertiesWnd.h"
 #include "treLib/tre_archive.h"
 
 class swgRepository;
@@ -43,6 +44,7 @@ protected:  // control bar embedded members
 	CMFCStatusBar     m_wndStatusBar;
 	CMFCToolBarImages m_UserImages;
 	CFileView         m_wndFileView;
+	CPropertiesWnd    m_wndProperties;
 
 // Generated message map functions
 protected:

@@ -442,6 +442,7 @@ END
 STRINGTABLE
 BEGIN
     IDS_FILE_VIEW           "File View"
+    IDS_PROPERTIES_WND      "Properties"
 END
 
 STRINGTABLE
