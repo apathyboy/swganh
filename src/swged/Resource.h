@@ -30,9 +30,17 @@
 #define ID_SORTING_SORTALPHABETIC       146
 #define ID_SORTING_SORTBYTYPE           147
 #define ID_SORTING_SORTBYACCESS         148
+#define ID_VIEW_PROPERTIESWND		    150
+#define ID_SORTPROPERTIES			    151
+#define ID_PROPERTIES1				    152
+#define ID_PROPERTIES2				    153
+#define ID_EXPAND_ALL				    154
 #define IDS_FILE_VIEW                   155
+#define IDS_PROPERTIES_WND			    158
 #define IDI_FILE_VIEW                   161
 #define IDI_FILE_VIEW_HC                162
+#define IDI_PROPERTIES_WND			    167
+#define IDI_PROPERTIES_WND_HC		    168
 #define IDR_EXPLORER                    169
 #define IDB_EXPLORER_24                 170
 #define IDR_SORT                        171
@@ -44,6 +52,8 @@
 #define IDR_MENU_IMAGES                 179
 #define IDB_MENU_IMAGES_24              180
 #define ID_TOOLS_MACRO                  181
+#define IDR_PROPERTIES				    183
+#define IDB_PROPERTIES_HC			    184
 #define IDS_EXPLORER                    305
 #define IDS_EDIT_MENU                   306
 #define IDD_PROGRESS                    310
