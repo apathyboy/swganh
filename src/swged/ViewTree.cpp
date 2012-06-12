@@ -79,6 +79,7 @@ bool CViewTree::IsRenderable(CString& item) const
         file_extension.compare("pob") == 0 ||
         file_extension.compare("mgn") == 0 ||
         file_extension.compare("trn") == 0 ||
+        file_extension.compare("ilf") == 0 ||
         file_extension.compare("msh") == 0)
     {
         return true;
