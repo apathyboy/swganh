@@ -53,9 +53,13 @@ void CViewTree::OpenItem(CString item)
     {
         static_cast<CSWGEdApp*>(AfxGetApp())->GetDatatableDocTemplate()->OpenDocumentFile(item);
     }
-    else
+    else if(IsRenderable(item))
     {
         static_cast<CSWGEdApp*>(AfxGetApp())->GetOSGDocTemplate()->OpenDocumentFile(item);
+    }
+    else
+    {
+        static_cast<CSWGEdApp*>(AfxGetApp())->GetHexDocTemplate()->OpenDocumentFile(item);
     }
 }
     
@@ -64,6 +68,23 @@ bool CViewTree::IsDatatable(CString& item) const
     const std::regex r("^datatables/.*$");
 
     return std::regex_match(std::string(CT2CA(item)), r);
+}
+
+bool CViewTree::IsRenderable(CString& item) const
+{
+    auto file_extension = std::string(item.GetString());
+    file_extension = file_extension.substr(file_extension.find_last_of(".") + 1);
+
+    if (file_extension.compare("sat") == 0 ||
+        file_extension.compare("pob") == 0 ||
+        file_extension.compare("mgn") == 0 ||
+        file_extension.compare("trn") == 0 ||
+        file_extension.compare("msh") == 0)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 CString CViewTree::GetSelectedItemPath()
