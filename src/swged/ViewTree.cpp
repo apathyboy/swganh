@@ -76,6 +76,7 @@ bool CViewTree::IsRenderable(CString& item) const
     file_extension = file_extension.substr(file_extension.find_last_of(".") + 1);
 
     if (file_extension.compare("sat") == 0 ||
+        file_extension.compare("apt") == 0 ||
         file_extension.compare("pob") == 0 ||
         file_extension.compare("mgn") == 0 ||
         file_extension.compare("trn") == 0 ||
