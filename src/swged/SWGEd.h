@@ -22,6 +22,7 @@ public:
     CMultiDocTemplate* GetHexDocTemplate();
     CMultiDocTemplate* GetDatatableDocTemplate();
     CMultiDocTemplate* GetOSGDocTemplate();
+    CMultiDocTemplate* GetSlotDescriptorDocTemplate();
 
 // Overrides
 public:
@@ -35,6 +36,7 @@ protected:
     CMultiDocTemplate* hex_doc_template_;
     CMultiDocTemplate* datatable_doc_template_;
     CMultiDocTemplate* osg_doc_template_;
+    CMultiDocTemplate* slot_descriptor_doc_template_;
 
 public:
 	BOOL  m_bHiColorIcons;

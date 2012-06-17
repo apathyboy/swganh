@@ -57,6 +57,10 @@ void CViewTree::OpenItem(CString item)
     {
         static_cast<CSWGEdApp*>(AfxGetApp())->GetOSGDocTemplate()->OpenDocumentFile(item);
     }
+    else if(IsSlotDescriptor(item))
+    {        
+        static_cast<CSWGEdApp*>(AfxGetApp())->GetSlotDescriptorDocTemplate()->OpenDocumentFile(item);
+    }
     else
     {
         static_cast<CSWGEdApp*>(AfxGetApp())->GetHexDocTemplate()->OpenDocumentFile(item);
@@ -66,6 +70,13 @@ void CViewTree::OpenItem(CString item)
 bool CViewTree::IsDatatable(CString& item) const
 {
     const std::regex r("^datatables/.*$");
+
+    return std::regex_match(std::string(CT2CA(item)), r);
+} 
+
+bool CViewTree::IsSlotDescriptor(CString& item) const
+{
+    const std::regex r("^abstract/slot/descriptor/.*$");
 
     return std::regex_match(std::string(CT2CA(item)), r);
 }
