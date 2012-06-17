@@ -1,5 +1,5 @@
 
-// SlotDescriptorView.cpp : implementation of the CSlotDescriptorView class
+// SlotArrangementView.cpp : implementation of the CSlotArrangementView class
 //
 
 #include "stdafx.h"
@@ -13,9 +13,9 @@
 #include <sstream>
 
 #include "TreDoc.h"
-#include "SlotDescriptorView.h"
+#include "SlotArrangementView.h"
 
-#include "meshLib/iff/sltd.hpp"
+#include "meshLib/iff/argd.hpp"
 
 #using <PresentationFramework.dll>
 
@@ -25,15 +25,15 @@
 
 namespace swf = System::Windows::Forms;
 
-// CSlotDescriptorView
+// CDatatableView
 
 
-ref class CSlotDescriptorViewWrapper
+ref class CSlotArrangementViewWrapper
 {
-    CSlotDescriptorView* view_;
+    CSlotArrangementView* view_;
 
 public:
-    CSlotDescriptorViewWrapper(CSlotDescriptorView* view)
+    CSlotArrangementViewWrapper(CSlotArrangementView* view)
         : view_(view)
     {}
     
@@ -41,28 +41,28 @@ public:
     {}
 };
 
-IMPLEMENT_DYNCREATE(CSlotDescriptorView, Microsoft::VisualC::MFC::CWinFormsView)
+IMPLEMENT_DYNCREATE(CSlotArrangementView, Microsoft::VisualC::MFC::CWinFormsView)
 
-BEGIN_MESSAGE_MAP(CSlotDescriptorView, Microsoft::VisualC::MFC::CWinFormsView)
+BEGIN_MESSAGE_MAP(CSlotArrangementView, Microsoft::VisualC::MFC::CWinFormsView)
 	// Standard printing commands
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
 END_MESSAGE_MAP()
 
-// CSlotDescriptorView construction/destruction
+// CDatatableView construction/destruction
 
-CSlotDescriptorView::CSlotDescriptorView()
+CSlotArrangementView::CSlotArrangementView()
     : Microsoft::VisualC::MFC::CWinFormsView(DoubleBufferedDataGridView::typeid)
 {
 	// TODO: add construction code here
 
 }
 
-CSlotDescriptorView::~CSlotDescriptorView()
+CSlotArrangementView::~CSlotArrangementView()
 {
 }
 
-BOOL CSlotDescriptorView::PreCreateWindow(CREATESTRUCT& cs)
+BOOL CSlotArrangementView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO: Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
@@ -70,9 +70,9 @@ BOOL CSlotDescriptorView::PreCreateWindow(CREATESTRUCT& cs)
 	return CView::PreCreateWindow(cs);
 }
 
-// CSlotDescriptorView drawing
+// CSlotArrangementView drawing
 
-BOOL CSlotDescriptorView::OnEraseBackground(CDC* pDC)
+BOOL CSlotArrangementView::OnEraseBackground(CDC* pDC)
 {
     CBrush brNew(RGB(0,0,255));  //Creates a blue brush
     CBrush* pOldBrush = (CBrush*)pDC->SelectObject(&brNew);
@@ -88,7 +88,7 @@ BOOL CSlotDescriptorView::OnEraseBackground(CDC* pDC)
                     // CView::OnEraseBkgnd(pDC) statement
 }
 
-void CSlotDescriptorView::OnDraw(CDC* /*pDC*/)
+void CSlotArrangementView::OnDraw(CDC* /*pDC*/)
 {
 	CTreDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
@@ -102,25 +102,25 @@ void CSlotDescriptorView::OnDraw(CDC* /*pDC*/)
 }
 
 
-// CSlotDescriptorView printing
-DoubleBufferedDataGridView^ CSlotDescriptorView::GetControl()
+// CDatatableView printing
+DoubleBufferedDataGridView^ CSlotArrangementView::GetControl()
 {
 	System::Windows::Forms::Control^ control = CWinFormsView::GetControl();
 	return safe_cast<DoubleBufferedDataGridView^>(control);
 }
 
-void CSlotDescriptorView::OnInitialUpdate()
+void CSlotArrangementView::OnInitialUpdate()
 {
 	CTreDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
     if (!pDoc || pDoc->GetLength() == 0)
 		return;
     
-    auto wrapper = gcnew CSlotDescriptorViewWrapper(this);
+    auto wrapper = gcnew CSlotArrangementViewWrapper(this);
     auto control = GetControl();
     control->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
     control->Dock = System::Windows::Forms::DockStyle::Fill;
-    control->DataError += gcnew swf::DataGridViewDataErrorEventHandler(wrapper, &CSlotDescriptorViewWrapper::OnDataError);
+    control->DataError += gcnew swf::DataGridViewDataErrorEventHandler(wrapper, &CSlotArrangementViewWrapper::OnDataError);
     control->BorderStyle = swf::BorderStyle::None;
     control->BackgroundColor = System::Drawing::Color::White;
     control->ColumnHeadersDefaultCellStyle->Padding = swf::Padding(5, 2, 2, 5);
@@ -132,11 +132,12 @@ void CSlotDescriptorView::OnInitialUpdate()
     control->MultiSelect = false;
     
     swf::DataGridViewColumn^ column = gcnew swf::DataGridViewColumn(gcnew swf::DataGridViewTextBoxCell());
-    
+    //column->DefaultCellStyle = swf::DataGridViewColumn::DefaultCellStyle
     column->HeaderText = gcnew System::String("Slot");
     column->Name = gcnew System::String("Slot");
     column->SortMode = swf::DataGridViewColumnSortMode::Automatic;
     column->MinimumWidth = column->Name->Length * 10;
+    column->AutoSizeMode = swf::DataGridViewAutoSizeColumnMode::AllCells;
     control->Columns->Add(column);
     
     // Read file data into a stream
@@ -144,56 +145,77 @@ void CSlotDescriptorView::OnInitialUpdate()
     auto iffFile = std::stringstream();
     iffFile.write(reinterpret_cast<char*>(&file_data[0]), file_data.size());
     
-    ml::iff::sltd sltd;
-    sltd.readSLTD(iffFile);
-
-    auto slots = sltd.getSlots();
-
-    for(auto& slot : slots)
+    ml::iff::argd argd;
+    argd.readARGD(iffFile);
+    
+    auto slot_arrangements = argd.getSlotArrangements();
+    
+    for(auto& arrangement : slot_arrangements)
     {
+        if (arrangement.size() == 0)
+            continue;
+
         swf::DataGridViewRow^ data_row = gcnew swf::DataGridViewRow();
         swf::DataGridViewCell^ cell = gcnew swf::DataGridViewTextBoxCell();
-        cell->Value = gcnew System::String(slot.c_str());
-        
-        int length = slot.length() * 6;
-        if (length > control->Columns[0]->MinimumWidth)
-            control->Columns[0]->MinimumWidth = length;
+
+        int max_length;
+        std::string arrangement_text;
+
+        std::tie(arrangement_text, max_length) = BuildArrangementCellText(arrangement);
+        cell->Style->WrapMode = swf::DataGridViewTriState::True;
+        cell->Value = gcnew System::String(arrangement_text.c_str());
         
         data_row->Cells->Add(cell);
+        data_row->MinimumHeight = data_row->Height * arrangement.size();
         control->Rows->Add(data_row);
     }
 }
 
-void CSlotDescriptorView::OnFilePrintPreview()
+std::tuple<std::string, int> CSlotArrangementView::BuildArrangementCellText(const std::vector<std::string>& arrangement)
+{
+    int max_length = 0;
+    std::string output;
+    for (auto& slot : arrangement)
+    {
+        output += slot + "\n";
+
+        if (slot.length() > static_cast<unsigned int>(max_length))
+            max_length = slot.length();
+    }
+
+    return std::make_tuple(output, max_length);
+}
+
+void CSlotArrangementView::OnFilePrintPreview()
 {
 #ifndef SHARED_HANDLERS
 	AFXPrintPreview(this);
 #endif
 }
 
-BOOL CSlotDescriptorView::OnPreparePrinting(CPrintInfo* pInfo)
+BOOL CSlotArrangementView::OnPreparePrinting(CPrintInfo* pInfo)
 {
 	// default preparation
 	return DoPreparePrinting(pInfo);
 }
 
-void CSlotDescriptorView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+void CSlotArrangementView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
 	// TODO: add extra initialization before printing
 }
 
-void CSlotDescriptorView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+void CSlotArrangementView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
 	// TODO: add cleanup after printing
 }
 
-void CSlotDescriptorView::OnRButtonUp(UINT /* nFlags */, CPoint point)
+void CSlotArrangementView::OnRButtonUp(UINT /* nFlags */, CPoint point)
 {
 	ClientToScreen(&point);
 	OnContextMenu(this, point);
 }
 
-void CSlotDescriptorView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
+void CSlotArrangementView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 {
 #ifndef SHARED_HANDLERS
 	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_POPUP_EDIT, point.x, point.y, this, TRUE);
@@ -201,20 +223,20 @@ void CSlotDescriptorView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 }
 
 
-// CSlotDescriptorView diagnostics
+// CSlotArrangementView diagnostics
 
 #ifdef _DEBUG
-void CSlotDescriptorView::AssertValid() const
+void CSlotArrangementView::AssertValid() const
 {
 	CView::AssertValid();
 }
 
-void CSlotDescriptorView::Dump(CDumpContext& dc) const
+void CSlotArrangementView::Dump(CDumpContext& dc) const
 {
 	CView::Dump(dc);
 }
 
-CTreDoc* CSlotDescriptorView::GetDocument() const // non-debug version is inline
+CTreDoc* CSlotArrangementView::GetDocument() const // non-debug version is inline
 {
 	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CTreDoc)));
 	return (CTreDoc*)m_pDocument;
@@ -222,4 +244,4 @@ CTreDoc* CSlotDescriptorView::GetDocument() const // non-debug version is inline
 #endif //_DEBUG
 
 
-// CSlotDescriptorView message handlers
+// CSlotArrangementView message handlers

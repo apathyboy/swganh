@@ -14,6 +14,7 @@
 #include "TreDocManager.h"
 #include "Views/DatatableView.h"
 #include "Views/OpenSceneGraphView.h"
+#include "Views/SlotArrangementView.h"
 #include "Views/SlotDescriptorView.h"
 
 #ifdef _DEBUG
@@ -130,6 +131,15 @@ BOOL CSWGEdApp::InitInstance()
     if (!datatable_doc_template_)
         return FALSE;
 	AddDocTemplate(datatable_doc_template_);
+    
+	slot_arrangement_doc_template_ = new CMultiDocTemplate(
+		IDR_MAINFRAME,
+		RUNTIME_CLASS(CTreDoc),
+		RUNTIME_CLASS(CChildFrame),       // main SDI frame window
+		RUNTIME_CLASS(CSlotArrangementView));
+    if (!slot_arrangement_doc_template_)
+        return FALSE;
+	AddDocTemplate(slot_arrangement_doc_template_);
     
 	slot_descriptor_doc_template_ = new CMultiDocTemplate(
 		IDR_MAINFRAME,
@@ -258,6 +268,12 @@ CMultiDocTemplate* CSWGEdApp::GetOSGDocTemplate()
 {
     return osg_doc_template_;
 }
+
+CMultiDocTemplate* CSWGEdApp::GetSlotArrangementDocTemplate()
+{
+    return slot_arrangement_doc_template_;
+}
+
 
 CMultiDocTemplate* CSWGEdApp::GetSlotDescriptorDocTemplate()
 {

@@ -16,6 +16,7 @@ public:
     virtual void OpenItem(CString item);
 
     virtual bool IsDatatable(CString& item) const;
+    virtual bool IsSlotArrangement(CString& item) const;
     virtual bool IsSlotDescriptor(CString& item) const;
     virtual bool IsRenderable(CString& item) const;
 
