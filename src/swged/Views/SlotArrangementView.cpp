@@ -133,8 +133,8 @@ void CSlotArrangementView::OnInitialUpdate()
     
     swf::DataGridViewColumn^ column = gcnew swf::DataGridViewColumn(gcnew swf::DataGridViewTextBoxCell());
     //column->DefaultCellStyle = swf::DataGridViewColumn::DefaultCellStyle
-    column->HeaderText = gcnew System::String("Slot");
-    column->Name = gcnew System::String("Slot");
+    column->HeaderText = gcnew System::String("Slot Arrangement");
+    column->Name = gcnew System::String("Slot Arrangement");
     column->SortMode = swf::DataGridViewColumnSortMode::Automatic;
     column->MinimumWidth = column->Name->Length * 10;
     column->AutoSizeMode = swf::DataGridViewAutoSizeColumnMode::AllCells;
