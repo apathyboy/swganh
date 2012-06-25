@@ -8,7 +8,6 @@
 using namespace anh::resource;
 using namespace std;
 
-
 ResourceHandle::ResourceHandle(
 	ResourceManager* resource_manager, 
 	const string& resource_name, 
@@ -31,6 +30,11 @@ uint32_t ResourceHandle::GetSize() const
 const vector<char>& ResourceHandle::GetBuffer() const
 {
 	return *buffer_;
+}
+
+ResourceHandle::ResourceStream ResourceHandle::GetBufferStream() const
+{
+    return ResourceStream(&(*buffer_)[0], buffer_->size());
 }
 
 const string& ResourceHandle::GetName() const

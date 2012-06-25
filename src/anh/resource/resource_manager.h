@@ -11,6 +11,9 @@
 #include <string>
 #include <vector>
 
+#include <boost/iostreams/device/array.hpp>
+#include <boost/iostreams/stream.hpp>
+
 namespace anh {
 namespace resource {
 
@@ -30,6 +33,9 @@ namespace resource {
 		uint32_t GetSize() const;
 
 		const std::vector<char>& GetBuffer() const;
+
+        typedef boost::iostreams::stream<boost::iostreams::array_source> ResourceStream;
+        ResourceStream GetBufferStream() const;
 
         const std::string& GetName() const;
 
