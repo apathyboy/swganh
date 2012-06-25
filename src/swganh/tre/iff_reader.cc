@@ -145,8 +145,11 @@ size_t IffReader::ReadNodes_(std::istream& input, IffNode* parent)
             parent->data.resize(remaining);
             std::copy(name_buffer, name_buffer + sizeof(name_buffer), std::begin(parent->data));
 
-            input.read(&parent->data[sizeof(name_buffer)], remaining - sizeof(name_buffer));
-            
+            if (remaining > sizeof(name_buffer))
+            {
+                input.read(&parent->data[sizeof(name_buffer)], remaining - sizeof(name_buffer));
+            }
+
             current_used += remaining;
         }
         else
