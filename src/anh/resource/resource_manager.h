@@ -39,6 +39,8 @@ namespace resource {
 
         const std::string& GetName() const;
 
+        ResourceManager* GetResourceManager() const;
+
 	private:
 		ResourceManager* resource_manager_;
 		std::string resource_name_;

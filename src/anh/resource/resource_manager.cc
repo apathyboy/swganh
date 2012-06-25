@@ -42,6 +42,11 @@ const string& ResourceHandle::GetName() const
     return resource_name_;
 }
 
+ResourceManager* ResourceHandle::GetResourceManager() const
+{
+    return resource_manager_;
+}
+
 ResourceManager::ResourceManager(
 	const shared_ptr<ResourceArchiveInterface>& resource_archive,
 	uint32_t cache_size_mb)
