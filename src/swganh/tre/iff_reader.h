@@ -23,6 +23,8 @@ namespace tre {
             ~IffNode();
     
             size_t GetNodeSize() const;
+            IffNode* FindNode(const std::string& node_name);    
+            std::list<IffNode*> FindAllNodes(const std::string& node_name);
     
             std::string name;
             size_t size;

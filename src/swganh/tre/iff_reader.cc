@@ -2,6 +2,7 @@
 #include "iff_reader.h"
 
 #include <cstring>
+#include <algorithm>
 
 #include "anh/utilities.h"
 
@@ -12,6 +13,50 @@ IffReader::IffNode::IffNode()
 
 IffReader::IffNode::~IffNode()
 {}
+    
+size_t IffReader::IffNode::GetNodeSize() const
+{
+    return 0;
+}
+
+IffReader::IffNode* IffReader::IffNode::FindNode(const std::string& node_name)
+{
+    IffNode* node = nullptr;
+
+    for (auto& child : children)
+    {
+        if (child->name.compare(node_name) == 0)
+        {
+            return child.get();
+        }
+
+        node = child->FindNode(node_name);
+
+        if (node != nullptr)
+        {
+            return node;
+        }
+    }
+
+    return node;
+}
+
+std::list<IffReader::IffNode*> IffReader::IffNode::FindAllNodes(const std::string& node_name)
+{
+    std::list<IffReader::IffNode*> nodes;
+
+    for (auto& child : children)
+    {
+        if (child->name.compare(node_name) == 0)
+        {
+            nodes.push_back(child.get());
+        }
+
+        nodes.splice(std::end(nodes), child->FindAllNodes(node_name));
+    }
+
+    return nodes;
+}
 
 IffReader::IffReader(std::istream& input)
 {
@@ -24,12 +69,15 @@ IffReader::IffReader(std::istream& input)
     }
 
     std::unique_ptr<IffNode> node(new IffNode);
-
-    std::copy(std::begin(header.name), std::end(header.name), std::begin(node->name));
+    
+    node->name = header.name;
     node->size = anh::bigToHost(header.size);
-
-    ReadNodes_(input, node.get());
-
+    
+    if (node->size > 0)
+    {
+        ReadNodes_(input, node.get());
+    }
+    
     heads_.push_back(std::move(node));
 }
 
@@ -38,12 +86,30 @@ IffReader::~IffReader()
 
 IffReader::IffNode* IffReader::FindNode(const std::string& node_name)
 {
-    return nullptr;
+    IffNode* node = nullptr;
+
+    for (auto& head : heads_)
+    {
+        node = head->FindNode(node_name);
+
+        if (node != nullptr)
+        {
+            return node;
+        }
+    }
+
+    return node;
 }
 
 std::list<IffReader::IffNode*> IffReader::FindAllNodes(const std::string& node_name)
 {
     std::list<IffReader::IffNode*> nodes;
+
+    for (auto& head : heads_)
+    {
+        nodes.splice(std::end(nodes), head->FindAllNodes(node_name));
+    }
+
     return nodes;
 }
 
@@ -60,23 +126,52 @@ size_t IffReader::ReadNodes_(std::istream& input, IffNode* parent)
 
         if (remaining >= 8)
         {
-            input.read(name_buffer, 8);
+            input.read(name_buffer, sizeof(name_buffer));
             name_size = GetNodeNameSize_(name_buffer);
         }
         else
         {
             parent->data.resize(remaining);
             input.read(&parent->data[0], remaining);
+
+            current_used += remaining;
             continue;
         }
 
         if (name_size == 0)
         {
+            parent->data.resize(remaining + sizeof(name_buffer));
+            std::copy_n(name_buffer, sizeof(name_buffer), std::back_inserter(parent->data));
+        }
+        else
+        {
+            std::unique_ptr<IffNode> node(new IffNode);
+            node->parent = parent;
+            
+            std::copy_n(name_buffer, name_size, std::back_inserter(node->name));
 
+            uint32_t data_size = 0;
+
+            if (name_size == 4)
+            {
+                data_size = *reinterpret_cast<uint32_t*>(&name_buffer[4]);
+            }
+            else
+            {
+                input.read(reinterpret_cast<char*>(&data_size), sizeof(data_size));
+            }
+            
+            node->size = anh::bigToHost(data_size);
+
+            ReadNodes_(input, node.get());
+
+            parent->children.push_back(std::move(node));
+
+            current_used += name_size + sizeof(node->size) + node->size;
         }
     }
 
-    return 0;
+    return current_used;
 }
 
 size_t IffReader::GetNodeNameSize_(char* data)
