@@ -1,3 +1,5 @@
+// This file is part of SWGANH which is released under the MIT license.
+// See file LICENSE or go to http://swganh.com/LICENSE
 
 #include "iff_reader.h"
 
@@ -140,8 +142,12 @@ size_t IffReader::ReadNodes_(std::istream& input, IffNode* parent)
 
         if (name_size == 0)
         {
-            parent->data.resize(remaining + sizeof(name_buffer));
-            std::copy_n(name_buffer, sizeof(name_buffer), std::back_inserter(parent->data));
+            parent->data.resize(remaining);
+            std::copy(name_buffer, name_buffer + sizeof(name_buffer), std::begin(parent->data));
+
+            input.read(&parent->data[sizeof(name_buffer)], remaining - sizeof(name_buffer));
+            
+            current_used += remaining;
         }
         else
         {
@@ -164,10 +170,10 @@ size_t IffReader::ReadNodes_(std::istream& input, IffNode* parent)
             node->size = anh::bigToHost(data_size);
 
             ReadNodes_(input, node.get());
+            
+            current_used += name_size + sizeof(node->size) + node->size;
 
             parent->children.push_back(std::move(node));
-
-            current_used += name_size + sizeof(node->size) + node->size;
         }
     }
 
