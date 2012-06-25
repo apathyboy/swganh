@@ -1,3 +1,5 @@
+// This file is part of SWGANH which is released under the MIT license.
+// See file LICENSE or go to http://swganh.com/LICENSE
 
 #include "slot_descriptor_reader.h"
 
@@ -16,7 +18,7 @@ SlotDescriptorReader::SlotDescriptorReader(const std::shared_ptr<anh::resource::
         throw IffReader::InvalidFormType("File is not in the SLTD format: " + resource->GetName());
     }
 
-    LoadSlotsFromNode_(sltd_node);
+    LoadSlotsFromNode_(sltd_node->FindNode("0000DATA"));
 }
 
 SlotDescriptorReader::~SlotDescriptorReader()
@@ -29,7 +31,7 @@ const std::vector<std::string>& SlotDescriptorReader::GetSlots() const
 
 void SlotDescriptorReader::LoadSlotsFromNode_(IffReader::IffNode* node)
 {
-    size_t read_size = 0, data_size = node->data.size();
+    size_t read_size = 0, data_size = node->size;
     while (read_size < data_size)
     {
         std::string slot(&node->data[read_size]);
