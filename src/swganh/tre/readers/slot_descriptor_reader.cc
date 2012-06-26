@@ -6,7 +6,6 @@
 #include "anh/resource/resource_manager.h"
 
 using swganh::tre::IffReader;
-using swganh::tre::IffReaderV2;
 using swganh::tre::readers::SlotDescriptorReader;
 
 SlotDescriptorReader::SlotDescriptorReader(const std::shared_ptr<anh::resource::ResourceHandle>& resource)
@@ -16,7 +15,7 @@ SlotDescriptorReader::SlotDescriptorReader(const std::shared_ptr<anh::resource::
 
     if (!sltd_node)
     {
-        throw IffReader::InvalidFormType("File is not in the SLTD format: " + resource->GetName());
+        throw IffReader::BadFileFormat("File is not in the SLTD format: " + resource->GetName());
     }
 
     LoadSlotsFromNode_(sltd_node->FindForm("0000")->FindRecord("DATA"));
@@ -30,7 +29,7 @@ const std::vector<std::string>& SlotDescriptorReader::GetSlots() const
     return slots_;
 }
 
-void SlotDescriptorReader::LoadSlotsFromNode_(IffReaderV2::Node* node)
+void SlotDescriptorReader::LoadSlotsFromNode_(IffReader::Node* node)
 {
     size_t read_size = 0, data_size = node->size;
     while (read_size < data_size)

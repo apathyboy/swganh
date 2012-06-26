@@ -33,8 +33,8 @@ namespace readers {
     private:
         SlotArrangementReader();
 
-        void LoadArranagementFromNodes_(std::list<IffReader::IffNode*>& nodes);
-        SlotList LoadSlotsFromNode_(IffReader::IffNode* node);
+        void LoadArranagementFromNodes_(std::list<IffReader::Node*>& nodes);
+        SlotList LoadSlotsFromNode_(IffReader::Node* node);
 
         std::vector<SlotList> arrangement_;
         IffReader iff_reader_;

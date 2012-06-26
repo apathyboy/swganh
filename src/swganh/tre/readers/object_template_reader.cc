@@ -7,7 +7,7 @@ using swganh::tre::IffReader;
 using swganh::tre::readers::ObjectTemplateReader;
 
 ObjectTemplateReader::ObjectTemplateReader(const std::shared_ptr<anh::resource::ResourceHandle>& resource)
-    : iff_io_(resource->GetBufferStream())
+    : iff_io_(resource->GetBuffer())
 {
     derived_ = LoadDerived_(resource->GetResourceManager());
     LoadObjectData_();
@@ -17,7 +17,7 @@ std::unique_ptr<ObjectTemplateReader> ObjectTemplateReader::LoadDerived_(anh::re
 {
     std::unique_ptr<ObjectTemplateReader> derived = nullptr;
 
-    auto derv_node = iff_io_.FindNode("DERV");
+    auto derv_node = iff_io_.FindForm("DERV")->FindRecord("XXXX");
 
     if (derv_node->data.size() > 0)
     {
@@ -34,17 +34,7 @@ std::unique_ptr<ObjectTemplateReader> ObjectTemplateReader::LoadDerived_(anh::re
 
 void ObjectTemplateReader::LoadObjectData_()
 {
-    auto pcnt_nodes = iff_io_.FindAllNodes("PCNT");
-
-    for (auto& pcnt_node : pcnt_nodes)
-    {
-        LoadObjectDataFromNode_(pcnt_node);
-    }
-}
-
-void ObjectTemplateReader::LoadObjectDataFromNode_(IffReader::IffNode* node)
-{
-    auto xxxx_nodes = node->FindAllNodes("XXXX");
+    auto xxxx_nodes = iff_io_.FindAllRecords("XXXX");
 
     for (auto& xxxx_node : xxxx_nodes)
     {

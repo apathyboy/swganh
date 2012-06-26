@@ -22,50 +22,7 @@ namespace tre {
     {
     public:
         typedef std::runtime_error BadFileFormat;
-        typedef std::runtime_error InvalidFormType;
-    
-        struct IffNode
-        {
-            IffNode();
-            ~IffNode();
-    
-            size_t GetNodeSize() const;
-            IffNode* FindNode(const std::string& node_name);    
-            std::list<IffNode*> FindAllNodes(const std::string& node_name);
-    
-            std::string name;
-            size_t size;
-            std::vector<char> data;
-            IffNode* parent;
-            std::vector<std::unique_ptr<IffNode>> children;
-        };
-    
-        IffReader(std::istream& input);
-        ~IffReader();
-    
-        IffNode* FindNode(const std::string& node_name);
-    
-        std::list<IffNode*> FindAllNodes(const std::string& node_name);
-    
-    private:
-        IffReader();
 
-        struct IffHeader
-        {
-            char name[4];
-            uint32_t size;
-        };
-
-        size_t ReadNodes_(std::istream& input, IffNode* parent);
-        size_t GetNodeNameSize_(char* data);
-        std::vector<std::unique_ptr<IffNode>> heads_;
-    };
-    
-    typedef std::runtime_error BadFileFormat;
-
-    class IffReaderV2
-    {
-    public:
         struct Node
         {
             char name[4];
@@ -74,21 +31,22 @@ namespace tre {
             Node* parent;
             std::vector<char> data;
             std::vector<std::unique_ptr<Node>> children;
-            
-            Node* FindRecord(const std::string& record_name);
-            std::list<Node*> FindAllRecords(const std::string& record_name);
 
             Node* FindForm(const std::string& form_name);
             std::list<Node*> FindAllForms(const std::string& form_name);
+            
+            Node* FindRecord(const std::string& record_name);
+            std::list<Node*> FindAllRecords(const std::string& record_name);
         };
         
-        IffReaderV2(const std::vector<char>& input);
+        IffReader(const std::vector<char>& input);
 
         Node* FindForm(const std::string& form_name);
         std::list<Node*> FindAllForms(const std::string& form_name);
+        std::list<Node*> FindAllRecords(const std::string& record_name);
     
     private:
-        IffReaderV2();
+        IffReader();
 
         void ReadHead_(boost::archive::binary_iarchive& archive);
         void ReadNodes_(boost::archive::binary_iarchive& archive, Node* parent);

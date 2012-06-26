@@ -53,8 +53,6 @@ namespace readers {
     
         void LoadObjectData_();
     
-        void LoadObjectDataFromNode_(IffReader::IffNode* node);
-    
         boost::any ParseData(const std::vector<char>& data, size_t offset);
     
         std::unique_ptr<ObjectTemplateReader> derived_;
