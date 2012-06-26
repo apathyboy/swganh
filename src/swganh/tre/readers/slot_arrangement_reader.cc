@@ -15,6 +15,7 @@ SlotArrangementReader::SlotArrangementReader(const std::shared_ptr<anh::resource
     if (arg_node)
     {
         LoadArranagementFromNodes_(arg_node->FindAllNodes("0000ARG "));
+        LoadArranagementFromNodes_(arg_node->FindAllNodes("ARG "));
     }
     else
     {

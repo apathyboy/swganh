@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(CanReadSlotDescriptors)
     
     auto data = std::make_shared<std::vector<char>>(sizeof(tmp));
 
-    std::copy(tmp, tmp+50, std::begin(*data));
+    std::copy(tmp, tmp+sizeof(tmp), std::begin(*data));
 
     auto resource = std::make_shared<ResourceHandle>(nullptr, "abstract/slot/descriptor/droid.iff", data);
 
