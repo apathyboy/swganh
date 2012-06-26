@@ -68,12 +68,13 @@ void IffReaderV2::ReadNodes_(boost::archive::binary_iarchive& archive, IffReader
         node->size = anh::bigToHost(node->size);
         node->parent = parent;
 
-        if (std::strncmp(node->name, "FORM", sizeof(node->name)) != 0)
+        if (std::strncmp(node->name, "FORM", sizeof(node->name)) == 0)
         {
             ReadNodes_(archive, node.get());
         }
         else
         {
+            node->data.resize(node->size);
             archive >> bs::make_array(&node->data[0], node->size);
         }
         
@@ -85,12 +86,28 @@ void IffReaderV2::ReadNodes_(boost::archive::binary_iarchive& archive, IffReader
 
 IffReaderV2::Node* IffReaderV2::FindForm(const std::string& form_name)
 {
+    if (std::strncmp(head_->name, "FORM", sizeof(head_->name)) == 0 &&
+        std::strncmp(head_->type, form_name.c_str(), sizeof(head_->type)) == 0)
+    {
+        return head_.get();
+    }
+
     return head_->FindForm(form_name);
 }
 
 std::list<IffReaderV2::Node*> IffReaderV2::FindAllForms(const std::string& form_name)
 {
-    return head_->FindAllForms(form_name);
+    std::list<IffReaderV2::Node*> nodes;
+        
+    if (std::strncmp(head_->name, "FORM", sizeof(head_->name)) == 0 &&
+        std::strncmp(head_->type, form_name.c_str(), sizeof(head_->type)) == 0)
+    {
+        nodes.push_back(head_.get());
+    }
+        
+    nodes.splice(std::end(nodes), head_->FindAllForms(form_name));
+
+    return nodes;
 }
 
 IffReaderV2::Node* IffReaderV2::Node::FindRecord(const std::string& record_name)

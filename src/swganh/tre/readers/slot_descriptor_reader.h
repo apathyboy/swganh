@@ -31,10 +31,10 @@ namespace readers {
     private:
         SlotDescriptorReader();
 
-        void LoadSlotsFromNode_(IffReader::IffNode* node);
+        void LoadSlotsFromNode_(IffReaderV2::Node* node);
 
         std::vector<std::string> slots_;
-        IffReader iff_reader_;
+        IffReaderV2 iff_reader_;
     };
 
 }}}
