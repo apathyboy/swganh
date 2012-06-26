@@ -17,7 +17,7 @@ std::unique_ptr<ObjectTemplateReader> ObjectTemplateReader::LoadDerived_(anh::re
 {
     std::unique_ptr<ObjectTemplateReader> derived = nullptr;
 
-    auto derv_node = iff_io_.FindForm("DERV")->FindRecord("XXXX");
+    auto derv_node = iff_io_.Form("DERV")->Record("XXXX");
 
     if (derv_node->data.size() > 0)
     {

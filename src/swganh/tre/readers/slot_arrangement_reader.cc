@@ -10,11 +10,11 @@ using swganh::tre::readers::SlotArrangementReader;
 SlotArrangementReader::SlotArrangementReader(const std::shared_ptr<anh::resource::ResourceHandle>& resource)
     : iff_reader_(resource->GetBuffer())
 {
-    auto arg_node = iff_reader_.FindForm("ARGD");
+    auto arg_node = iff_reader_.Form("ARGD");
 
     if (arg_node)
     {
-        LoadArranagementFromNodes_(arg_node->FindForm("0000")->FindAllRecords("ARG "));
+        LoadArranagementFromNodes_(arg_node->Form("0000")->FindAllRecords("ARG "));
     }
     else
     {

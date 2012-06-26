@@ -11,14 +11,14 @@ using swganh::tre::readers::SlotDescriptorReader;
 SlotDescriptorReader::SlotDescriptorReader(const std::shared_ptr<anh::resource::ResourceHandle>& resource)
     : iff_reader_(resource->GetBuffer())
 {
-    auto sltd_node = iff_reader_.FindForm("SLTD");
+    auto sltd_node = iff_reader_.Form("SLTD");
 
     if (!sltd_node)
     {
         throw IffReader::BadFileFormat("File is not in the SLTD format: " + resource->GetName());
     }
 
-    LoadSlotsFromNode_(sltd_node->FindForm("0000")->FindRecord("DATA"));
+    LoadSlotsFromNode_(sltd_node->Form("0000")->Record("DATA"));
 }
 
 SlotDescriptorReader::~SlotDescriptorReader()

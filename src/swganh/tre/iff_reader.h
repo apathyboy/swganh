@@ -4,7 +4,7 @@
 #ifndef SWGANH_TRE_IFF_READER_H_
 #define SWGANH_TRE_IFF_READER_H_
 
-#include <exception>
+#include <stdexcept>
 #include <list>
 #include <memory>
 #include <string>
@@ -22,6 +22,8 @@ namespace tre {
     {
     public:
         typedef std::runtime_error BadFileFormat;
+        typedef std::invalid_argument InvalidFormType;
+        typedef std::invalid_argument InvalidRecordType;
 
         struct Node
         {
@@ -32,16 +34,26 @@ namespace tre {
             std::vector<char> data;
             std::vector<std::unique_ptr<Node>> children;
 
-            Node* FindForm(const std::string& form_name);
+            /**
+             * Returns the first form found with the requested name.
+             *
+             * This method throws an exception when a requested name cannot be found making
+             * it ideal for daisy-chaining requests:
+             *
+             * @code    node->Form("SCOT")->Form("STAT")->Form("SHOT")->Record("DERV");
+             *
+             * @throws InvalidFormType When no form by the requested name can be found.
+             */
+            Node* Form(const std::string& form_name);
             std::list<Node*> FindAllForms(const std::string& form_name);
             
-            Node* FindRecord(const std::string& record_name);
+            Node* Record(const std::string& record_name);
             std::list<Node*> FindAllRecords(const std::string& record_name);
         };
         
         IffReader(const std::vector<char>& input);
 
-        Node* FindForm(const std::string& form_name);
+        Node* Form(const std::string& form_name);
         std::list<Node*> FindAllForms(const std::string& form_name);
         std::list<Node*> FindAllRecords(const std::string& record_name);
     

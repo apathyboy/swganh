@@ -81,7 +81,7 @@ void IffReader::ReadNodes_(boost::archive::binary_iarchive& archive, IffReader::
     }
 }
 
-IffReader::Node* IffReader::FindForm(const std::string& form_name)
+IffReader::Node* IffReader::Form(const std::string& form_name)
 {
     if (std::strncmp(head_->name, "FORM", sizeof(head_->name)) == 0 &&
         std::strncmp(head_->type, form_name.c_str(), sizeof(head_->type)) == 0)
@@ -89,7 +89,7 @@ IffReader::Node* IffReader::FindForm(const std::string& form_name)
         return head_.get();
     }
 
-    return head_->FindForm(form_name);
+    return head_->Form(form_name);
 }
 
 std::list<IffReader::Node*> IffReader::FindAllForms(const std::string& form_name)
@@ -107,7 +107,12 @@ std::list<IffReader::Node*> IffReader::FindAllForms(const std::string& form_name
     return nodes;
 }
 
-IffReader::Node* IffReader::Node::FindForm(const std::string& form_name)
+std::list<IffReader::Node*> IffReader::FindAllRecords(const std::string& record_name)
+{
+    return head_->FindAllRecords(record_name);
+}
+
+IffReader::Node* IffReader::Node::Form(const std::string& form_name)
 {
     Node* node = nullptr;
 
@@ -124,7 +129,7 @@ IffReader::Node* IffReader::Node::FindForm(const std::string& form_name)
         }
         else
         {
-            node = child->FindForm(form_name);
+            node = child->Form(form_name);
         }
 
         if (node)
@@ -133,12 +138,12 @@ IffReader::Node* IffReader::Node::FindForm(const std::string& form_name)
         }
     }
 
-    return node;
-}
+    if (!node)
+    {
+        throw InvalidFormType(form_name);
+    }
 
-std::list<IffReader::Node*> IffReader::FindAllRecords(const std::string& record_name)
-{
-    return head_->FindAllRecords(record_name);
+    return node;
 }
 
 std::list<IffReader::Node*> IffReader::Node::FindAllForms(const std::string& form_name)
@@ -159,7 +164,7 @@ std::list<IffReader::Node*> IffReader::Node::FindAllForms(const std::string& for
     return nodes;
 }
 
-IffReader::Node* IffReader::Node::FindRecord(const std::string& record_name)
+IffReader::Node* IffReader::Node::Record(const std::string& record_name)
 {
     Node* node = nullptr;
 
@@ -172,6 +177,11 @@ IffReader::Node* IffReader::Node::FindRecord(const std::string& record_name)
     if (find_iter != std::end(children))
     {
         node = (*find_iter).get();
+    }
+
+    if (!node)
+    {
+        throw InvalidRecordType(record_name);
     }
 
     return node;
