@@ -10,7 +10,7 @@
 
 using anh::resource::ResourceHandle;
 using swganh::tre::readers::ObjectTemplateReader;
-
+using swganh::tre::readers::DataParserMap;
 
 typedef boost::iostreams::stream<boost::iostreams::array_source> ResourceStream;
 
@@ -86,7 +86,12 @@ BOOST_AUTO_TEST_CASE(CanReadObjectTemplate)
 
     auto resource = std::make_shared<ResourceHandle>(nullptr, "object/object/base/shared_base_object.iff", data);
 
-    ObjectTemplateReader reader(resource);
+    DataParserMap map;
+    map.insert(std::make_pair("scale", std::bind(&ObjectTemplateReader::ParseFloat, std::placeholders::_1, std::placeholders::_2)));
+
+    ObjectTemplateReader reader(resource, map);
+
+    BOOST_CHECK_EQUAL(1.0f, reader.GetValue<float>("scale"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

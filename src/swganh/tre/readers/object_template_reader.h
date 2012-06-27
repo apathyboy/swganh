@@ -14,6 +14,11 @@
 
 #include "swganh/tre/iff_reader.h"
 
+namespace boost {
+namespace archive {
+    class binary_iarchive;
+}}
+
 namespace anh {
 namespace resource {
     class ResourceHandle;
@@ -24,10 +29,18 @@ namespace swganh {
 namespace tre {
 namespace readers {
 
+    typedef std::unordered_map<std::string, std::function<boost::any (boost::archive::binary_iarchive&, size_t)>> DataParserMap;
+
+    struct StoredString
+    {
+        std::string file;
+        std::string id;
+    };
+
     class ObjectTemplateReader
     {
     public:        
-        explicit ObjectTemplateReader(const std::shared_ptr<anh::resource::ResourceHandle>& resource);
+        explicit ObjectTemplateReader(const std::shared_ptr<anh::resource::ResourceHandle>& resource, const DataParserMap& data_parsers);
     
         template<typename T>
         boost::optional<T> GetValue(const std::string& var_name)
@@ -47,14 +60,21 @@ namespace readers {
     
             return value;
         }
-    
+
+        static boost::any ParseBool(boost::archive::binary_iarchive& archive, size_t size);
+        static boost::any ParseInt(boost::archive::binary_iarchive& archive, size_t size);
+        static boost::any ParseFloat(boost::archive::binary_iarchive& archive, size_t size);
+        static boost::any ParseString(boost::archive::binary_iarchive& archive, size_t size);
+        static boost::any ParseStoredString(boost::archive::binary_iarchive& archive, size_t size);
+
     private:
         std::unique_ptr<ObjectTemplateReader> LoadDerived_(anh::resource::ResourceManager* resource_manager);
     
         void LoadObjectData_();
     
-        boost::any ParseData(const std::vector<char>& data, size_t offset);
-    
+        boost::any ParseData(const std::string& field_name, boost::archive::binary_iarchive& archive, size_t size);
+        
+        const DataParserMap& data_parsers_;
         std::unique_ptr<ObjectTemplateReader> derived_;
         IffReader iff_io_;
         std::unordered_map<std::string, boost::any> object_data_;
