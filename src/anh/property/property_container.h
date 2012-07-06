@@ -53,10 +53,10 @@ namespace property {
     protected:
         // PropertyContainer is a mixin class and should not deleted polymorphically.
         ~PropertyContainer();
+        
+        virtual Property* DoGetProperty(const std::string& name) const;
     
     private:
-        virtual Property* DoGetProperty(const std::string& name) const;
-
         typedef std::unordered_map<
             std::string, std::shared_ptr<Property>
         > PropertyMap;
