@@ -3,6 +3,14 @@
 
 #include "property_types.h"
 
+#include <sstream>
+
+#pragma warning( push )
+#pragma warning( disable : 4244 )
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#pragma warning( pop )
+
 using namespace anh::property;
 
 
@@ -126,6 +134,59 @@ StringListProperty::StringListProperty(
     Setter&& setter)
     : BaseProperty<StringList>(P_BOOL, name, label, description, group, std::move(getter), std::move(setter))
 {}
+
+StringListProperty::~StringListProperty()
+{}
+
+std::string StringListProperty::DoToString() const
+{
+    std::stringstream ss;
+
+    auto value = GetValue();
+
+    for (auto& str : value)
+    {
+        ss << str << " ";
+    }
+
+    return ss.str();
+}
+
+void StringListProperty::DoFromString(const std::string& string_value)
+{
+
+}
+
+size_t StringListProperty::DoSerialize(boost::archive::binary_oarchive& archive) const
+{
+    return 0;
+}
+
+void StringListProperty::DoDeserialize(boost::archive::binary_iarchive& archive, size_t length)
+{
+    uint8_t enabled;
+
+    archive >> enabled;
+
+    if (enabled > 0)
+    {
+        StringList value;
+        std::string tmp;
+        uint8_t spacer;
+
+        archive >> spacer;
+        archive >> tmp;
+
+        value.push_back(tmp);
+
+        archive >> spacer;
+        archive >> tmp;
+        
+        value.push_back(tmp);
+
+        SetValue(value);
+    }
+}
 
 UStringProperty::UStringProperty(
     std::string name, 
