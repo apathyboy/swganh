@@ -3,9 +3,9 @@
 
 #include "property_container.h"
 
-#include <boost/thread/locks.hpp>
-
 using namespace anh::property;
+
+PropertyContainer::~PropertyContainer() {}
 
 void PropertyContainer::RemoveProperty(const std::string& name)
 {

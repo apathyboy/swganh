@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 
+#include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
 #include "property.h"
@@ -19,7 +20,8 @@ namespace property {
     {
     public:
         template<typename T>
-        void AddProperty(const std::shared_ptr<BaseProperty<T>>& property)
+        typename std::enable_if<std::is_base_of<BaseProperty<typename T::property_type>, T>::value, void>::type
+        AddProperty(const std::shared_ptr<T>& property)
         {
             boost::unique_lock<boost::shared_mutex> lock(properties_mutex_);
 
