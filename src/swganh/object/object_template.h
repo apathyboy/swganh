@@ -9,7 +9,7 @@
 namespace swganh {
 namespace object {
 
-    class ObjectTemplate : anh::property::PropertyContainer
+    class ObjectTemplate : public anh::property::PropertyContainer
 	{
     public:
         explicit ObjectTemplate(std::string name, ObjectTemplate* derived = nullptr);
