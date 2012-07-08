@@ -36,7 +36,7 @@ std::unique_ptr<ObjectTemplate> ObjectTemplateFactory::CreateObjectTemplate(cons
 
     if (find_iter != std::end(object_template_creators_))
     {
-        return find_iter->second();
+        return find_iter->second(name);
     }
 
     return nullptr;
@@ -55,7 +55,11 @@ ObjectTemplate* ObjectTemplateManager::GetObjectTemplate(const std::string& name
 
     if (find_iter == std::end(object_templates_))
     {
-        object_template = CreateObjectTemplate(name);
+        auto new_object_template = CreateObjectTemplate(name);
+
+        object_template = new_object_template.get();
+
+        object_templates_.insert(find_iter, std::make_pair(name, std::move(new_object_template)));
     }
     else
     {
@@ -65,16 +69,24 @@ ObjectTemplate* ObjectTemplateManager::GetObjectTemplate(const std::string& name
     return object_template;
 }
 
-ObjectTemplate* ObjectTemplateManager::CreateObjectTemplate(const std::string& name)
+std::unique_ptr<ObjectTemplate> ObjectTemplateManager::CreateObjectTemplate(const std::string& name)
 {
     auto resource = resource_manager_->GetHandle(name);
 
-    if (resource)
+    if (!resource)
     {
-        ObjectTemplateReaderV2 reader(resource);
+        return nullptr;
+    }
+    
+    ObjectTemplateReaderV2 reader(resource);
 
-        std::unique_ptr<ObjectTemplate> object_template;
+    auto new_template = object_template_factory_.CreateObjectTemplate(reader.GetType());
+    reader.ReadData(*new_template);
+
+    if (reader.HasDerived())
+    {
+        new_template->SetDerived(GetObjectTemplate(reader.GetDerivedType()));
     }
 
-    return nullptr;
+    return new_template;
 }

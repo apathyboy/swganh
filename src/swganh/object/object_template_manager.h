@@ -19,14 +19,14 @@ namespace object {
 
     class ObjectTemplate;
     
-    typedef std::function<std::unique_ptr<ObjectTemplate> ()> ObjectTemplateCreator;
+    typedef std::function<std::unique_ptr<ObjectTemplate> (std::string)> ObjectTemplateCreator;
 
     class ObjectTemplateFactory
     {
     public:
-        void AddTemplateCreator(std::string name, ObjectTemplateCreator&& creator);
-        void RemoveTemplateCreator(const std::string& name);
-        std::unique_ptr<ObjectTemplate> CreateObjectTemplate(const std::string& name);
+        void AddTemplateCreator(std::string type_name, ObjectTemplateCreator&& creator);
+        void RemoveTemplateCreator(const std::string& type_name);
+        std::unique_ptr<ObjectTemplate> CreateObjectTemplate(const std::string& type_name);
         
     private:
         typedef std::unordered_map<std::string, ObjectTemplateCreator> ObjectTemplateCreatorMap;
@@ -43,7 +43,7 @@ namespace object {
     private:
         typedef std::unordered_map<std::string, std::unique_ptr<ObjectTemplate>> ObjectTemplateMap;
         
-        ObjectTemplate* CreateObjectTemplate(const std::string& name);
+        std::unique_ptr<ObjectTemplate> CreateObjectTemplate(const std::string& name);
 
         anh::resource::ResourceManager* resource_manager_;
         ObjectTemplateMap object_templates_;
