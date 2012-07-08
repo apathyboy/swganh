@@ -14,7 +14,7 @@ namespace object {
     class ObjectTemplate : public anh::property::PropertyContainer
 	{
     public:
-        explicit ObjectTemplate(std::string name, ObjectTemplate* derived = nullptr);
+        explicit ObjectTemplate(std::string name);
         virtual ~ObjectTemplate();
     
         std::string GetName() const;

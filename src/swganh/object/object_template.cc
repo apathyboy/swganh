@@ -4,9 +4,9 @@
 using namespace anh::property;
 using swganh::object::ObjectTemplate;
 
-ObjectTemplate::ObjectTemplate(std::string name, ObjectTemplate* derived)
+ObjectTemplate::ObjectTemplate(std::string name)
     : name_(name)
-    , derived_(derived)
+    , derived_(nullptr)
 {}
 
 ObjectTemplate::~ObjectTemplate()
