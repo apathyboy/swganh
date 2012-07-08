@@ -40,7 +40,7 @@ namespace property {
         template<typename T>
         T GetPropertyAs(const std::string& name)
         {
-            auto property = DoGetProperty(name);
+            auto property = GetProperty(name);
 
             if (!property)
             {
@@ -49,6 +49,8 @@ namespace property {
 
             return static_cast<BaseProperty<T>*>(property)->GetValue();
         }
+
+        Property* GetProperty(const std::string& name) const;
 
         void RemoveProperty(const std::string& name);
 

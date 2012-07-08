@@ -12,7 +12,12 @@ void PropertyContainer::RemoveProperty(const std::string& name)
     boost::unique_lock<boost::shared_mutex> lock(properties_mutex_);
     properties_.erase(name);
 }
-        
+     
+Property* PropertyContainer::GetProperty(const std::string& name) const
+{
+    return DoGetProperty(name);
+}
+
 Property* PropertyContainer::DoGetProperty(const std::string& name) const
 {
     boost::shared_lock<boost::shared_mutex> lock(properties_mutex_);
