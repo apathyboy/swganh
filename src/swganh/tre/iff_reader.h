@@ -52,7 +52,8 @@ namespace tre {
         };
         
         IffReader(const std::vector<char>& input);
-
+        
+        Node* Head();
         Node* Form(const std::string& form_name);
         std::list<Node*> FindAllForms(const std::string& form_name);
         std::list<Node*> FindAllRecords(const std::string& record_name);

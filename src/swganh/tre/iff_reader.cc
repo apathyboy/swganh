@@ -81,6 +81,11 @@ void IffReader::ReadNodes_(boost::archive::binary_iarchive& archive, IffReader::
     }
 }
 
+IffReader::Node* IffReader::Head()
+{
+    return head_.get();
+}
+
 IffReader::Node* IffReader::Form(const std::string& form_name)
 {
     if (std::strncmp(head_->name, "FORM", sizeof(head_->name)) == 0 &&
