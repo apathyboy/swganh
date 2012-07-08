@@ -25,8 +25,6 @@ namespace property {
         Property(
             uint32_t type,
             std::string name,
-            std::string label,
-            std::string description,
             std::string group,
             bool read_only = false);
         virtual ~Property();
@@ -34,13 +32,9 @@ namespace property {
         uint32_t GetType() const;
     
         const std::string& GetName() const;
-        const std::string& GetLabel() const;
-        const std::string& GetDescription() const;
         const std::string& GetGroup() const;
     
         void SetName(std::string name);
-        void SetLabel(std::string label);
-        void SetDescription(std::string description);
         void SetGroup(std::string group);
     
         bool IsReadOnly() const;
@@ -61,8 +55,6 @@ namespace property {
     
         uint32_t type_;
         std::string name_;
-        std::string label_;
-        std::string description_;
         std::string group_;
         bool read_only_;
     };
@@ -77,12 +69,10 @@ namespace property {
         BaseProperty(
             uint32_t type, 
             std::string name, 
-            std::string label, 
-            std::string description, 
             std::string group,
             Getter&& getter, 
             Setter&& setter)
-            : Property(type, name, label, description, group)
+            : Property(type, name, group)
             , getter_(std::move(getter))
             , setter_(std::move(setter))
         {}
