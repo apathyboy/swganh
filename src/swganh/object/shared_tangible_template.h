@@ -10,7 +10,7 @@ namespace object {
     class SharedTangibleTemplate : public SharedObjectTemplate
     {
     public:
-        explicit SharedTangibleTemplate(std::string name, ObjectTemplate* derived = nullptr);
+        explicit SharedTangibleTemplate(std::string name);
         ~SharedTangibleTemplate();
 
     protected:

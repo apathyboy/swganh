@@ -15,7 +15,7 @@ namespace object {
     class SharedObjectTemplate : public ObjectTemplate
     {
     public:
-        explicit SharedObjectTemplate(std::string name, ObjectTemplate* derived = nullptr);
+        explicit SharedObjectTemplate(std::string name);
         ~SharedObjectTemplate();
 
     protected:

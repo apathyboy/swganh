@@ -4,8 +4,8 @@
 using namespace anh::property;
 using namespace swganh::object;
 
-SharedTangibleTemplate::SharedTangibleTemplate(std::string name, ObjectTemplate* derived)
-    : SharedObjectTemplate(name, derived)
+SharedTangibleTemplate::SharedTangibleTemplate(std::string name)
+    : SharedObjectTemplate(name)
 {}
 
 SharedTangibleTemplate::~SharedTangibleTemplate()
