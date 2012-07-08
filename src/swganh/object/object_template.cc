@@ -22,6 +22,11 @@ ObjectTemplate* ObjectTemplate::GetDerived() const
     return derived_;
 }
 
+void ObjectTemplate::SetDerived(ObjectTemplate* derived)
+{
+    derived_ = derived;
+}
+
 anh::property::Property* ObjectTemplate::DoGetProperty(const std::string& name)
 {
     auto property = PropertyContainer::DoGetProperty(name);
