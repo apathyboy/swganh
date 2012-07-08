@@ -48,11 +48,14 @@ namespace readers {
         explicit ObjectTemplateReaderV2(const std::shared_ptr<anh::resource::ResourceHandle>& resource);
 
         bool HasDerived() const;
-        std::string GetDerivedName() const;
-        std::string GetType() const;
+        const std::string& GetDerivedType() const;
+        const std::string& GetType() const;
         void ReadData(swganh::object::ObjectTemplate& output);
 
     private:
+        void ReadType();
+        void ReadDerived();
+
         IffReader iff_io_;
         std::string type_;
         std::string derived_name_;

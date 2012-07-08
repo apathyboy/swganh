@@ -11,7 +11,7 @@
 #include "anh/utilities.h"
 #include "anh/resource/resource_manager.h"
 
-#include "swganh/object/object_template_manager.h"
+#include "swganh/object/object_template.h"
 
 namespace bs = boost::serialization;
 
@@ -25,6 +25,7 @@ using swganh::tre::readers::DataParserMap;
 
 ObjectTemplateReaderV2::ObjectTemplateReaderV2(const std::shared_ptr<anh::resource::ResourceHandle>& resource)
     : iff_io_(resource->GetBuffer())
+    , has_derived_(false)
 {}
 
 bool ObjectTemplateReaderV2::HasDerived() const
@@ -32,19 +33,57 @@ bool ObjectTemplateReaderV2::HasDerived() const
     return has_derived_;
 }
 
-std::string ObjectTemplateReaderV2::GetDerivedName() const
+const std::string& ObjectTemplateReaderV2::GetDerivedType() const
 {
     return derived_name_;
 }
 
-std::string ObjectTemplateReaderV2::GetType() const
+const std::string& ObjectTemplateReaderV2::GetType() const
 {
     return type_;
 }
 
 void ObjectTemplateReaderV2::ReadData(swganh::object::ObjectTemplate& output)
 {
+    auto xxxx_nodes = iff_io_.FindAllRecords("XXXX");
 
+    for (auto& xxxx_node : xxxx_nodes)
+    {
+        std::string name(&xxxx_node->data[0]);
+
+        size_t data_offset = name.length() + 1;
+        size_t remaining = xxxx_node->data.size() - data_offset;
+        
+        auto property = output.GetProperty(name);
+        if (property)
+        {
+            stream_buffer<basic_array_source<char>> buffer(&xxxx_node->data[data_offset], remaining);
+            binary_iarchive archive(buffer, boost::archive::no_header);
+
+            property->Deserialize(archive, remaining);
+        }
+    }
+}
+
+void ObjectTemplateReaderV2::ReadType()
+{
+    type_ = iff_io_.Head()->name;
+}
+
+void ObjectTemplateReaderV2::ReadDerived()
+{
+    try
+    {        
+        auto derv_node = iff_io_.Form("DERV")->Record("XXXX");
+
+        if (derv_node->data.size() > 0)
+        {
+            derived_name_ = &derv_node->data[0];
+            has_derived_ = true;
+        }
+    }
+    catch(const IffReader::InvalidFormType&)
+    {}
 }
 
 
