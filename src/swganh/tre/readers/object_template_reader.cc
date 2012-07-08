@@ -11,6 +11,8 @@
 #include "anh/utilities.h"
 #include "anh/resource/resource_manager.h"
 
+#include "swganh/object/object_template_manager.h"
+
 namespace bs = boost::serialization;
 
 using boost::archive::binary_iarchive;
@@ -18,7 +20,33 @@ using boost::iostreams::basic_array_source;
 using boost::iostreams::stream_buffer;
 using swganh::tre::IffReader;
 using swganh::tre::readers::ObjectTemplateReader;
+using swganh::tre::readers::ObjectTemplateReaderV2;
 using swganh::tre::readers::DataParserMap;
+
+ObjectTemplateReaderV2::ObjectTemplateReaderV2(const std::shared_ptr<anh::resource::ResourceHandle>& resource)
+    : iff_io_(resource->GetBuffer())
+{}
+
+bool ObjectTemplateReaderV2::HasDerived() const
+{
+    return has_derived_;
+}
+
+std::string ObjectTemplateReaderV2::GetDerivedName() const
+{
+    return derived_name_;
+}
+
+std::string ObjectTemplateReaderV2::GetType() const
+{
+    return type_;
+}
+
+void ObjectTemplateReaderV2::ReadData(swganh::object::ObjectTemplate& output)
+{
+
+}
+
 
 ObjectTemplateReader::ObjectTemplateReader(const std::shared_ptr<anh::resource::ResourceHandle>& resource, const DataParserMap& data_parsers)
     : iff_io_(resource->GetBuffer())

@@ -26,6 +26,11 @@ namespace resource {
 }}
 
 namespace swganh {
+namespace object {
+    class ObjectTemplate;
+}}
+
+namespace swganh {
 namespace tre {
 namespace readers {
 
@@ -37,10 +42,27 @@ namespace readers {
         std::string id;
     };
 
+    class ObjectTemplateReaderV2
+    {
+    public:
+        explicit ObjectTemplateReaderV2(const std::shared_ptr<anh::resource::ResourceHandle>& resource);
+
+        bool HasDerived() const;
+        std::string GetDerivedName() const;
+        std::string GetType() const;
+        void ReadData(swganh::object::ObjectTemplate& output);
+
+    private:
+        IffReader iff_io_;
+        std::string type_;
+        std::string derived_name_;
+        bool has_derived_;
+    };
+
     class ObjectTemplateReader
     {
     public:        
-        explicit ObjectTemplateReader(const std::shared_ptr<anh::resource::ResourceHandle>& resource, const DataParserMap& data_parsers);
+        ObjectTemplateReader(const std::shared_ptr<anh::resource::ResourceHandle>& resource, const DataParserMap& data_parsers);
     
         template<typename T>
         boost::optional<T> GetValue(const std::string& var_name)
@@ -74,7 +96,7 @@ namespace readers {
     
         boost::any ParseData(const std::string& field_name, boost::archive::binary_iarchive& archive, size_t size);
         
-        const DataParserMap& data_parsers_;
+        DataParserMap data_parsers_;
         std::unique_ptr<ObjectTemplateReader> derived_;
         IffReader iff_io_;
         std::unordered_map<std::string, boost::any> object_data_;
