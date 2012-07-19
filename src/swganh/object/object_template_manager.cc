@@ -8,7 +8,7 @@
 #include "object_template.h"
 
 using namespace swganh::object;
-using swganh::tre::readers::ObjectTemplateReaderV2;
+using swganh::tre::readers::ObjectTemplateReader;
 
 
 void ObjectTemplateFactory::AddTemplateCreator(std::string name, ObjectTemplateCreator&& creator)
@@ -78,7 +78,7 @@ std::unique_ptr<ObjectTemplate> ObjectTemplateManager::CreateObjectTemplate(cons
         return nullptr;
     }
     
-    ObjectTemplateReaderV2 reader(resource);
+    ObjectTemplateReader reader(resource);
 
     auto new_template = object_template_factory_.CreateObjectTemplate(reader.GetType());
     reader.ReadData(*new_template);
