@@ -210,7 +210,7 @@ private:
     filters::EncryptionFilter encryption_filter_;
     filters::SecurityFilter security_filter_;
 
-	std::map<uint16_t, SequencedCallbacks> acknowledgement_callbacks_;
+	std::vector<std::pair<uint16_t, SequencedCallbacks>> acknowledgement_callbacks_;
 };
 
 }}} // namespace swganh::network::soe

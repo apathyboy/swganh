@@ -446,10 +446,15 @@ void Session::AcknowledgeSequence_(const uint16_t& sequence)
 
 void Session::QueueSequencedCallback(uint16_t sequence, SequencedCallbacks callbacks)
 {
-	auto iter = acknowledgement_callbacks_.find(sequence);
+	auto iter = std::find_if(std::begin(acknowledgement_callbacks_), std::end(acknowledgement_callbacks_),
+        [&sequence] (const std::pair<uint16_t, SequencedCallbacks>& item)
+    {
+        return item.first == sequence;
+    });
+
 	if(iter == acknowledgement_callbacks_.end())
 	{
-		acknowledgement_callbacks_.insert(std::pair<uint16_t, SequencedCallbacks>(sequence, callbacks));
+        acknowledgement_callbacks_.emplace_back(sequence, callbacks);
 	}
 	else
 		LOG(error) << "Sequence callback is slotted but has not been dequeued.";
@@ -457,20 +462,19 @@ void Session::QueueSequencedCallback(uint16_t sequence, SequencedCallbacks callb
 
 void Session::DequeueSequencedCallback(uint16_t sequence)
 {
-	for(std::map<uint16_t, SequencedCallbacks>::iterator iter = acknowledgement_callbacks_.begin(); iter != acknowledgement_callbacks_.end(); iter++)
-	{
-		if((*iter).first > sequence)
-			break;
+    for(auto& callback_item : acknowledgement_callbacks_)
+    {
+        if (callback_item.first > sequence) break;
 
-		for(auto& func : (*iter).second)
-		{
-			func((*iter).first);
-		}
-	}
-	
-	auto iter = acknowledgement_callbacks_.find(sequence);
-	if(iter != acknowledgement_callbacks_.end()) {
-		acknowledgement_callbacks_.erase(acknowledgement_callbacks_.begin(), iter);
-		acknowledgement_callbacks_.erase(iter);
-	}
+        for (auto& func : callback_item.second)
+        {
+            func(callback_item.first);
+        }
+    }
+    
+    acknowledgement_callbacks_.erase(std::remove_if(std::begin(acknowledgement_callbacks_), std::end(acknowledgement_callbacks_),
+        [&sequence] (const std::pair<uint16_t, SequencedCallbacks>& item)
+    {
+        return item.first == sequence;
+    }), std::end(acknowledgement_callbacks_));
 }
