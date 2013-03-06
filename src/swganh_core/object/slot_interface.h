@@ -13,12 +13,15 @@ namespace object {
 	class SlotInterface
 	{
 	public:
-		virtual std::shared_ptr<swganh::object::Object> insert_object(const std::shared_ptr<swganh::object::Object> insertObject) = 0;
-		virtual void remove_object(const std::shared_ptr<swganh::object::Object> removeObject) = 0;
-		virtual void view_objects(std::function<void(const std::shared_ptr<swganh::object::Object>&)> walkerFunction) = 0;
-		virtual void view_objects_if(std::function<bool(std::shared_ptr<swganh::object::Object>)> walkerFunction) = 0;
+
+        typedef std::function<void(const std::shared_ptr<Object>&)> ViewWalkerFunction;
+
+        virtual ~SlotInterface() {}
+
+		virtual std::shared_ptr<Object> insert_object(std::shared_ptr<Object> insertObject) = 0;
+		virtual void remove_object(const std::shared_ptr<Object>& removeObject) = 0;
+		virtual void view_objects(ViewWalkerFunction walkerFunction) = 0;
 		virtual bool is_filled() = 0;
 	};
 
-}
-}
+}}

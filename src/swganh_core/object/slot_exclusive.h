@@ -11,14 +11,15 @@ namespace object {
 	{
 	public:
 
-		virtual std::shared_ptr<swganh::object::Object> insert_object(const std::shared_ptr<swganh::object::Object> insertObject);
-		virtual void remove_object(const std::shared_ptr<swganh::object::Object> removeObject);
+        virtual ~SlotExclusive() {}
+
+		virtual std::shared_ptr<Object> insert_object(std::shared_ptr<Object> insertObject);
+		virtual void remove_object(const std::shared_ptr<Object>& removeObject);
 		virtual bool is_filled() { return held_object_ != nullptr; }
-		virtual void view_objects(std::function<void(const std::shared_ptr<swganh::object::Object>&)> walkerFunction);
-		virtual void view_objects_if(std::function<bool(std::shared_ptr<swganh::object::Object>)> walkerFunction);
+		virtual void view_objects(ViewWalkerFunction walkerFunction);
 
 	private:
-		std::shared_ptr<swganh::object::Object> held_object_;
+		std::shared_ptr<Object> held_object_;
 	};
 
 }
