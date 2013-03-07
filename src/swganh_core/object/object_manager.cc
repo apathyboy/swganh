@@ -155,7 +155,7 @@ shared_ptr<Object> ObjectManager::LoadObjectById(uint64_t object_id)
     {
         object = CreateObjectFromStorage(object_id);
 
-		LoadContainedObjects(object);
+		//LoadContainedObjects(object);
     }
 
     return object;
@@ -171,7 +171,7 @@ shared_ptr<Object> ObjectManager::LoadObjectById(uint64_t object_id, uint32_t ob
 
         InsertObject(object);
 
-		LoadContainedObjects(object);		
+		//LoadContainedObjects(object);		
     }	
 
     return object;

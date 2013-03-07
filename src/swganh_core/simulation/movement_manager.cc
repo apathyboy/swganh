@@ -20,6 +20,7 @@
 
 #include "swganh_core/simulation/spatial_provider_interface.h"
 #include "swganh_core/simulation/simulation_service_interface.h"
+#include "swganh_core/simulation/player_view_box.h"
 
 using namespace swganh::event_dispatcher;
 using namespace std;
@@ -44,16 +45,18 @@ void MovementManager::HandleDataTransformServer(
 	const glm::vec3& new_position)
 {
     counter_map_[object->GetObjectId()] = counter_map_[object->GetObjectId()];
-    
+	auto& view_box = object->GetViewBox();
+
 	AABB old_bounding_volume = object->GetAABB();
+	AABB view_box_old_bounding_volume = view_box->GetAABB();
 
 	//If the object was inside a container we need to move it out
-	if(object->GetContainer() != spatial_provider_)
+	/* if(object->GetContainer() != spatial_provider_)
 	{
 		std::shared_ptr<Object> old_container = std::static_pointer_cast<Object>(object->GetContainer());
 		if(old_container->GetTemplate().compare("object/cell/shared_cell.iff") == 0) 
 		{
-			object->GetContainer()->TransferObject(object, object, spatial_provider_, new_position);
+			LOG(warning) << "Entering Cells... cells are under construction.";
 		} 
 		else 
 		{
@@ -70,13 +73,18 @@ void MovementManager::HandleDataTransformServer(
 		}
 	}
 	else
-	{
+	{*/
 		object->SetPosition(new_position);
+		view_box->SetPosition(object->GetPosition());
+
 		object->UpdateWorldCollisionBox();
 		object->UpdateAABB();
-		spatial_provider_->UpdateObject(object, old_bounding_volume, object->GetAABB());
+		view_box->UpdateWorldCollisionBox();
+		view_box->UpdateAABB();
+
+		spatial_provider_->UpdateObject(object, old_bounding_volume, object->GetAABB(), view_box, view_box_old_bounding_volume, view_box->GetAABB());
 		SendDataTransformMessage(object);
-	}
+	//}
 }
 
 void MovementManager::HandleDataTransformWithParentServer(
@@ -120,16 +128,18 @@ void MovementManager::HandleDataTransform(
     }
 
     counter_map_[object->GetObjectId()] = message.counter;
+
+	auto& view_box = object->GetViewBox();
+	AABB view_box_old_bounding_volume = view_box->GetAABB();
 	AABB old_bounding_volume = object->GetAABB();
 
 	//If the object was inside a container we need to move it out
-	if(object->GetContainer() != spatial_provider_)
+	/* if(object->GetContainer() != spatial_provider_)
 	{
 		std::shared_ptr<Object> old_container = std::static_pointer_cast<Object>(object->GetContainer());
 		if(old_container->GetTemplate().compare("object/cell/shared_cell.iff") == 0) 
 		{
-			object->SetOrientation(message.orientation);
-			object->GetContainer()->TransferObject(object, object, spatial_provider_, message.position);
+			LOG(warning) << "Entering cell.... cells are underconstruction.";
 		} 
 		else 
 		{
@@ -147,21 +157,24 @@ void MovementManager::HandleDataTransform(
 		}
 	}
 	else
-	{
+	{*/
 		object->SetPosition(message.position);
 		object->SetOrientation(message.orientation);
+		view_box->SetPosition(object->GetPosition());
 		object->UpdateWorldCollisionBox();
 		object->UpdateAABB();
-		spatial_provider_->UpdateObject(object, old_bounding_volume, object->GetAABB());
+		view_box->UpdateWorldCollisionBox();
+		view_box->UpdateAABB();
+		spatial_provider_->UpdateObject(object, old_bounding_volume, object->GetAABB(), view_box, view_box_old_bounding_volume, view_box->GetAABB());
 		SendUpdateDataTransformMessage(object);
-	}
+	//}
 }
 
 void MovementManager::HandleDataTransformWithParent(
     const shared_ptr<Object>& object, 
     DataTransformWithParent message)
 {
-    
+    return; // to implement....
 	auto container = simulation_service_->GetObjectById(message.cell_id);
 	if(container != nullptr)
 	{
@@ -254,18 +267,8 @@ void MovementManager::RegisterEvents(swganh::EventDispatcher* event_dispatcher)
         [this] (shared_ptr<swganh::EventInterface> incoming_event)
     {
         const auto& object = static_pointer_cast<swganh::ValueEvent<shared_ptr<Object>>>(incoming_event)->Get();
-        
-		LOG(error) << "Resetting counter... " << object->GetObjectId() << ":" << scene_name_;
-		counter_map_[object->GetObjectId()] = 0;
 
-        if (object->GetContainer())
-        {
-            SendDataTransformWithParentMessage(object);
-        }
-        else
-        {
-            SendDataTransformMessage(object);
-        }
+		counter_map_[object->GetObjectId()] = 0;
     });
 
 	event_dispatcher->Subscribe(
@@ -279,14 +282,6 @@ void MovementManager::RegisterEvents(swganh::EventDispatcher* event_dispatcher)
 bool MovementManager::ValidateCounter_(uint64_t object_id, uint32_t counter)
 {    
     return counter >= counter_map_[object_id];
-}
-
-void MovementManager::ResetMovementCounter(std::shared_ptr<swganh::object::Object> object)
-{
-	if(counter_map_.find(object->GetObjectId()) == counter_map_.end())
-		return;
-
-	counter_map_[object->GetObjectId()] = 0;
 }
 
 void MovementManager::SetSpatialProvider(std::shared_ptr<swganh::simulation::SpatialProviderInterface> spatial_provider)

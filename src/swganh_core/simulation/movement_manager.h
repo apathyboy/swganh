@@ -73,8 +73,6 @@ public:
     void SendUpdateDataTransformWithParentMessage(const std::shared_ptr<swganh::object::Object>& object);
 
 	void SetSpatialProvider(std::shared_ptr<swganh::simulation::SpatialProviderInterface> spatial_provider);
-
-	void ResetMovementCounter(std::shared_ptr<swganh::object::Object> object);
 private:
     void RegisterEvents(swganh::EventDispatcher* event_dispatcher);
 

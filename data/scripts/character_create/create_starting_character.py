@@ -58,12 +58,12 @@ def CreateStartingCharacter(kernel, scale, base_model, customization, full_name,
 	creature.add(creature, player)
 	# Now add the objects to the inventory
 	# Wearables get equipped
-	for item in startingItems:
-		item_obj  = simulation.createObject(item)
-		if 'wearables' in item:
-			creature.add(creature, item_obj)
-		else:
-			inventory.add(creature, item_obj)
+	#for item in startingItems:
+	#	item_obj  = simulation.createObject(item)
+	#	if 'wearables' in item:
+	#		creature.add(creature, item_obj)
+	#	else:
+	#		inventory.add(creature, item_obj)
 	
 	simulation.addObjectToScene(creature, startLoc.name)
 	return creature

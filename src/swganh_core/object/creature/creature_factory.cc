@@ -285,7 +285,7 @@ shared_ptr<Object> CreatureFactory::CreateObjectFromStorage(uint64_t object_id)
         LoadSkillMods_(creature, statement);
         LoadSkillCommands_(creature, statement);
 
-		LoadContainedObjects(creature, statement);
+		//LoadContainedObjects(creature, statement);
 
 		//Clear us from the db persist update queue.
 		boost::lock_guard<boost::mutex> lock(persisted_objects_mutex_);

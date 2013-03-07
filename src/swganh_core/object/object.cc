@@ -22,6 +22,7 @@
 #include "swganh_core/messages/controllers/object_menu_response.h"
 
 #include "swganh_core/object/permissions/container_permissions_interface.h"
+#include "swganh_core/simulation/player_view_box.h"
 
 using namespace swganh::observer;
 using namespace std;
@@ -48,6 +49,7 @@ Object::Object()
 	, attributes_template_id(-1)
 	, event_dispatcher_(nullptr)
 	, controller_(nullptr)
+	, view_box_(nullptr)
 {
 }
 
@@ -1106,9 +1108,9 @@ void Object::UpdateWorldCollisionBox(void)
 
 void Object::__InternalUpdateWorldCollisionBox()
 {
-	glm::vec3 pos;
-	glm::quat rotation;
-	__InternalGetAbsolutes(pos, rotation);
+	glm::vec3 pos = position_;
+	glm::quat rotation = orientation_;
+	//__InternalGetAbsolutes(pos, rotation);
 	
 	auto rot = glm::yaw(rotation);
 	boost::geometry::strategy::transform::translate_transformer<Point, Point> translate(pos.x, pos.z);

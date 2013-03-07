@@ -50,6 +50,8 @@
 #include "movement_manager.h"
 #include "scene_manager.h"
 #include "swganh_core/simulation/movement_manager_interface.h"
+#include "player_view_box.h"
+#include "swganh_core/object/permissions/default_permission.h"
 
 using namespace swganh;
 using namespace std;
@@ -268,7 +270,7 @@ public:
 			start_scene.galaxy_time = 0;
 
 			controller->Notify(&start_scene, [=](uint16_t sequence) {
-				std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!Attaching controller...." << std::endl;
+
 				// Reset Controller
 				obj->SetController(controller);
 
@@ -401,35 +403,28 @@ public:
 
 		client->SendTo(start_scene, boost::optional<Session::SequencedCallback>(
 			[=](uint16_t sequence){
-				LOG(warning) << "here.";
-				if(object->GetContainer() == nullptr)
-				{
-					scene->AddObject(object);
-				}
-
 				//Attach the controller
 				StartControllingObject(object, client);
 
-				//Make sure the controller gets his awareness creates
-				//regardless of the current state of awareness.
-				auto controller = object->GetController();
-				scene->ViewObjects(object, 0, true, [&] (std::shared_ptr<swganh::object::Object> aware) {
-					if(aware->__HasAwareObject(object) && !aware->IsInSnapshot())
-					{
-						//Send create manually
-						aware->Subscribe(controller);
-						aware->SendCreateByCrc(controller);
-						aware->CreateBaselines(controller);
-					}
-					else
-					{
-						aware->AddAwareObject(object);
-						object->AddAwareObject(aware);
-					}
-				});
-				
-
 				object->SetCollidable(true);
+
+				if(object->GetContainer() == nullptr)
+				{
+					// Create View Box
+					std::shared_ptr<PlayerViewBox> view_box = std::make_shared<PlayerViewBox>(object);
+					view_box->SetPosition(object->GetPosition());
+					view_box->SetObjectId(object->GetObjectId() + 16);
+					view_box->SetInSnapshot(true);
+					view_box->SetDatabasePersisted(false);
+					view_box->SetCollidable(true);
+					view_box->SetPermissions(std::make_shared<swganh::object::DefaultPermission>());
+					object->SetViewBox(view_box);
+
+					// Add to scene.
+					// note: View Box will later be attached to player.
+					scene->AddObject(object);
+					scene->AddObject(view_box);
+				}
 		}));
     }
 

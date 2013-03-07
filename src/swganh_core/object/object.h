@@ -42,6 +42,10 @@
 {GetEventDispatcher()->Dispatch(make_shared<BIG ## Event>(#BIG "::" #LITTLE, static_pointer_cast<BIG>(shared_from_this())));}
 
 namespace swganh {
+namespace simulation {
+	class PlayerViewBox;
+} // namespace swganh::simulation
+
 namespace object {
 
 typedef std::vector<
@@ -596,6 +600,12 @@ public:
 	void Clone(std::shared_ptr<Object> other);
 
 	//
+	// View Box
+	//
+	void SetViewBox(std::shared_ptr<simulation::PlayerViewBox> view_box) { view_box_ = view_box; }
+	std::shared_ptr<simulation::PlayerViewBox> GetViewBox() { return view_box_; }
+
+	//
 	// Spatial/Collision
 	//
 	virtual void OnCollisionEnter(std::shared_ptr<Object> collider) { }
@@ -666,6 +676,8 @@ protected:
 
 	CollisionBox local_collision_box_;
 	CollisionBox world_collision_box_;
+
+	std::shared_ptr<simulation::PlayerViewBox> view_box_;
 
 	AABB aabb_;
 

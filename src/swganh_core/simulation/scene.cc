@@ -34,7 +34,6 @@ public:
 		
     {
 		auto tmp = kernel_->GetPluginManager()->CreateObject<swganh::simulation::QuadtreeSpatialProvider>("Simulation::SpatialProvider");
-		tmp->SetThis(tmp);
 		tmp->SetSceneName(description.name);
 		tmp->SetSceneId(description.id);
 		spatial_index_ = tmp;
@@ -75,8 +74,6 @@ public:
 		EraseObject(object);             
 
 		spatial_index_->RemoveObject(nullptr, object);
-
-		movement_manager_->ResetMovementCounter(object);
     }
 
 	void InsertObject(const shared_ptr<Object>& object)
@@ -194,7 +191,8 @@ void Scene::HandleDataTransformWithParent(const shared_ptr<Object>& object, Data
 
 void Scene::ViewObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<Object>)> func)
 {
-	impl_->GetSpatialIndex()->ViewObjects(requester, max_depth, topDown, func);
+	LOG(warning) << "Scene::ViewObjects";
+	//impl_->GetSpatialIndex()->ViewObjects(requester, max_depth, topDown, func);
 }
 
 void Scene::ViewObjects(glm::vec3 position, float radius, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<swganh::object::Object>)> func)
