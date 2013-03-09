@@ -56,7 +56,7 @@ INCLUDE(CMakeMacroParseArguments)
 INCLUDE(ANHLibrary)
 
 FUNCTION(AddANHExecutable name)
-    PARSE_ARGUMENTS(ANHEXE "DEPENDS;FOLDER;SOURCES;TEST_SOURCES;ADDITIONAL_LIBRARY_DIRS;ADDITIONAL_INCLUDE_DIRS;ADDITIONAL_SOURCE_DIRS;DEBUG_LIBRARIES;OPTIMIZED_LIBRARIES" "" ${ARGN})
+    PARSE_ARGUMENTS(ANHEXE "NO_LIB_GEN;DEPENDS;FOLDER;SOURCES;TEST_SOURCES;ADDITIONAL_LIBRARY_DIRS;ADDITIONAL_INCLUDE_DIRS;ADDITIONAL_SOURCE_DIRS;DEBUG_LIBRARIES;OPTIMIZED_LIBRARIES" "" ${ARGN})
 
     # get information about the data passed in, helpful for checking if a value
     # has been set or not
@@ -72,7 +72,7 @@ FUNCTION(AddANHExecutable name)
     FILE(GLOB_RECURSE HEADERS *.h)
     FILE(GLOB_RECURSE TEST_SOURCES *_unittest.h *_unittest.cc *_unittest.cpp mock_*.h)
 	FILE(GLOB_RECURSE BINDINGS *_binding.h *_binding.cc *_binding.cpp py_*.h py_*.cc)
-    
+
     FOREACH(__source_file ${SOURCES})
         STRING(REGEX REPLACE "(${CMAKE_CURRENT_SOURCE_DIR}/)((.*/)*)(.*)" "\\2" __source_dir "${__source_file}")
         STRING(REGEX REPLACE "(${CMAKE_CURRENT_SOURCE_DIR}/${__source_dir})(.*)" "\\2" __source_filename "${__source_file}")
@@ -87,15 +87,15 @@ FUNCTION(AddANHExecutable name)
             SET(MAIN_EXISTS ${__source_file})
         ENDIF()
     ENDFOREACH()
-	
-    list(LENGTH SOURCES _bindings_list_length)
+
+    list(LENGTH BINDINGS _bindings_list_length)
     if(_bindings_list_length GREATER 1)
 	    list(REMOVE_ITEM SOURCES ${BINDINGS})
 	endif()
-	
+
     # if unit tests have been specified break out the project into a library to make it testable
     LIST(LENGTH SOURCES _sources_list_length)
-    IF(_sources_list_length GREATER 1)
+    IF(_sources_list_length GREATER 1 AND "${ANHEXE_NO_LIB_GEN}" STREQUAL "")
         SET(__project_library "${name}_lib")
 
         list(REMOVE_ITEM SOURCES ${MAIN_EXISTS})
@@ -130,11 +130,11 @@ FUNCTION(AddANHExecutable name)
 	IF(_librarydirs_list_length GREATER 0)
         LINK_DIRECTORIES(${ANHEXE_ADDITIONAL_LIBRARY_DIRS})
     ENDIF()
-    
+
     if(NOT "${ANHEXE_FOLDER}" STREQUAL "")
         set(EXECUTABLE_FOLDER FOLDER "${ANHEXE_FOLDER}")
     endif()
-    
+
     # Create the executable and link to it's library
     ADD_EXECUTABLE(${name} ${SOURCES})
 	SET_TARGET_PROPERTIES(${name}
@@ -142,11 +142,11 @@ FUNCTION(AddANHExecutable name)
 		ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 		${EXECUTABLE_FOLDER}
     )
-    
+
     IF(_project_deps_list_length GREATER 0)
         TARGET_LINK_LIBRARIES(${name} ${ANHEXE_DEPENDS})
     ENDIF()
-        
+
     ADD_DEPENDENCIES(${name} DEPS)
 
     IF(_debug_list_length GREATER 0)
