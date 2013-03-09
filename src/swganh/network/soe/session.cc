@@ -240,10 +240,12 @@ void Session::SendSequencedMessage_(HeaderBuilder header_builder, ByteBuffer mes
     data_channel_message.append(move(message));
 
     // Send it over the wire
-    SendSoePacket_(data_channel_message, message_sequence);
+    SendSoePacket_(data_channel_message);
 
 	if(callbacks.get().size() > 0)
 		QueueSequencedCallback(message_sequence, callbacks.get());
+
+    sent_messages_.push_back(make_pair(message_sequence, std::move(message)));
 }
 
 void Session::handleSessionRequest_(SessionRequest packet)
@@ -302,7 +304,6 @@ void Session::handleNetStatsClient_(NetStatsClient packet)
 void Session::handleChildDataA_(ChildDataA packet)
 {
     if(!SequenceIsValid_(packet.sequence)) {
-        LOG(warning) << "Invalid sequence: " << packet.sequence << "; Current sequence " << this->next_client_sequence_;
         return;
     }
 
@@ -384,28 +385,22 @@ void Session::handleOutOfOrderA_(OutOfOrderA packet)
         end(sent_messages_),
         [=](const SequencedMessageMap::value_type& item)
     {
-        SendSoePacket_(item.second);
+        server_->SendTo(remote_endpoint(), item.second);
     });
 }
 
-void Session::SendSoePacket_(swganh::ByteBuffer message, boost::optional<uint16_t> sequence)
+void Session::SendSoePacket_(swganh::ByteBuffer message)
 {
-    strand_.post(bind(&Session::SendSoePacketInternal, shared_from_this(), std::move(message), sequence));
+    strand_.post(bind(&Session::SendSoePacketInternal, shared_from_this(), std::move(message)));
 }
 
-void Session::SendSoePacketInternal(swganh::ByteBuffer message, boost::optional<uint16_t> sequence)
+void Session::SendSoePacketInternal(swganh::ByteBuffer message)
 {
 	LOG_NET << "Server -> Client: \n" << message;
 
     compression_filter_(this, &message);
     encryption_filter_(this, &message);
     crc_output_filter_(this, &message);
-	
-    // Store it for resending later if necessary
-    if (sequence)
-    {
-        sent_messages_.push_back(make_pair(*sequence, message));
-    }
 
     server_->SendTo(remote_endpoint(), move(message));
 }
@@ -418,21 +413,24 @@ bool Session::SequenceIsValid_(const uint16_t& sequence)
         return true;
     }
 	// are we more than 50 packets out of sequence?
-	else if(sequence > (next_client_sequence_ + 50) )
+	else if(sequence > (next_client_sequence_ + 50) && next_client_sequence_ > 50)
 	{
 		Close();
 	}
-    else if (next_client_sequence_ < sequence)
+    // If the sequence is bigger than the next expected sequence (accounting for potential rollover)
+    // trigger an Out of Order message.
+    else if (next_client_sequence_ < sequence && ((std::numeric_limits<uint16_t>::max() - sequence) > (sequence - next_client_sequence_)))
     {
 		// Tell the client we have received an Out of Order sequence.
 		OutOfOrderA	out_of_order(sequence);
 		ByteBuffer buffer;
 		out_of_order.serialize(buffer);
-		encryption_filter_(this, &buffer);
 		SendSoePacket_(move(buffer));        
     }
+
+	LOG(warning) << "Invalid sequence: [" << sequence << "] Current sequence [" << next_client_sequence_ << "]";
 	
-	return false;
+    return false;
 }
 
 void Session::AcknowledgeSequence_(const uint16_t& sequence)
