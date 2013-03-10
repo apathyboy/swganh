@@ -20,11 +20,11 @@ class SpatialProviderInterface
 {
 public:
 	virtual void SvgToFile()=0;
-	virtual void AddObject(std::shared_ptr<swganh::object::Object> requester, std::shared_ptr<swganh::object::Object> newObject, int32_t arrangement_id=-2)=0;
-	virtual void RemoveObject(std::shared_ptr<swganh::object::Object> requester, std::shared_ptr<swganh::object::Object> oldObject)=0;
+	virtual void AddObject(std::shared_ptr<swganh::object::Object> newObject, int32_t arrangement_id=-2)=0;
+	virtual void RemoveObject(std::shared_ptr<swganh::object::Object> oldObject)=0;
 	virtual void UpdateObject(std::shared_ptr<swganh::object::Object> obj, const swganh::object::AABB& old_bounding_volume, const swganh::object::AABB& new_bounding_volume, std::shared_ptr<swganh::object::Object> view_box, const swganh::object::AABB view_box_old_bounding_volume, const swganh::object::AABB view_box_new_bounding_volume) = 0;
-	virtual void ViewObjectsInRange(glm::vec3 position, float radius, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<swganh::object::Object>)> func) = 0;
 	virtual std::set<std::shared_ptr<swganh::object::Object>> Query(boost::geometry::model::polygon<swganh::object::Point> query_box) = 0;
+	virtual std::set<std::shared_ptr<swganh::object::Object>> Query(glm::vec3 position = glm::vec3(), float radius = 0.0f) = 0;
 	virtual std::set<std::pair<float, std::shared_ptr<swganh::object::Object>>> FindObjectsInRangeByTag(const std::shared_ptr<swganh::object::Object> requester, const std::string& tag, float range=-1)=0;
 };
 

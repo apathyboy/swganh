@@ -7,13 +7,13 @@
 using namespace swganh::simulation;
 using namespace swganh::object;
 
-static double VIEWING_RANGE = 150.0f;
+static double VIEWING_RANGE = 128.0f;
 
 PlayerViewBox::PlayerViewBox(std::shared_ptr<Object> player)
 	: Object()
 	, player_(player)
 {
-	SetCollisionBoxSize((float)VIEWING_RANGE,(float) VIEWING_RANGE);
+	SetCollisionBoxSize((float)VIEWING_RANGE * 2.0f,(float) VIEWING_RANGE * 2.0f);
 }
 
 PlayerViewBox::~PlayerViewBox()
@@ -23,26 +23,27 @@ PlayerViewBox::~PlayerViewBox()
 
 void PlayerViewBox::OnCollisionEnter(std::shared_ptr<Object> collider)
 {
+	// Add collided object to view.
 	auto& controller = player_->GetController();
-	if(controller != nullptr)
+	if(controller != nullptr && collider->IsInSnapshot() == false)
 	{
+		std::cout << "Creating [ " << collider->GetTemplate() << "] for ";
+		std::wcout << player_->GetCustomName() << std::endl;
 		collider->Subscribe(controller);
 		collider->SendCreateByCrc(controller);
 		collider->CreateBaselines(controller);
 	}
-
-
-	player_->AddAwareObject(collider);
 }
 
 void PlayerViewBox::OnCollisionLeave(std::shared_ptr<Object> collider)
 {
+	// Remove collided object from view.
 	auto& controller = player_->GetController();
-	if(controller != nullptr)
+	if(controller != nullptr && collider->IsInSnapshot() == false)
 	{
-		collider->Unsubscribe(controller);
+		std::cout << "Destroying [ " << collider->GetTemplate() << "] for ";
+		std::wcout << player_->GetCustomName() << std::endl;
 		collider->SendDestroy(controller);
+		collider->Unsubscribe(controller);
 	}
-
-	player_->RemoveAwareObject(collider);
 }

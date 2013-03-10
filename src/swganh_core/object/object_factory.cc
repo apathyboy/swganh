@@ -22,6 +22,9 @@
 
 #include "swganh_core/object/permissions/container_permissions_interface.h"
 
+#include "swganh/service/service_manager.h"
+#include "swganh/app/kernel_interface.h"
+
 using namespace sql;
 using namespace std;
 using namespace swganh::app;
@@ -296,14 +299,19 @@ void ObjectFactory::LoadContainedObjects(
 
             auto contained_object = object_manager_->CreateObjectFromStorage(contained_id, contained_type);
 
+			swganh::simulation::SimulationServiceInterface* simulation_service = kernel_->GetServiceManager()->GetService<SimulationServiceInterface>("SimulationService");
+			contained_object->SetCustomName(L"Contained object.");
 			if(contained_object->GetArrangementId() == -2)
 			{
 				//This object has never been loaded before and needs to be put into the default slot.
+				std::cout << "Adding contained object... " << contained_object->GetTemplate() << std::endl;
 				object->AddObject(nullptr, contained_object);
+				
 			}
 			else 
 			{
 				//Put it back where it was persisted
+				std::cout << "Adding contained object... " << contained_object->GetTemplate() << std::endl;
 				object->AddObject(nullptr, contained_object, contained_object->GetArrangementId());
 			}
 

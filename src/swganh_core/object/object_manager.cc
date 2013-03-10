@@ -155,7 +155,7 @@ shared_ptr<Object> ObjectManager::LoadObjectById(uint64_t object_id)
     {
         object = CreateObjectFromStorage(object_id);
 
-		//LoadContainedObjects(object);
+		LoadContainedObjects(object);
     }
 
     return object;
@@ -171,7 +171,7 @@ shared_ptr<Object> ObjectManager::LoadObjectById(uint64_t object_id, uint32_t ob
 
         InsertObject(object);
 
-		//LoadContainedObjects(object);		
+		LoadContainedObjects(object);		
     }	
 
     return object;
@@ -416,16 +416,15 @@ std::shared_ptr<swganh::tre::SlotDefinitionVisitor>  ObjectManager::GetSlotDefin
 
 void ObjectManager::LoadCollisionInfoForObject(std::shared_ptr<Object> obj)
 {
-		auto obj_visitor = kernel_->GetResourceManager()->GetResourceByName<ObjectVisitor>(obj->GetTemplate());
-		obj_visitor->load_aggregate_data(kernel_->GetResourceManager());
+		//auto obj_visitor = kernel_->GetResourceManager()->GetResourceByName<ObjectVisitor>(obj->GetTemplate());
+		//obj_visitor->load_aggregate_data(kernel_->GetResourceManager());
 
-		if(obj_visitor->has_attribute("collisionLength") && obj_visitor->has_attribute("collisionHeight"))
-		{
-			obj->SetCollisionBoxSize(obj_visitor->attribute<float>("collisionLength") / 2.0f, obj_visitor->attribute<float>("collisionLength") / 2.0f);
-			obj->SetCollidable(true);
-		}
-		else
-			obj->SetCollidable(false);
+		//if(obj_visitor->has_attribute("collisionLength") && obj_visitor->has_attribute("collisionHeight"))
+		//{
+		//	obj->SetCollisionBoxSize(obj_visitor->attribute<float>("collisionLength") / 2.0f, obj_visitor->attribute<float>("collisionLength") / 2.0f);
+			//obj->SetCollidable(true);
+		//}
+			//obj->SetCollidable(false);
 }
 
 void ObjectManager::LoadSlotsForObject(std::shared_ptr<Object> object)

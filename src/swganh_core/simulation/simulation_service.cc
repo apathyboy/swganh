@@ -278,6 +278,10 @@ public:
 				scene_obj->AddObject(obj);
 			});
 		}
+		else
+		{
+			scene_obj->AddObject(obj);
+		}
 	}
 
 	shared_ptr<Object> TransferObjectToScene(uint64_t object_id, const string& scene)
@@ -414,8 +418,9 @@ public:
 					std::shared_ptr<PlayerViewBox> view_box = std::make_shared<PlayerViewBox>(object);
 					view_box->SetPosition(object->GetPosition());
 					view_box->SetObjectId(object->GetObjectId() + 16);
-					view_box->SetInSnapshot(true);
 					view_box->SetDatabasePersisted(false);
+					view_box->SetInSnapshot(false);
+					view_box->SetTemplate("anh/view_box");
 					view_box->SetCollidable(true);
 					view_box->SetPermissions(std::make_shared<swganh::object::DefaultPermission>());
 					object->SetViewBox(view_box);

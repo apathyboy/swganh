@@ -67,7 +67,6 @@ void Node::InsertObject(std::shared_ptr<swganh::object::Object> obj)
 	if(success)
 		return;
 
-
 	objects_.insert(obj);
 }
 
@@ -328,38 +327,11 @@ void Node::SvgDumpObjects(std::ofstream& file)
 		}
 
 		auto name = obj->GetCustomName();
-		file << "<text x=\"" << obj->GetPosition().x << "\" y=\"" << obj->GetPosition().z * -1.0f << "\" fill=\"black\" style=\"text-anchor: middle;\" font-size=\"8px\">" << std::string(name.begin(), name.end()) << "<" << '/' << "text>\n";
+		glm::vec3 position;
+		obj->GetAbsolutes(position, glm::quat());
+		file << "<text x=\"" << position.x << "\" y=\"" << position.z * -1.0f << "\" fill=\"black\" style=\"text-anchor: middle;\" font-size=\"1px\">" << std::string(name.begin(), name.end()) << "<" << '/' << "text>\n";
 		file << "<polygon points=\"" << bounding_volume_points.str() << "\" style=\"fill-opacity:0;fill:none;stroke:red;stroke-width:0.4px\"" << '/' << "> \n";
 		file << "<polygon points=\"" << current_collision_points.str() << "\" style=\"fill-opacity:0;fill:none;stroke:blue;stroke-width:0.4px\"" << '/' << "> \n";
-
-		obj->ViewObjects(obj, 0, true, [=, &file](std::shared_ptr<swganh::object::Object> object) {
-			if(object->GetCustomName().size() > 0)
-			{
-				std::cout << "Printing internal object of ";
-				std::wcout << obj->GetCustomName() << " : ";
-				std::wcout << object->GetCustomName() << std::endl;
-			}
-			std::stringstream bounding_volume_points;
-
-			auto bounding_volume = object->GetAABB();
-			auto collision_box = object->GetWorldCollisionBox();
-
-			current_collision_points = std::stringstream();
-			boost::geometry::for_each_point(collision_box, GetCollisionBoxPoints<Point>);
-		
-			boost::geometry::box_view<swganh::object::AABB> bounding_volume_view(bounding_volume);
-			for(boost::range_iterator<boost::geometry::box_view<swganh::object::AABB>>::type it = boost::begin(bounding_volume_view); it != boost::end(bounding_volume_view); ++it) 
-			{
-				bounding_volume_points << " " << (*it).x() << "," << (*it).y() * -1.0f;
-			}
-
-			auto name = object->GetCustomName();
-			auto abs_position = glm::vec3();
-			object->GetAbsolutes(abs_position, object->GetOrientation());
-			file << "<text x=\"" << abs_position.x << "\" y=\"" << abs_position.z * -1.0f << "\" fill=\"black\" style=\"text-anchor: middle;\" font-size=\"8px\">" << std::string(name.begin(), name.end()) << " * <" << '/' << "text>\n";
-			file << "<polygon points=\"" << bounding_volume_points.str() << "\" style=\"fill-opacity:0;fill:none;stroke:red;stroke-width:0.4px\"" << '/' << "> \n";
-			file << "<polygon points=\"" << current_collision_points.str() << "\" style=\"fill-opacity:0;fill:none;stroke:blue;stroke-width:0.4px\"" << '/' << "> \n";
-		});
 	}
 
 	if(state_ == BRANCH)

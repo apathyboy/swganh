@@ -43,9 +43,9 @@ Object::Object()
 	, arrangement_id_(-2)
 	, database_persisted_(true)
 	, in_snapshot_(false)
-	, collision_height_(0.0f)
-	, collision_length_(0.0f)
-	, collidable_(false)
+	, collision_height_(1.0f)
+	, collision_length_(1.0f)
+	, collidable_(true)
 	, attributes_template_id(-1)
 	, event_dispatcher_(nullptr)
 	, controller_(nullptr)
@@ -94,7 +94,7 @@ void Object::ClearController()
 void Object::AddObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> obj, int32_t arrangement_id)
 {
 	if(requester == nullptr || container_permissions_->canInsert(shared_from_this(), requester, obj))
-	{
+	{	
 		boost::upgrade_lock<boost::shared_mutex> lock(global_container_lock_);
 		
 		//Add Object To Datastructure
@@ -102,12 +102,6 @@ void Object::AddObject(std::shared_ptr<Object> requester, std::shared_ptr<Object
 			boost::upgrade_to_unique_lock<boost::shared_mutex> unique_lock(lock);
 			arrangement_id = __InternalInsert(obj, obj->GetPosition(), arrangement_id);
 		}
-
-		//Update our observers with the new object
-		std::for_each(aware_objects_.begin(), aware_objects_.end(), [&] (std::shared_ptr<Object> object) {
-			obj->__InternalAddAwareObject(object, true);		
-			object->__InternalAddAwareObject(obj, true);
-		});
 	}
 }
 
@@ -116,12 +110,6 @@ void Object::RemoveObject(std::shared_ptr<Object> requester, std::shared_ptr<Obj
 	if(requester == nullptr || container_permissions_->canRemove(shared_from_this(), requester, oldObject))
 	{
 		boost::upgrade_lock<boost::shared_mutex> lock(global_container_lock_);
-
-		//Update our observers about the dead object
-		std::for_each(aware_objects_.begin(), aware_objects_.end(), [&] (std::shared_ptr<Object> object) {
-			oldObject->__InternalRemoveAwareObject(object, true);	
-			object->__InternalRemoveAwareObject(oldObject, true);
-		});
 
 		{
 			boost::upgrade_to_unique_lock<boost::shared_mutex> unique_lock(lock);
@@ -179,6 +167,7 @@ void Object::TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<O
 			}
 		}, requester);
 
+		/**
 		//Send Creates to only new
 		for(auto& observer : newObservers) {
 			object->__InternalAddAwareObject(observer, true);
@@ -193,6 +182,7 @@ void Object::TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<O
 		for(auto& observer : oldObservers) {
 			object->__InternalRemoveAwareObject(observer, true);
 		}
+		*/
 	}
 }
 
@@ -349,6 +339,7 @@ void Object::__InternalTransfer(std::shared_ptr<Object> requester, std::shared_p
 				}
 			}, requester);
 
+			/**
 			//Send Creates to only new
 			for(auto& observer : newObservers) {
 				object->__InternalAddAwareObject(observer, true);
@@ -363,110 +354,16 @@ void Object::__InternalTransfer(std::shared_ptr<Object> requester, std::shared_p
 			for(auto& observer : oldObservers) {
 				object->__InternalRemoveAwareObject(observer, true);
 			}
+			*/
 		}
 	} catch(const std::exception& e){
 		LOG(error) << "Could not transfer object " << object->GetObjectId() << " to container :" << GetObjectId() << " with error " << e.what();
 	}
 }
 
-
-void Object::__InternalAddAwareObject(std::shared_ptr<swganh::object::Object> object, bool reverse_still_valid)
-{	
-	std::shared_ptr<ObserverInterface> observer;
-
-	auto find_itr = aware_objects_.find(object);
-	if(find_itr == aware_objects_.end())
-	{
-		aware_objects_.insert(object);
-		if(!IsInSnapshot())
-		{
-			observer = object->GetController();
-			if(observer)
-			{
-				Subscribe(observer);
-				SendCreateByCrc(observer);
-				CreateBaselines(observer);
-			}
-		}
-	}
-
-	find_itr = object->aware_objects_.find(shared_from_this());
-	if(find_itr == object->aware_objects_.end())
-	{
-		object->aware_objects_.insert(shared_from_this());
-		if(!object->IsInSnapshot())
-		{
-			observer = GetController();
-			if(observer)
-			{
-				object->Subscribe(observer);
-				object->SendCreateByCrc(observer);
-				object->CreateBaselines(observer);
-			}
-		}
-	}
-		
-	for(auto& slot : slot_descriptor_)
-	{
-		slot.second->view_objects([&] (const std::shared_ptr<Object>& v) {
-			v->__InternalAddAwareObject(object, reverse_still_valid);
-			if(reverse_still_valid)
-			{
-				object->__InternalAddAwareObject(v, reverse_still_valid);
-			}
-		});
-	}
-}
-
 void Object::__InternalViewAwareObjects(std::function<void(std::shared_ptr<swganh::object::Object>)> func, std::shared_ptr<swganh::object::Object> hint)
 {
 	std::for_each(aware_objects_.begin(), aware_objects_.end(), func);
-}
-
-void Object::__InternalRemoveAwareObject(std::shared_ptr<swganh::object::Object> object, bool reverse_still_valid)
-{
-	for(auto& slot : slot_descriptor_)
-	{
-		slot.second->view_objects([&] (const std::shared_ptr<Object>& v) {
-			v->__InternalRemoveAwareObject(object, reverse_still_valid);
-			if(!reverse_still_valid)
-			{
-				object->__InternalRemoveAwareObject(v, reverse_still_valid);
-			}
-		});
-	}
-
-	std::shared_ptr<ObserverInterface> observer;
-	auto find_itr = aware_objects_.find(object);
-	if(find_itr != aware_objects_.end())
-	{
-		aware_objects_.erase(find_itr);
-		if(!IsInSnapshot())
-		{
-			observer = object->GetController();
-			if(observer)
-			{
-				//DLOG(info) << "DELETING " << GetObjectId() << " FOR " << observer->GetId();
-				SendDestroy(observer);
-				Unsubscribe(observer);
-			}
-		}
-	}
-
-	find_itr = object->aware_objects_.find(shared_from_this());
-	if(find_itr != object->aware_objects_.end())
-	{
-		object->aware_objects_.erase(find_itr);
-		if(!object->IsInSnapshot())
-		{
-			observer = GetController();
-			if(observer)
-			{
-				object->SendDestroy(observer);
-				object->Unsubscribe(observer);
-			}
-		}
-	}
 }
 
 bool Object::__HasAwareObject(std::shared_ptr<Object> object)
@@ -865,15 +762,16 @@ void Object::SendUpdateContainmentMessage(std::shared_ptr<swganh::observer::Obse
 		return;
 
 	uint64_t container_id = 0;
-	if (GetContainer())
+	auto& container = GetContainer();
+	if (container)
 		container_id = GetContainer()->GetObjectId();
 
-	//DLOG(info) << "CONTAINMENT " << GetObjectId() << " INTO " << container_id << " ARRANGEMENT " << arrangement_id_;
+	//DLOG(info) << "CONTAINMENT " << GetObjectId() << ":" << GetTemplate() << " INTO " << container_id << " ARRANGEMENT " << arrangement_id_;
 
 	UpdateContainmentMessage containment_message;
 	containment_message.container_id = container_id;
 	containment_message.object_id = GetObjectId();
-	containment_message.containment_type = arrangement_id_;
+	containment_message.containment_type = 4;
 	observer->Notify(&containment_message);
 }
 
@@ -1108,9 +1006,9 @@ void Object::UpdateWorldCollisionBox(void)
 
 void Object::__InternalUpdateWorldCollisionBox()
 {
-	glm::vec3 pos = position_;
-	glm::quat rotation = orientation_;
-	//__InternalGetAbsolutes(pos, rotation);
+	glm::vec3 pos;
+	glm::quat rotation;
+	__InternalGetAbsolutes(pos, rotation);
 	
 	auto rot = glm::yaw(rotation);
 	boost::geometry::strategy::transform::translate_transformer<Point, Point> translate(pos.x, pos.z);

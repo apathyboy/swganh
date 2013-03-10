@@ -27,27 +27,46 @@ QuadtreeSpatialProvider::~QuadtreeSpatialProvider(void)
 {
 }
 
-void QuadtreeSpatialProvider::AddObject(std::shared_ptr<swganh::object::Object> requester, shared_ptr<Object> object, int32_t arrangement_id)
+void QuadtreeSpatialProvider::AddObject(shared_ptr<Object> object, int32_t arrangement_id)
 {
 	boost::upgrade_lock<boost::shared_mutex> uplock(lock_);
-	{
-		boost::upgrade_to_unique_lock<boost::shared_mutex> unique(uplock);
-		root_node_.InsertObject(object);
-		object->SetArrangementId(arrangement_id);
-		object->SetSceneId(scene_id_);
-	}
+	root_node_.InsertObject(object);
+	object->SetArrangementId(arrangement_id);
+	object->SetSceneId(scene_id_);
 
 	CheckCollisions(object);
 
+	// Add our children.
+	object->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
+		root_node_.InsertObject(child);
+		child->SetSceneId(scene_id_);
+
+		CheckCollisions(child);
+	});
 }
 
-void QuadtreeSpatialProvider::RemoveObject(std::shared_ptr<swganh::object::Object> requester,shared_ptr<Object> object)
+void QuadtreeSpatialProvider::RemoveObject(shared_ptr<Object> object)
 {
 	boost::upgrade_lock<boost::shared_mutex> uplock(lock_);
 
+	// Remove our children.
+	object->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
+		auto& collided_objects = child->GetCollidedObjects();
+		root_node_.RemoveObject(child);
+
+		for(auto& collided_object : collided_objects)
+		{
+			collided_object->OnCollisionLeave(object);
+		}
+	});
+
+	auto& collided_objects = object->GetCollidedObjects();
+	root_node_.RemoveObject(object);
+
+	// 
+	for(auto& collided_object : collided_objects)
 	{
-		boost::upgrade_to_unique_lock<boost::shared_mutex> unique(uplock);
-		root_node_.RemoveObject(object);
+		collided_object->OnCollisionLeave(object);
 	}
 }
 
@@ -56,24 +75,34 @@ void QuadtreeSpatialProvider::UpdateObject(shared_ptr<Object> obj, const swganh:
 {
 	boost::upgrade_lock<boost::shared_mutex> uplock(lock_);
 
-	boost::upgrade_to_unique_lock<boost::shared_mutex> unique(uplock);
+	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
 	root_node_.UpdateObject(obj, old_bounding_volume, new_bounding_volume);
 	
+	// Update children
+	obj->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
+		AABB old_aabb = child->GetAABB();
+		child->UpdateWorldCollisionBox();
+		child->UpdateAABB();
+		root_node_.UpdateObject(obj, old_bounding_volume, child->GetAABB());
+	});
+
 	if(view_box != nullptr) {
 		root_node_.UpdateObject(view_box, view_box_old_bounding_volume, view_box_new_bounding_volume);
 		CheckCollisions(view_box);
 	}
 
+	obj->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
+		CheckCollisions(child);
+	});
+
 	CheckCollisions(obj);
 
-}
+	auto stop_time = std::chrono::high_resolution_clock::now();
 
-QueryBox QuadtreeSpatialProvider::GetQueryBoxViewRange(std::shared_ptr<Object> object)
-{
-	glm::vec3 position;
-	object->__InternalGetAbsolutes(position, glm::quat());
-	return QueryBox(quadtree::Point(position.x - VIEWING_RANGE, position.z - VIEWING_RANGE), 
-					quadtree::Point(position.x + VIEWING_RANGE, position.z + VIEWING_RANGE));	
+   // std::cout << "SpatialProvider::UpdateObject Duration: " << 
+       // std::chrono::duration_cast<std::chrono::milliseconds>(stop_time - start_time).count() 
+        //<< "ms" << std::endl;
+
 }
 
 std::set<std::shared_ptr<swganh::object::Object>> QuadtreeSpatialProvider::Query(boost::geometry::model::polygon<swganh::object::Point> query_box)
@@ -94,10 +123,31 @@ std::set<std::shared_ptr<swganh::object::Object>> QuadtreeSpatialProvider::Query
 	return return_vector;
 }
 
-
-void QuadtreeSpatialProvider::ViewObjectsInRange(glm::vec3 position, float radius, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<swganh::object::Object>)> func)
+std::set<std::shared_ptr<swganh::object::Object>> QuadtreeSpatialProvider::Query(glm::vec3 position, float radius)
 {
-	LOG(error) << "QuadtreeSpatialProvider::ViewObjectsInRage... Removed.";
+	std::set<std::shared_ptr<swganh::object::Object>> return_vector;
+	
+	AABB aabb;
+	QueryBox query_box;
+
+	if(radius <= 0)
+		query_box = QueryBox(quadtree::Point(1.0f - VIEWING_RANGE, 1.0f - VIEWING_RANGE), 
+					quadtree::Point(1.0f + VIEWING_RANGE, 1.0f + VIEWING_RANGE));
+	else
+		query_box = QueryBox(quadtree::Point(1.0f - VIEWING_RANGE, 1.0f - VIEWING_RANGE), 
+					quadtree::Point(1.0f + VIEWING_RANGE, 1.0f + VIEWING_RANGE));
+
+	boost::geometry::envelope(query_box, aabb);
+
+	return_vector = root_node_.Query(aabb); // Find objects with our AABB
+	for(auto i = return_vector.begin(); i != return_vector.end(); i++)
+	{
+		// Do more precise intersection detection, if we are not colliding, erase.
+		if(boost::geometry::intersects((*i)->GetWorldCollisionBox(), query_box) == false)
+			i = return_vector.erase(i);
+	}
+
+	return return_vector;
 }
 
 std::set<std::pair<float, std::shared_ptr<swganh::object::Object>>> QuadtreeSpatialProvider::FindObjectsInRangeByTag(std::shared_ptr<swganh::object::Object> requester, const std::string& tag, float range)
@@ -139,30 +189,30 @@ std::set<std::pair<float, std::shared_ptr<swganh::object::Object>>> QuadtreeSpat
 
 void QuadtreeSpatialProvider::CheckCollisions(std::shared_ptr<swganh::object::Object> object)
 {
-	if(object->IsCollidable() == false)
-		return;
+	//if(object->IsInSnapshot() == true)// || object->IsCollidable() == false)
+		//return;
 
 	auto objects = root_node_.Query(object->GetAABB());
 	auto collided_objects = object->GetCollidedObjects();
-	std::for_each(collided_objects.begin(), collided_objects.end(), [=, &objects](std::shared_ptr<swganh::object::Object> other) {
-		auto iter = std::find(objects.begin(), objects.end(), other);
-		
+	for(std::set<std::shared_ptr<swganh::object::Object>>::iterator iter = collided_objects.begin(); iter != collided_objects.end();) {
+		auto& other = *iter;
 		if(iter == objects.end())
 		{
-			//std::cout << "Object::OnCollisionLeave " << object->GetObjectId() << " (" << object->GetTemplate() << ") <-> " << other->GetObjectId() << " (" << other->GetTemplate() << ")" << std::endl;
+			//std::cout << "Object::OnCollisionLeave "; std::wcout << "] " << object->GetCustomName() << "] "; std::cout << object->GetObjectId() << " (" << object->GetTemplate() << ") <-> "; std::wcout << other->GetCustomName() << "]"; std::cout << other->GetObjectId() << " (" << other->GetTemplate() << ")" << std::endl;
 			object->RemoveCollidedObject(other);
 			other->RemoveCollidedObject(object);
 
 			object->OnCollisionLeave(other);
 			other->OnCollisionLeave(object);
 			
-			objects.erase(iter);
+			iter = objects.erase(iter);
+			continue;
 		}
 		else
 		{
 			// Make sure we still are intersecting.
 			if(boost::geometry::intersects(object->GetWorldCollisionBox(), other->GetWorldCollisionBox()) == false) {
-				//std::cout << "Object::OnCollisionLeave " << object->GetObjectId() << " (" << object->GetTemplate() << ") <-> " << other->GetObjectId() << " (" << other->GetTemplate() << ")" << std::endl;
+				//std::cout << "Object::OnCollisionLeave "; std::wcout << "] " << object->GetCustomName() << "] "; std::cout << object->GetObjectId() << " (" << object->GetTemplate() << ") <-> "; std::wcout << other->GetCustomName() << "]"; std::cout << other->GetObjectId() << " (" << other->GetTemplate() << ")" << std::endl;
 				
 				object->RemoveCollidedObject(other);
 				other->RemoveCollidedObject(object);
@@ -170,17 +220,15 @@ void QuadtreeSpatialProvider::CheckCollisions(std::shared_ptr<swganh::object::Ob
 				object->OnCollisionLeave(other);
 				other->OnCollisionLeave(object);
 				
-				objects.erase(iter);
-				return;
+				iter = objects.erase(iter);
+				continue;
 			}
-			//std::cout << "Object::OnCollisionStay " << object->GetObjectId() << " (" << object->GetTemplate() << ") <-> " << other->GetObjectId() << " (" << other->GetTemplate() << ")" << std::endl;
-			object->OnCollisionStay(other);
-			other->OnCollisionStay(object);
 		}
-	});
+		iter++;
+	}
 
 	std::for_each(objects.begin(), objects.end(), [=](const std::shared_ptr<swganh::object::Object> other) {
-		if(other->GetObjectId() == object->GetObjectId() || other->IsCollidable() == false)
+		if(other->GetObjectId() == object->GetObjectId())
 			return;
 
 		if(boost::geometry::intersects(object->GetWorldCollisionBox(), other->GetWorldCollisionBox()))
@@ -190,13 +238,16 @@ void QuadtreeSpatialProvider::CheckCollisions(std::shared_ptr<swganh::object::Ob
 			std::for_each(collided_objects.begin(), collided_objects.end(), [=, &found](std::shared_ptr<Object> collided_object){
 				if(collided_object->GetObjectId() == other->GetObjectId())
 				{
+					//std::cout << "Object::OnCollisionStay "; std::wcout << "] " << object->GetCustomName() << "] "; std::cout << object->GetObjectId() << " (" << object->GetTemplate() << ") <-> "; std::wcout << other->GetCustomName() << "]"; std::cout << other->GetObjectId() << " (" << other->GetTemplate() << ")" << std::endl;
+					object->OnCollisionStay(other);
+					other->OnCollisionStay(object);
 					found = true;
 				}
 			});
 
 			if(!found)
 			{
-				//std::cout << "Object::OnCollisionEnter " << object->GetObjectId() << " (" << object->GetTemplate() << ") <-> " << other->GetObjectId() << " (" << other->GetTemplate() << ")" << std::endl;
+				//std::cout << "Object::OnCollisionEnter "; std::wcout << "] " << object->GetCustomName() << "] "; std::cout << object->GetObjectId() << " (" << object->GetTemplate() << ") <-> "; std::wcout << other->GetCustomName() << "]"; std::cout << other->GetObjectId() << " (" << other->GetTemplate() << ")" << std::endl;
 				
 				object->AddCollidedObject(other);
 				other->AddCollidedObject(object);

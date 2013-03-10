@@ -204,7 +204,7 @@ void StaticService::_loadBuildings(SimulationServiceInterface* simulation_servic
 		object->SetDatabasePersisted(false);
 			
 		//Put it into the scene
-		simulation_service->AddObjectToScene(object, scene_name);
+		simulation_service->TransferObjectToScene(object, scene_name);
 	}
 }
 
@@ -229,7 +229,7 @@ void StaticService::_loadCells(SimulationServiceInterface* simulation_service, s
 		{
 			parent->AddObject(nullptr, object);
 		}
-
+		simulation_service->TransferObjectToScene(object, scene_name);
 	}
 }
 
@@ -280,18 +280,14 @@ void StaticService::_loadTerminals(SimulationServiceInterface* simulation_servic
 
 		//Put it into the scene
 		uint64_t parent_id = result->getUInt64(2);
-		if(parent_id == 0)
+		auto parent = simulation_service->GetObjectById(parent_id);
+		if(parent != nullptr)
 		{
-			simulation_service->AddObjectToScene(object, scene_name);
+			parent->AddObject(nullptr, object);
 		}
-		else
-		{
-			auto parent = simulation_service->GetObjectById(parent_id);
-			if(parent != nullptr)
-			{
-				parent->AddObject(nullptr, object);
-			}
-		}
+
+		simulation_service->TransferObjectToScene(object, scene_name);
+		
 	}
 }
 
@@ -361,18 +357,13 @@ void StaticService::_loadTicketCollectors(SimulationServiceInterface* simulation
 		object->SetDatabasePersisted(false);
 
 		uint64_t parent_id = result->getUInt64(2);
-		if(parent_id == 0)
+		auto parent = simulation_service->GetObjectById(parent_id);
+		if(parent != nullptr)
 		{
-			simulation_service->AddObjectToScene(object, scene_name);
+			parent->AddObject(nullptr, object);
 		}
-		else
-		{
-			auto parent = simulation_service->GetObjectById(parent_id);
-			if(parent != nullptr)
-			{
-				parent->AddObject(nullptr, object);
-			}
-		}
+
+		simulation_service->TransferObjectToScene(object, scene_name);
 
 		auto travel_point = result->getString(14).asStdString();
 		object->SetAttribute("travel_point", std::wstring(travel_point.begin(), travel_point.end()));
@@ -446,18 +437,14 @@ void StaticService::_loadNPCS(SimulationServiceInterface* simulation_service, Sp
 		
 		//Put it into the scene
 		uint64_t parent_id = result->getUInt64(2);
-		if(parent_id == 0)
+
+		auto parent = simulation_service->GetObjectById(parent_id);
+		if(parent != nullptr)
 		{
-			simulation_service->AddObjectToScene(object, scene_name);
+			parent->AddObject(nullptr, object);
 		}
-		else
-		{
-			auto parent = simulation_service->GetObjectById(parent_id);
-			if(parent != nullptr)
-			{
-				parent->AddObject(nullptr, object);
-			}
-		}
+
+		simulation_service->TransferObjectToScene(object, scene_name);
 	}
 }
 
@@ -496,18 +483,13 @@ void StaticService::_loadShuttles(SimulationServiceInterface* simulation_service
 		object->SetDatabasePersisted(false);
 
 		uint64_t parent_id = result->getUInt64(2);
-		if(parent_id == 0)
+		auto parent = simulation_service->GetObjectById(parent_id);
+		if(parent != nullptr)
 		{
-			simulation_service->AddObjectToScene(object, scene_name);
+			parent->AddObject(nullptr, object);
 		}
-		else
-		{
-			auto parent = simulation_service->GetObjectById(parent_id);
-			if(parent != nullptr)
-			{
-				parent->AddObject(nullptr, object);
-			}
-		}
+
+		simulation_service->TransferObjectToScene(object, scene_name);
 
 		object->SetFlag("shuttle");
 

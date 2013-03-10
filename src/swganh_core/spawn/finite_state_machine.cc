@@ -18,8 +18,10 @@ FiniteStateMachine::FiniteStateMachine(swganh::app::SwganhKernel* kernel, uint32
 	, bundle_factory_(bundle_factory)
 	, shutdown_(false)
 {
+	/**
 	while(threads_required > 0)
 	{
+		
 		threads_.push_back(std::move(thread([this] () {
 			while(!shutdown_)
 			{
@@ -44,7 +46,7 @@ FiniteStateMachine::FiniteStateMachine(swganh::app::SwganhKernel* kernel, uint32
 
 		
 		--threads_required;
-	}
+	} */
 }
 
 FiniteStateMachine::~FiniteStateMachine()

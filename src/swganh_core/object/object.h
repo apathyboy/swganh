@@ -166,9 +166,7 @@ public:
 	
 	virtual void __InternalTransfer(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<ContainerInterface> newContainer, int32_t arrangement_id=-2);
 	virtual bool __HasAwareObject(std::shared_ptr<Object> object);
-	virtual void __InternalAddAwareObject(std::shared_ptr<Object> object, bool reverse_still_valid);
 	virtual void __InternalViewAwareObjects(std::function<void(std::shared_ptr<swganh::object::Object>)> func, std::shared_ptr<swganh::object::Object> hint=nullptr);
-	virtual void __InternalRemoveAwareObject(std::shared_ptr<Object> object, bool reverse_still_valid);
 
 	virtual int32_t __InternalInsert(std::shared_ptr<Object> object, glm::vec3 new_position, int32_t arrangement_id=-2);
     virtual void __InternalViewObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<Object>)> func);
