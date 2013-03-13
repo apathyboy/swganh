@@ -158,20 +158,57 @@ public:
      * Clears the active current controller, if one exists, for this instance.
      */
     void ClearController();
+    
+    virtual void AddObject(
+        const std::shared_ptr<Object>& requester,
+        std::shared_ptr<Object> newObject,
+        int32_t arrangement_id=-2);
+    
+    virtual void RemoveObject(
+        const std::shared_ptr<Object>& requester, 
+        const std::shared_ptr<Object>& oldObject);
+    
+    virtual void TransferObject(
+        const std::shared_ptr<Object>& requester,
+        const std::shared_ptr<Object>& object,
+        const std::shared_ptr<ContainerInterface>& newContainer, 
+        glm::vec3 position,
+        int32_t arrangement_id = -2);
+    
+    virtual void SwapSlots(
+        const std::shared_ptr<Object>& requester,
+        const std::shared_ptr<Object>& object,
+        int32_t new_arrangement_id);
+    
+	virtual void __InternalTransfer(
+        const std::shared_ptr<Object>& requester,
+        const std::shared_ptr<Object>& object, 
+        const std::shared_ptr<ContainerInterface>& newContainer,
+        int32_t arrangement_id = -2);
 
-	virtual void AddObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> newObject, int32_t arrangement_id=-2);
-	virtual void RemoveObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> oldObject);
-	virtual void TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<ContainerInterface> newContainer, glm::vec3 new_position,  int32_t arrangement_id=-2);
-	virtual void SwapSlots(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, int32_t new_arrangement_id);
+    virtual bool __HasAwareObject(const std::shared_ptr<Object>& object);
 	
-	virtual void __InternalTransfer(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<ContainerInterface> newContainer, int32_t arrangement_id=-2);
-	virtual bool __HasAwareObject(std::shared_ptr<Object> object);
-	virtual void __InternalViewAwareObjects(std::function<void(std::shared_ptr<swganh::object::Object>)> func, std::shared_ptr<swganh::object::Object> hint=nullptr);
-
-	virtual int32_t __InternalInsert(std::shared_ptr<Object> object, glm::vec3 new_position, int32_t arrangement_id=-2);
-    virtual void __InternalViewObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<Object>)> func);
-	virtual void __InternalGetObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::list<std::shared_ptr<Object>>& out);
-
+    virtual void __InternalViewObjects(
+        const std::shared_ptr<Object>& requester, 
+        uint32_t max_depth, 
+        bool topDown, 
+        std::function<void (const std::shared_ptr<Object>&)> func);
+    
+    virtual int32_t __InternalInsert(
+        const std::shared_ptr<Object>& object,
+        glm::vec3 new_position,
+        int32_t arrangement_id=-2);
+    
+    virtual void __InternalViewAwareObjects(
+        std::function<void (const std::shared_ptr<Object>&)> func, 
+        const std::shared_ptr<swganh::object::Object>& hint=nullptr);
+    
+    virtual void __InternalGetObjects(
+        const std::shared_ptr<Object>& requester,
+        uint32_t max_depth,
+        bool topDown,
+        std::list<std::shared_ptr<Object>>& out);
+    
 	virtual void __InternalGetAbsolutes(glm::vec3& pos, glm::quat& rot);
 
 	/**

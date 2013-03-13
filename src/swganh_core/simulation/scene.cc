@@ -57,7 +57,7 @@ public:
 		InsertObject(object);
 		// Set Scene Id for all sub objects as well
 		object->SetSceneId(description_.id);
-		object->ViewObjects(object, 1, true, [=] (shared_ptr<Object> contained){
+		object->ViewObjects(object, 1, true, [=] (const std::shared_ptr<Object>& contained){
 			if (contained->GetSceneId() != description_.id)
 				contained->SetSceneId(description_.id);
 		});
@@ -189,7 +189,7 @@ void Scene::HandleDataTransformWithParent(const shared_ptr<Object>& object, Data
 	impl_->HandleDataTransformWithParent(object, message);
 }
 
-void Scene::ViewObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<Object>)> func)
+void Scene::ViewObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::function<void(const std::shared_ptr<Object>&)> func)
 {
 	auto objects = impl_->GetSpatialIndex()->Query(); // Grab all objects.
 	for(auto& object : objects)
@@ -205,7 +205,7 @@ void Scene::ViewObjects(std::shared_ptr<Object> requester, uint32_t max_depth, b
 	}
 }
 
-void Scene::ViewObjects(glm::vec3 position, float radius, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<swganh::object::Object>)> func)
+void Scene::ViewObjects(glm::vec3 position, float radius, uint32_t max_depth, bool topDown, std::function<void(const std::shared_ptr<Object>&)> func)
 {
 	auto objects = impl_->GetSpatialIndex()->Query(position, radius); // Grabs objects within radius
 	for(auto& object : objects)

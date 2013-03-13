@@ -179,7 +179,7 @@ shared_ptr<Object> ObjectManager::LoadObjectById(uint64_t object_id, uint32_t ob
 
 void ObjectManager::LoadContainedObjects(std::shared_ptr<Object> object)
 {	
-	object->ViewObjects(nullptr, 0, true, [&](shared_ptr<Object> contained_object){
+	object->ViewObjects(nullptr, 0, true, [&](const std::shared_ptr<Object>& contained_object){
 		InsertObject(contained_object);
 	});
 }
@@ -392,7 +392,7 @@ void ObjectManager::PersistRelatedObjects(const std::shared_ptr<Object>& object,
         PersistObject(object, persist_inherited);
 
 		// Now related objects
-		object->ViewObjects(nullptr, 0, true, [&](shared_ptr<Object> contained)
+		object->ViewObjects(nullptr, 0, true, [&](const std::shared_ptr<Object>& contained)
 		{
 			PersistObject(contained, persist_inherited);
 		});

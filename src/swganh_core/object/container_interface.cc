@@ -35,7 +35,10 @@ bool ContainerInterface::__InternalHasContainedObjects()
 	return out.size() > 0;
 }
 
-std::list<std::shared_ptr<Object>> ContainerInterface::GetObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown)
+std::list<std::shared_ptr<Object>> ContainerInterface::GetObjects(
+    const std::shared_ptr<Object>& requester,
+    uint32_t max_depth,
+    bool topDown)
 {
 	boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
 	std::list<std::shared_ptr<Object>> out;
@@ -43,19 +46,29 @@ std::list<std::shared_ptr<Object>> ContainerInterface::GetObjects(std::shared_pt
 	return out;
 }
 
-void ContainerInterface::GetObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::list<std::shared_ptr<Object>>& out)
+void ContainerInterface::GetObjects(
+    const std::shared_ptr<Object>& requester,
+    uint32_t max_depth,
+    bool topDown,
+    std::list<std::shared_ptr<Object>>& out)
 {
 	boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
 	__InternalGetObjects(requester, max_depth, topDown, out);
 }
 
-void ContainerInterface::ViewObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<Object>)> func)
+void ContainerInterface::ViewObjects(
+    const std::shared_ptr<Object>& requester,
+    uint32_t max_depth,
+    bool topDown,
+    std::function<void (const std::shared_ptr<Object>&)> func)
 {
 	boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
 	__InternalViewObjects(requester, max_depth, topDown, func);
 }
 
-void ContainerInterface::ViewAwareObjects(std::function<void(std::shared_ptr<swganh::object::Object>)> func, std::shared_ptr<swganh::object::Object> hint)
+void ContainerInterface::ViewAwareObjects(
+    std::function<void (const std::shared_ptr<swganh::object::Object>&)> func,
+    const std::shared_ptr<swganh::object::Object>& hint)
 {
 	boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
 	__InternalViewAwareObjects(func, hint);
@@ -66,8 +79,3 @@ void ContainerInterface::GetAbsolutes(glm::vec3& pos, glm::quat& rot)
 	boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
 	__InternalGetAbsolutes(pos, rot);
 }
-
-//void ContainerInterface::TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<ContainerInterface> newContainer, int32_t arrangement_id=-2)
-//{
-	//TransferObject(requester, object, newContainer, object->GetPosition(), arrangement_id);
-//}

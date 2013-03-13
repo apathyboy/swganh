@@ -131,7 +131,7 @@ SkillModsMap SkillManager::GetSkillMods(const std::shared_ptr<Creature>& creatur
 	}
 
 	//Add the mod values
-	creature->ViewObjects(creature, 1, true, [&] (std::shared_ptr<Object> child) {
+	creature->ViewObjects(creature, 1, true, [&] (const std::shared_ptr<Object>& child) {
 		for(auto& mod : result)
 		{
 			auto modifier = child->GetAttributeRecursive(mod.first);

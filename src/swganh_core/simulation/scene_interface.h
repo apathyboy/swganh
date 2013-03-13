@@ -53,10 +53,10 @@ public:
 	virtual void RemoveObject(std::shared_ptr<swganh::object::Object> object) = 0;
 		
 	virtual void ViewObjects(std::shared_ptr<swganh::object::Object> requester, uint32_t max_depth, 
-		bool topDown, std::function<void(std::shared_ptr<swganh::object::Object>)> func) = 0;
+		bool topDown, std::function<void(const std::shared_ptr<swganh::object::Object>&)> func) = 0;
 		
 	virtual void ViewObjects(glm::vec3 position, float radius, uint32_t max_depth, bool topDown,
-		std::function<void(std::shared_ptr<swganh::object::Object>)> func) = 0;
+		std::function<void(const std::shared_ptr<swganh::object::Object>&)> func) = 0;
 
 	virtual void HandleDataTransform(const std::shared_ptr<swganh::object::Object>& controller, swganh::messages::controllers::DataTransform message) = 0;
 		

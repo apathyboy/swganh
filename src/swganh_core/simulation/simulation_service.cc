@@ -200,7 +200,7 @@ public:
 		StopControllingObject(object);
 
 		// We're ok with the object existing in the object_manager until server shutdown
-		/*object->ViewObjects(nullptr, 0, true, [&](shared_ptr<Object> viewObject){
+		/*object->ViewObjects(nullptr, 0, true, [&](const std::shared_ptr<Object>& viewObject){
 			object_manager_->RemoveObject(viewObject);
 		});
         object_manager_->RemoveObject(object);*/
@@ -436,7 +436,7 @@ public:
 	void SendToAll(swganh::messages::BaseSwgMessage* message)
 	{
 		scene_manager_->ViewScenes([&] (std::string name, std::shared_ptr<Scene> scene) {
-			scene->ViewObjects(nullptr, 0, true,[&] (std::shared_ptr<Object> object) {
+			scene->ViewObjects(nullptr, 0, true,[&] (const std::shared_ptr<Object>& object) {
 				auto controller = object->GetController();
 				if(controller)
 					controller->Notify(message);
@@ -446,7 +446,7 @@ public:
 
     void SendToScene(swganh::messages::BaseSwgMessage* message, uint32_t scene_id)
 	{
-		scene_manager_->GetScene(scene_id)->ViewObjects(nullptr, 0, true, [&] (std::shared_ptr<Object> object) {
+		scene_manager_->GetScene(scene_id)->ViewObjects(nullptr, 0, true, [&] (const std::shared_ptr<Object>& object) {
 			auto controller = object->GetController();
 			if(controller)
 				controller->Notify(message);
@@ -455,7 +455,7 @@ public:
 
 	void SendToScene(swganh::messages::BaseSwgMessage* message, std::string scene_name)
 	{
-		scene_manager_->GetScene(scene_name)->ViewObjects(nullptr, 0, true, [&] (std::shared_ptr<Object> object) {
+		scene_manager_->GetScene(scene_name)->ViewObjects(nullptr, 0, true, [&] (const std::shared_ptr<Object>& object) {
 			auto controller = object->GetController();
 			if(controller)
 				controller->Notify(message);
@@ -464,7 +464,7 @@ public:
 
 	void SendToSceneInRange(swganh::messages::BaseSwgMessage* message, uint32_t scene_id, glm::vec3 position, float radius)
 	{
-		scene_manager_->GetScene(scene_id)->ViewObjects(position, radius, 0, true, [&] (std::shared_ptr<Object> object) {
+		scene_manager_->GetScene(scene_id)->ViewObjects(position, radius, 0, true, [&] (const std::shared_ptr<Object>& object) {
 			auto controller = object->GetController();
 			if(controller)
 				controller->Notify(message);
@@ -473,7 +473,7 @@ public:
 
 	void SendToSceneInRange(swganh::messages::BaseSwgMessage* message, std::string scene_name, glm::vec3 position, float radius)
 	{
-		scene_manager_->GetScene(scene_name)->ViewObjects(position, radius, 0, true, [&] (std::shared_ptr<Object> object) {
+		scene_manager_->GetScene(scene_name)->ViewObjects(position, radius, 0, true, [&] (const std::shared_ptr<Object>& object) {
 			auto controller = object->GetController();
 			if(controller)
 				controller->Notify(message);

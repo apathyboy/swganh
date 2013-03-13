@@ -91,21 +91,26 @@ void Object::ClearController()
 
     Unsubscribe(controller);
 }
-void Object::AddObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> obj, int32_t arrangement_id)
+void Object::AddObject(
+    const std::shared_ptr<Object>& requester,
+    std::shared_ptr<Object> newObject,
+    int32_t arrangement_id)
 {
-	if(requester == nullptr || container_permissions_->canInsert(shared_from_this(), requester, obj))
+	if(requester == nullptr || container_permissions_->canInsert(shared_from_this(), requester, newObject))
 	{	
 		boost::upgrade_lock<boost::shared_mutex> lock(global_container_lock_);
 		
 		//Add Object To Datastructure
 		{
 			boost::upgrade_to_unique_lock<boost::shared_mutex> unique_lock(lock);
-			arrangement_id = __InternalInsert(obj, obj->GetPosition(), arrangement_id);
+			arrangement_id = __InternalInsert(newObject, newObject->GetPosition(), arrangement_id);
 		}
 	}
 }
 
-void Object::RemoveObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> oldObject)
+void Object::RemoveObject(
+    const std::shared_ptr<Object>& requester, 
+    const std::shared_ptr<Object>& oldObject)
 {
 	if(requester == nullptr || container_permissions_->canRemove(shared_from_this(), requester, oldObject))
 	{
@@ -123,7 +128,12 @@ void Object::RemoveObject(std::shared_ptr<Object> requester, std::shared_ptr<Obj
 	}
 }
 
-void Object::TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<ContainerInterface> newContainer, glm::vec3 new_position, int32_t arrangement_id)
+void Object::TransferObject(
+    const std::shared_ptr<Object>& requester,
+    const std::shared_ptr<Object>& object,
+    const std::shared_ptr<ContainerInterface>& newContainer, 
+    glm::vec3 position,
+    int32_t arrangement_id)
 {
 	if(	requester == nullptr || (
 		this->GetPermissions()->canRemove(shared_from_this(), requester, object) && 
@@ -140,17 +150,17 @@ void Object::TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<O
 			//	slot.second->remove_object(object);
 			//}
 
-			arrangement_id = newContainer->__InternalInsert(object, new_position, arrangement_id);
+			arrangement_id = newContainer->__InternalInsert(object, position, arrangement_id);
 		}
 
 		//Split into 3 groups -- only ours, only new, and both ours and new
 		std::set<std::shared_ptr<Object>> oldObservers, newObservers, bothObservers;
 
-		object->__InternalViewAwareObjects([&] (std::shared_ptr<Object> observer) {
+		object->__InternalViewAwareObjects([&] (const std::shared_ptr<Object>& observer) {
 			oldObservers.insert(observer);
 		});
 	
-		newContainer->__InternalViewAwareObjects([&] (std::shared_ptr<Object> observer) 
+		newContainer->__InternalViewAwareObjects([&] (const std::shared_ptr<Object>& observer) 
 		{
 			if(newContainer->GetPermissions()->canView(newContainer, observer))
 			{
@@ -186,7 +196,11 @@ void Object::TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<O
 	}
 }
 
-void Object::__InternalViewObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<Object>)> func)
+void Object::__InternalViewObjects(
+    const std::shared_ptr<Object>& requester, 
+    uint32_t max_depth, 
+    bool topDown, 
+    std::function<void (const std::shared_ptr<Object>&)> func)
 {
 	if(requester == nullptr || container_permissions_->canView(shared_from_this(), requester))
 	{
@@ -214,7 +228,11 @@ void Object::__InternalViewObjects(std::shared_ptr<Object> requester, uint32_t m
 	}
 }
 
-void Object::__InternalGetObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::list<std::shared_ptr<Object>>& out)
+void Object::__InternalGetObjects(
+    const std::shared_ptr<Object>& requester,
+    uint32_t max_depth,
+    bool topDown,
+    std::list<std::shared_ptr<Object>>& out)
 {
 	if(requester == nullptr || container_permissions_->canView(shared_from_this(), requester))
 	{
@@ -242,7 +260,10 @@ void Object::__InternalGetObjects(std::shared_ptr<Object> requester, uint32_t ma
 	}
 }
 
-int32_t Object::__InternalInsert(std::shared_ptr<Object> object, glm::vec3 new_position, int32_t arrangement_id)
+int32_t Object::__InternalInsert(
+    const std::shared_ptr<Object>& object,
+    glm::vec3 new_position,
+    int32_t arrangement_id)
 {
 	std::shared_ptr<Object> removed_object = nullptr;
 	if(arrangement_id == -2)
@@ -287,7 +308,10 @@ int32_t Object::__InternalInsert(std::shared_ptr<Object> object, glm::vec3 new_p
 	return arrangement_id;
 }
 
-void Object::SwapSlots(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, int32_t new_arrangement_id)
+void Object::SwapSlots(
+    const std::shared_ptr<Object>& requester,
+    const std::shared_ptr<Object>& object,
+    int32_t new_arrangement_id)
 {
 	boost::upgrade_lock<boost::shared_mutex> uplock(global_container_lock_);
 	
@@ -300,12 +324,16 @@ void Object::SwapSlots(std::shared_ptr<Object> requester, std::shared_ptr<Object
 		__InternalInsert(object, object->GetPosition(), new_arrangement_id);
 	}
 
-	__InternalViewAwareObjects([&] (std::shared_ptr<Object> aware_object) {
+	__InternalViewAwareObjects([&] (const std::shared_ptr<Object>& aware_object) {
 		object->SendUpdateContainmentMessage(object->GetController());
 	});
 }
 
-void Object::__InternalTransfer(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<ContainerInterface> newContainer, int32_t arrangement_id)
+void Object::__InternalTransfer(
+    const std::shared_ptr<Object>& requester,
+    const std::shared_ptr<Object>& object, 
+    const std::shared_ptr<ContainerInterface>& newContainer,
+    int32_t arrangement_id)
 {
 	try {
 		// we are already locked
@@ -318,11 +346,11 @@ void Object::__InternalTransfer(std::shared_ptr<Object> requester, std::shared_p
 			//Split into 3 groups -- only ours, only new, and both ours and new
 			std::set<std::shared_ptr<Object>> oldObservers, newObservers, bothObservers;
 
-			object->__InternalViewAwareObjects([&] (std::shared_ptr<Object> observer) {
+			object->__InternalViewAwareObjects([&] (const std::shared_ptr<Object>& observer) {
 				oldObservers.insert(observer);
 			});
 	
-			newContainer->__InternalViewAwareObjects([&] (std::shared_ptr<Object> observer) 
+			newContainer->__InternalViewAwareObjects([&] (const std::shared_ptr<Object>& observer) 
 			{
 				if(newContainer->GetPermissions()->canView(newContainer, observer))
 				{
@@ -361,12 +389,14 @@ void Object::__InternalTransfer(std::shared_ptr<Object> requester, std::shared_p
 	}
 }
 
-void Object::__InternalViewAwareObjects(std::function<void(std::shared_ptr<swganh::object::Object>)> func, std::shared_ptr<swganh::object::Object> hint)
+void Object::__InternalViewAwareObjects(
+    std::function<void (const std::shared_ptr<Object>&)> func, 
+    const std::shared_ptr<swganh::object::Object>& hint)
 {
 	std::for_each(aware_objects_.begin(), aware_objects_.end(), func);
 }
 
-bool Object::__HasAwareObject(std::shared_ptr<Object> object)
+bool Object::__HasAwareObject(const std::shared_ptr<Object>& object)
 {
 	return aware_objects_.find(object) != aware_objects_.end();
 }
@@ -1089,7 +1119,7 @@ void Object::Clone(std::shared_ptr<Object> other)
     other->flags_ = flags_;
 	other->slot_arrangements_ = slot_arrangements_;
 
-	__InternalViewObjects(nullptr, 0, true, [&] (std::shared_ptr<Object> object) {
+	__InternalViewObjects(nullptr, 0, true, [&] (const std::shared_ptr<Object>& object) {
 		other->AddObject(nullptr, object->Clone());
 	});
 }

@@ -37,7 +37,7 @@ void QuadtreeSpatialProvider::AddObject(shared_ptr<Object> object, int32_t arran
 	CheckCollisions(object);
 
 	// Add our children.
-	object->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
+	object->ViewObjects(nullptr, 0, true, [=](const std::shared_ptr<Object>& child) {
 		root_node_.InsertObject(child);
 		child->SetSceneId(scene_id_);
 
@@ -50,7 +50,7 @@ void QuadtreeSpatialProvider::RemoveObject(shared_ptr<Object> object)
 	boost::upgrade_lock<boost::shared_mutex> uplock(lock_);
 
 	// Remove our children.
-	object->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
+	object->ViewObjects(nullptr, 0, true, [=](const std::shared_ptr<Object>& child) {
 		auto& collided_objects = child->GetCollidedObjects();
 		root_node_.RemoveObject(child);
 
@@ -79,7 +79,7 @@ void QuadtreeSpatialProvider::UpdateObject(shared_ptr<Object> obj, const swganh:
 	root_node_.UpdateObject(obj, old_bounding_volume, new_bounding_volume);
 	
 	// Update children
-	obj->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
+	obj->ViewObjects(nullptr, 0, true, [=](const std::shared_ptr<Object>& child) {
 		AABB old_aabb = child->GetAABB();
 		child->UpdateWorldCollisionBox();
 		child->UpdateAABB();
@@ -91,7 +91,7 @@ void QuadtreeSpatialProvider::UpdateObject(shared_ptr<Object> obj, const swganh:
 		CheckCollisions(view_box);
 	}
 
-	obj->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
+	obj->ViewObjects(nullptr, 0, true, [=](const std::shared_ptr<Object>& child) {
 		CheckCollisions(child);
 	});
 
@@ -173,7 +173,7 @@ std::set<std::pair<float, std::shared_ptr<swganh::object::Object>>> QuadtreeSpat
 			object->GetAbsolutes(pos2, glm::quat());
 
 			obj_map.insert(std::pair<float, std::shared_ptr<swganh::object::Object>>(glm::distance(pos1, pos2),object));
-			object->ViewObjects(object, 0, true, [=, &obj_map](std::shared_ptr<Object> object) {
+			object->ViewObjects(object, 0, true, [=, &obj_map](const std::shared_ptr<Object>& object) {
 				glm::vec3 pos1, pos2;
 				if(object->HasFlag(tag))
 				{

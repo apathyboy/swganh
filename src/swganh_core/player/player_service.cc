@@ -195,7 +195,7 @@ bool PlayerService::HasCalledMount(std::shared_ptr<swganh::object::Creature> own
 	bool result = false;
 	if(datapad)
 	{
-		datapad->ViewObjects(nullptr, 0, true, [&] (std::shared_ptr<Object> object) {
+		datapad->ViewObjects(nullptr, 0, true, [&] (const std::shared_ptr<Object>& object) {
 			if(!result && object->HasAttribute("is_mount") && !object->HasContainedObjects())
 			{
 				result = true;
@@ -233,7 +233,7 @@ void PlayerService::StoreAllCalledObjects(std::shared_ptr<swganh::object::Creatu
 	auto datapad = equipment->GetEquippedObject(owner, "datapad");
 	if(datapad)
 	{
-		datapad->ViewObjects(nullptr, 0, true, [&] (std::shared_ptr<Object> object) {
+		datapad->ViewObjects(nullptr, 0, true, [&] (const std::shared_ptr<Object>& object) {
 			if(object->HasAttribute("mobile_id") && !object->HasContainedObjects())
 			{
 				auto mobile = simulation->GetObjectById((uint64_t)object->GetAttribute<int64_t>("mobile_id"));

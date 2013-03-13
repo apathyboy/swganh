@@ -433,7 +433,7 @@ std::vector<std::string> TravelService::GetAvailableTickets(std::shared_ptr<swga
 		return in;
 
 	auto descriptor = ticket_collector->GetAttributeAsString("travel_point");
-	inventory->ViewObjects(object, 0, true, [=, &in](std::shared_ptr<swganh::object::Object> obj){
+	inventory->ViewObjects(object, 0, true, [=, &in](const std::shared_ptr<Object>& obj){
 		if(obj->GetTemplate() == "object/tangible/travel/travel_ticket/base/shared_base_travel_ticket.iff")
 		{
 			std::wstring depart = obj->GetAttribute<std::wstring>("travel_departure_point");
@@ -467,7 +467,7 @@ std::shared_ptr<swganh::object::Object> TravelService::GetAvailableInventoryTick
 	auto descriptor = ticket_collector->GetAttributeAsString("travel_point");
 	uint32_t cindex = 0;
 	std::cout << "Ticket Collector Travel Point Descriptor: " << std::string(descriptor.begin(), descriptor.end()) << std::endl;
-	inventory->ViewObjects(object, 0, true, [=, &out, &cindex](std::shared_ptr<swganh::object::Object> obj){
+	inventory->ViewObjects(object, 0, true, [=, &out, &cindex](const std::shared_ptr<Object>& obj){
 		if(obj->GetTemplate() == "object/tangible/travel/travel_ticket/base/shared_base_travel_ticket.iff")
 		{
 			std::wstring depart = obj->GetAttribute<std::wstring>("travel_departure_point");
@@ -492,7 +492,7 @@ std::shared_ptr<swganh::object::Object> TravelService::GetInventoryTicket(std::s
 		return ticket;
 
 	uint32_t cindex = 0;
-	inventory->ViewObjects(object, 0, true, [=, &cindex, &ticket](std::shared_ptr<swganh::object::Object> obj){
+	inventory->ViewObjects(object, 0, true, [=, &cindex, &ticket](const std::shared_ptr<Object>& obj){
 		if(index == cindex) {
 			ticket = obj;
 		}

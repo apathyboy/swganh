@@ -300,7 +300,7 @@ vector<shared_ptr<Tangible>> CombatService::GetCombatTargets(
 	// area range
 	if (combat_data->area_range > 0)
 	{
-		target->ViewAwareObjects([&targets_in_range, target, combat_data](shared_ptr<Object> obj){
+		target->ViewAwareObjects([&targets_in_range, target, combat_data](const std::shared_ptr<Object>& obj){
 			if (target->InRange(obj->GetPosition(), (float)(combat_data->range)))
 			{
 				auto tano = static_pointer_cast<Tangible>(obj);

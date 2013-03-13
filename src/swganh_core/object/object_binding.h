@@ -180,7 +180,7 @@ void exportObject()
     .value("WHITE", controllers::WHITE)
     .value("MIX", controllers::MIX)
     ;
-	void (ContainerInterface::*RemoveObject)(shared_ptr<Object>, shared_ptr<Object>) = &ContainerInterface::RemoveObject;
+	void (ContainerInterface::*RemoveObject)(const shared_ptr<Object>&, const shared_ptr<Object>&) = &ContainerInterface::RemoveObject;
 
 	class_<ContainerInterface, std::shared_ptr<ContainerInterface>, boost::noncopyable>("ContainerInterface", "Container interface", no_init)
 		.def("add", &ContainerInterface::AddObject, addObjectOverload(args("requester", "newObject", "arrangement_id"), "Adds an object to the current object"))
