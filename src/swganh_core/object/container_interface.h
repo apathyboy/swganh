@@ -38,7 +38,9 @@ namespace object
         virtual void TransferObject(
             const std::shared_ptr<Object>& requester,
             const std::shared_ptr<Object>& object,
-            const std::shared_ptr<ContainerInterface>& newContainer, glm::vec3 position, int32_t arrangement_id=-2) = 0;
+            const std::shared_ptr<Object>& newContainer, 
+            glm::vec3 position, 
+            int32_t arrangement_id=-2) = 0;
 		
         virtual void SwapSlots(
             const std::shared_ptr<Object>& requester,
@@ -46,7 +48,6 @@ namespace object
             int32_t new_arrangement_id) {};
 
 		bool HasContainedObjects();
-		bool __InternalHasContainedObjects();
 
 		std::list<std::shared_ptr<Object>> GetObjects(
             const std::shared_ptr<Object>& requester, 
@@ -58,18 +59,33 @@ namespace object
             uint32_t max_depth, 
             bool topDown, 
             std::list<std::shared_ptr<Object>>& out);
-
-		virtual void __InternalGetObjects(
-            const std::shared_ptr<Object>& requester,
-            uint32_t max_depth,
-            bool topDown,
-            std::list<std::shared_ptr<Object>>& out) = 0;
-
+        
 		void ViewObjects(
             const std::shared_ptr<Object>& requester, 
             uint32_t max_depth,
             bool topDown, 
             std::function<void (const std::shared_ptr<Object>&)> func);
+
+		virtual std::shared_ptr<ContainerPermissionsInterface> GetPermissions();
+		virtual void SetPermissions(std::shared_ptr<ContainerPermissionsInterface> obj);
+
+		//Call to View
+		void ViewAwareObjects(
+            std::function<void (const std::shared_ptr<Object>&)> func, 
+            const std::shared_ptr<swganh::object::Object>& hint=nullptr);
+
+		virtual std::shared_ptr<Object> GetContainer() = 0;
+		virtual void SetContainer(const std::shared_ptr<Object>& container) = 0;
+
+		virtual void GetAbsolutes(glm::vec3& pos, glm::quat& rot);
+
+	protected:
+		std::shared_ptr<swganh::object::ContainerPermissionsInterface> container_permissions_;
+
+		static boost::shared_mutex global_container_lock_;
+
+    private:
+		bool __InternalHasContainedObjects();
 
 		virtual void __InternalViewObjects(
             const std::shared_ptr<Object>& requester, 
@@ -77,40 +93,29 @@ namespace object
             bool topDown, 
             std::function<void (const std::shared_ptr<Object>&)> func) = 0;
 
-		virtual std::shared_ptr<ContainerPermissionsInterface> GetPermissions();
-		virtual void SetPermissions(std::shared_ptr<ContainerPermissionsInterface> obj);
+		virtual void __InternalGetAbsolutes(glm::vec3& pos, glm::quat& rot) = 0;
+
+		virtual void __InternalViewAwareObjects(
+            std::function<void (const std::shared_ptr<Object>&)> func, 
+            const std::shared_ptr<Object>& hint=nullptr) = 0;
 
 		//FOR USE BY TRANSFER OBJECT ONLY. DO NOT CALL IN OUTSIDE CODE
 		virtual void __InternalTransfer(
             const std::shared_ptr<Object>& requester,
             const std::shared_ptr<Object>& object, 
-            const std::shared_ptr<ContainerInterface>& newContainer,
-            int32_t arrangement_id=-2) {};
+            const std::shared_ptr<Object>& newContainer,
+            int32_t arrangement_id=-2) = 0;
 
 		virtual int32_t __InternalInsert(
             const std::shared_ptr<Object>& object,
             glm::vec3 new_position,
             int32_t arrangement_id=-2) = 0;
-
-		//Call to View
-		void ViewAwareObjects(
-            std::function<void (const std::shared_ptr<Object>&)> func, 
-            const std::shared_ptr<swganh::object::Object>& hint=nullptr);
-
-		virtual void __InternalViewAwareObjects(
-            std::function<void (const std::shared_ptr<Object>&)> func, 
-            const std::shared_ptr<swganh::object::Object>& hint=nullptr) = 0;
-
-		virtual std::shared_ptr<Object> GetContainer() = 0;
-		virtual void SetContainer(const std::shared_ptr<Object>& container) = 0;
-
-		virtual void GetAbsolutes(glm::vec3& pos, glm::quat& rot);
-		virtual void __InternalGetAbsolutes(glm::vec3& pos, glm::quat& rot) = 0;
-
-	protected:
-		std::shared_ptr<swganh::object::ContainerPermissionsInterface> container_permissions_;
-
-		static boost::shared_mutex global_container_lock_;
+        
+		virtual void __InternalGetObjects(
+            const std::shared_ptr<Object>& requester,
+            uint32_t max_depth,
+            bool topDown,
+            std::list<std::shared_ptr<Object>>& out) = 0;
 	};
 }
 }

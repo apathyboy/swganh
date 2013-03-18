@@ -171,7 +171,7 @@ public:
     virtual void TransferObject(
         const std::shared_ptr<Object>& requester,
         const std::shared_ptr<Object>& object,
-        const std::shared_ptr<ContainerInterface>& newContainer, 
+        const std::shared_ptr<Object>& newContainer, 
         glm::vec3 position,
         int32_t arrangement_id = -2);
     
@@ -180,37 +180,8 @@ public:
         const std::shared_ptr<Object>& object,
         int32_t new_arrangement_id);
     
-	virtual void __InternalTransfer(
-        const std::shared_ptr<Object>& requester,
-        const std::shared_ptr<Object>& object, 
-        const std::shared_ptr<ContainerInterface>& newContainer,
-        int32_t arrangement_id = -2);
-
     virtual bool __HasAwareObject(const std::shared_ptr<Object>& object);
-	
-    virtual void __InternalViewObjects(
-        const std::shared_ptr<Object>& requester, 
-        uint32_t max_depth, 
-        bool topDown, 
-        std::function<void (const std::shared_ptr<Object>&)> func);
-    
-    virtual int32_t __InternalInsert(
-        const std::shared_ptr<Object>& object,
-        glm::vec3 new_position,
-        int32_t arrangement_id=-2);
-    
-    virtual void __InternalViewAwareObjects(
-        std::function<void (const std::shared_ptr<Object>&)> func, 
-        const std::shared_ptr<swganh::object::Object>& hint=nullptr);
-    
-    virtual void __InternalGetObjects(
-        const std::shared_ptr<Object>& requester,
-        uint32_t max_depth,
-        bool topDown,
-        std::list<std::shared_ptr<Object>>& out);
-    
-	virtual void __InternalGetAbsolutes(glm::vec3& pos, glm::quat& rot);
-
+	    
 	/**
      * Returns whether or not this observable object has any observers.
      *
@@ -740,8 +711,36 @@ protected:
 
 	swganh::EventDispatcher* event_dispatcher_;
 
-private:
+private:    
+    virtual void __InternalViewObjects(
+        const std::shared_ptr<Object>& requester, 
+        uint32_t max_depth, 
+        bool topDown, 
+        std::function<void (const std::shared_ptr<Object>&)> func);
     
+    virtual void __InternalGetAbsolutes(glm::vec3& pos, glm::quat& rot);
+
+    virtual void __InternalViewAwareObjects(
+        std::function<void (const std::shared_ptr<Object>&)> func, 
+        const std::shared_ptr<swganh::object::Object>& hint=nullptr);
+    
+    virtual void __InternalTransfer(
+        const std::shared_ptr<Object>& requester,
+        const std::shared_ptr<Object>& object, 
+        const std::shared_ptr<Object>& newContainer,
+        int32_t arrangement_id = -2);
+
+    virtual int32_t __InternalInsert(
+        const std::shared_ptr<Object>& object,
+        glm::vec3 new_position,
+        int32_t arrangement_id=-2);
+    
+    virtual void __InternalGetObjects(
+        const std::shared_ptr<Object>& requester,
+        uint32_t max_depth,
+        bool topDown,
+        std::list<std::shared_ptr<Object>>& out);
+
     typedef std::set<std::shared_ptr<swganh::observer::ObserverInterface>> ObserverContainer;
 	typedef std::set<std::shared_ptr<swganh::object::Object>> AwareObjectContainer;
 

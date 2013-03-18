@@ -131,7 +131,7 @@ void Object::RemoveObject(
 void Object::TransferObject(
     const std::shared_ptr<Object>& requester,
     const std::shared_ptr<Object>& object,
-    const std::shared_ptr<ContainerInterface>& newContainer, 
+    const std::shared_ptr<Object>& newContainer, 
     glm::vec3 position,
     int32_t arrangement_id)
 {
@@ -332,7 +332,7 @@ void Object::SwapSlots(
 void Object::__InternalTransfer(
     const std::shared_ptr<Object>& requester,
     const std::shared_ptr<Object>& object, 
-    const std::shared_ptr<ContainerInterface>& newContainer,
+    const std::shared_ptr<Object>& newContainer,
     int32_t arrangement_id)
 {
 	try {
@@ -391,7 +391,7 @@ void Object::__InternalTransfer(
 
 void Object::__InternalViewAwareObjects(
     std::function<void (const std::shared_ptr<Object>&)> func, 
-    const std::shared_ptr<swganh::object::Object>& hint)
+    const std::shared_ptr<Object>& hint)
 {
 	std::for_each(aware_objects_.begin(), aware_objects_.end(), func);
 }
