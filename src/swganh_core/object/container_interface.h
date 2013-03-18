@@ -101,8 +101,8 @@ namespace object
             std::function<void (const std::shared_ptr<Object>&)> func, 
             const std::shared_ptr<swganh::object::Object>& hint=nullptr) = 0;
 
-		virtual std::shared_ptr<ContainerInterface> GetContainer() = 0;
-		virtual void SetContainer(const std::shared_ptr<ContainerInterface>& container) = 0;
+		virtual std::shared_ptr<Object> GetContainer() = 0;
+		virtual void SetContainer(const std::shared_ptr<Object>& container) = 0;
 
 		virtual void GetAbsolutes(glm::vec3& pos, glm::quat& rot);
 		virtual void __InternalGetAbsolutes(glm::vec3& pos, glm::quat& rot) = 0;

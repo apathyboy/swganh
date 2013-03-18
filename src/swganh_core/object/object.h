@@ -352,7 +352,7 @@ public:
     /**
      * @return The container for the current object.
      */
-    virtual std::shared_ptr<ContainerInterface> GetContainer();
+    virtual std::shared_ptr<Object> GetContainer();
 
     /**
     *  @param Type of object to return
@@ -374,7 +374,7 @@ public:
      *
      * @param container The new object container.
      */
-    void SetContainer(const std::shared_ptr<ContainerInterface>& container);
+    void SetContainer(const std::shared_ptr<Object>& container);
 
     /**
      * Base complexity for this object (primarily used for crafting).
@@ -756,7 +756,7 @@ private:
     BaselinesCacheContainer baselines_;
     DeltasCacheContainer deltas_;
 
-    std::shared_ptr<ContainerInterface> container_;
+    std::shared_ptr<Object> container_;
 
     bool is_dirty_;
 

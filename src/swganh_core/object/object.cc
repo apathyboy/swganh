@@ -657,7 +657,7 @@ uint8_t Object::GetHeading()
 	return static_cast<uint8_t>(heading);
 }
 
-void Object::SetContainer(const std::shared_ptr<ContainerInterface>& container)
+void Object::SetContainer(const std::shared_ptr<Object>& container)
 {
     {
 	    boost::lock_guard<boost::mutex> lock(object_mutex_);
@@ -666,7 +666,7 @@ void Object::SetContainer(const std::shared_ptr<ContainerInterface>& container)
 	DISPATCH(Object, Container);
 }
 
-shared_ptr<ContainerInterface> Object::GetContainer()
+shared_ptr<Object> Object::GetContainer()
 {
 	boost::lock_guard<boost::mutex> lock(object_mutex_);
 	return container_;
