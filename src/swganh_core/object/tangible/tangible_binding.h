@@ -38,7 +38,7 @@ void exportTangible()
 		.def("removeDefender", &Tangible::RemoveDefender, "Removes a defender from the list")
 		.def("defended", &Tangible::IsDefending, "Checks if the object is being defended")
 		.def("resetDefenders", &Tangible::ResetDefenders, "Resets the defenders to the specified tangible")
-		.def("clearDefenders", &Tangible::ClearDefenders, "Clears all defenders from the tangible object")
+		.def("clearDefenders", &Tangible::ClearDefenders, "Clears all defenders from the tngaible object")
         .def("activateAutoAttack", &Tangible::ActivateAutoAttack, "Activates auto attack for the tangible object")
         .def("clearAutoAttack", &Tangible::ClearAutoAttack, "Clears the auto attack flag")
         .def("isAutoAttacking", &Tangible::IsAutoAttacking, "returns true if currently auto attacking")
@@ -50,7 +50,6 @@ void exportTangible()
 	implicitly_convertible<std::shared_ptr<FactoryCrate>, std::shared_ptr<Tangible>>();
 	implicitly_convertible<std::shared_ptr<Building>, std::shared_ptr<Tangible>>();
 	implicitly_convertible<std::shared_ptr<Tangible>, std::shared_ptr<Object>>();
-	implicitly_convertible<std::shared_ptr<Tangible>, std::shared_ptr<ContainerInterface>>();
 }
 void exportWeapon()
 {

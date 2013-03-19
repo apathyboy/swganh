@@ -463,7 +463,7 @@ void ObjectManager::LoadSlotsForObject(std::shared_ptr<Object> object)
 
 		// Globals
 		//
-		descriptors.insert(ObjectSlots::value_type(-1, shared_ptr<SlotContainer>(new SlotContainer())));
+		descriptors.insert(std::make_pair(-1, std::make_shared<SlotContainer>()));
 
 		// Descriptors
 		if (slotDescriptor != nullptr)
@@ -474,9 +474,9 @@ void ObjectManager::LoadSlotsForObject(std::shared_ptr<Object> object)
 				size_t id = slot_definition_->findSlotByName(descriptor);
 				auto entry = slot_definition_->entry(id);
 				if(entry.exclusive)
-					descriptors.insert(ObjectSlots::value_type(id, shared_ptr<SlotExclusive>(new SlotExclusive())));
+                    descriptors.insert(std::make_pair(id, std::make_shared<SlotExclusive>()));
 				else
-					descriptors.insert(ObjectSlots::value_type(id, shared_ptr<SlotContainer>(new SlotContainer())));
+                    descriptors.insert(std::make_pair(id, std::make_shared<SlotContainer>()));
 			}
 		}
 	

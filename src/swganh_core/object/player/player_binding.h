@@ -127,5 +127,4 @@ void exportPlayer()
 		;
 
 	implicitly_convertible<std::shared_ptr<Player>, std::shared_ptr<Object>>();
-	implicitly_convertible<std::shared_ptr<Player>, std::shared_ptr<ContainerInterface>>();
 }

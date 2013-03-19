@@ -61,14 +61,7 @@ typedef std::map<
 	boost::variant<float, int64_t, std::wstring>
 > AttributesMap;
 
-typedef std::map<
-	int32_t,
-	std::shared_ptr<SlotInterface>
-> ObjectSlots;
-
 typedef boost::variant<float, int64_t, std::wstring, boost::blank> AttributeVariant;
-
-typedef std::vector<std::vector<int32_t>> ObjectArrangements;
 
 typedef swganh::ValueEvent<std::shared_ptr<Object>> ObjectEvent;
 
@@ -82,7 +75,7 @@ class ContainerPermissionsInterface;
 
 class Object : 
 	public swganh::observer::ObservableInterface, 
-	public swganh::object::ContainerInterface, 
+	public swganh::object::ContainerInterface<Object>, 
 	public std::enable_shared_from_this<Object>
 {
 public:
@@ -158,30 +151,7 @@ public:
      * Clears the active current controller, if one exists, for this instance.
      */
     void ClearController();
-    
-    virtual void AddObject(
-        const std::shared_ptr<Object>& requester,
-        std::shared_ptr<Object> newObject,
-        int32_t arrangement_id=-2);
-    
-    virtual void RemoveObject(
-        const std::shared_ptr<Object>& requester, 
-        const std::shared_ptr<Object>& oldObject);
-    
-    virtual void TransferObject(
-        const std::shared_ptr<Object>& requester,
-        const std::shared_ptr<Object>& object,
-        const std::shared_ptr<Object>& newContainer, 
-        glm::vec3 position,
-        int32_t arrangement_id = -2);
-    
-    virtual void SwapSlots(
-        const std::shared_ptr<Object>& requester,
-        const std::shared_ptr<Object>& object,
-        int32_t new_arrangement_id);
-    
-    virtual bool __HasAwareObject(const std::shared_ptr<Object>& object);
-	    
+    	    
 	/**
      * Returns whether or not this observable object has any observers.
      *
@@ -463,13 +433,6 @@ public:
      */
     virtual uint32_t GetType() const { return 0; }
 
-	/**
-	 * @brief Sets the slots and arragements information for the Object
-	 * 
-	 * This is used to determine which objects can be equipped into which slot for the Object
-	 */
-	void SetSlotInformation(ObjectSlots slots, ObjectArrangements arrangements);
-
 	swganh::EventDispatcher* GetEventDispatcher();
     void SetEventDispatcher(swganh::EventDispatcher* dispatcher);
 
@@ -506,29 +469,7 @@ public:
 	{
 		return GetObjectId() == other->GetObjectId();
 	}
-
-	/**
-	 * @brief Clears the given slot by slot_id
-	 */
-	bool ClearSlot(int32_t slot_id);
-	/**
-	 * @brief Gets the slot object by slot_id
-	 */
-	std::shared_ptr<Object> GetSlotObject(int32_t slot_id);
-	/**
-	 * @brief Gets the appropriate arrangement given an object
-	 */
-	int32_t GetAppropriateArrangementId(std::shared_ptr<Object> other);
-	/**
-	 * @brief Gets the slot descriptors for this object
-	 */
-	ObjectSlots GetSlotDescriptor();
-	/**
-	 * @brief Gets the slot arrangements for this object
-	 */
-	ObjectArrangements GetSlotArrangements();
-
-
+    
 	bool IsDatabasePersisted();
 	bool IsInSnapshot();
 	void SetDatabasePersisted(bool value);
@@ -711,46 +652,13 @@ protected:
 
 	swganh::EventDispatcher* event_dispatcher_;
 
-private:    
-    virtual void __InternalViewObjects(
-        const std::shared_ptr<Object>& requester, 
-        uint32_t max_depth, 
-        bool topDown, 
-        std::function<void (const std::shared_ptr<Object>&)> func);
-    
-    virtual void __InternalGetAbsolutes(glm::vec3& pos, glm::quat& rot);
-
-    virtual void __InternalViewAwareObjects(
-        std::function<void (const std::shared_ptr<Object>&)> func, 
-        const std::shared_ptr<swganh::object::Object>& hint=nullptr);
-    
-    virtual void __InternalTransfer(
-        const std::shared_ptr<Object>& requester,
-        const std::shared_ptr<Object>& object, 
-        const std::shared_ptr<Object>& newContainer,
-        int32_t arrangement_id = -2);
-
-    virtual int32_t __InternalInsert(
-        const std::shared_ptr<Object>& object,
-        glm::vec3 new_position,
-        int32_t arrangement_id=-2);
-    
-    virtual void __InternalGetObjects(
-        const std::shared_ptr<Object>& requester,
-        uint32_t max_depth,
-        bool topDown,
-        std::list<std::shared_ptr<Object>>& out);
+private:
 
     typedef std::set<std::shared_ptr<swganh::observer::ObserverInterface>> ObserverContainer;
-	typedef std::set<std::shared_ptr<swganh::object::Object>> AwareObjectContainer;
 
 	AttributesMap attributes_map_;
-
-    ObjectSlots slot_descriptor_;
-	ObjectArrangements slot_arrangements_;
-
+    
     ObserverContainer observers_;
-	AwareObjectContainer aware_objects_;
 
     BaselinesCacheContainer baselines_;
     DeltasCacheContainer deltas_;

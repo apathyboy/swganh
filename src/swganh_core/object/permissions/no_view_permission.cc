@@ -8,17 +8,17 @@
 
 using namespace swganh::object;
 
-bool NoViewPermission::canInsert(std::shared_ptr<ContainerInterface> container, std::shared_ptr<Object> requester, std::shared_ptr<Object> object)
+bool NoViewPermission::canInsert(std::shared_ptr<Object> container, std::shared_ptr<Object> requester, std::shared_ptr<Object> object)
 {
 	return true;
 }
 
-bool NoViewPermission::canRemove(std::shared_ptr<ContainerInterface> container, std::shared_ptr<Object> requester, std::shared_ptr<Object> object)
+bool NoViewPermission::canRemove(std::shared_ptr<Object> container, std::shared_ptr<Object> requester, std::shared_ptr<Object> object)
 {
 	return true;
 }
 
-bool NoViewPermission::canView(std::shared_ptr<ContainerInterface> container, std::shared_ptr<Object> requester)
+bool NoViewPermission::canView(std::shared_ptr<Object> container, std::shared_ptr<Object> requester)
 {
 	return false;
 }
