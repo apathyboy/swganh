@@ -41,17 +41,51 @@ namespace object {
 		//Object Management
 		void AddObject(
             const std::shared_ptr<T>& requester,
-            std::shared_ptr<T> newObject,
+            std::shared_ptr<T> object,
             int32_t arrangement_id = -2)
         {
-            if(requester == nullptr || container_permissions_->canInsert(static_cast<T*>(this)->shared_from_this(), requester, newObject))
+            if(requester == nullptr || container_permissions_->canInsert(static_cast<T*>(this)->shared_from_this(), requester, object))
         	{	
         		//boost::upgrade_lock<boost::shared_mutex> lock(global_container_lock_);
         		
         		//Add Object To Datastructure
         		{
         			//boost::upgrade_to_unique_lock<boost::shared_mutex> unique_lock(lock);
-        			arrangement_id = __InternalInsert(newObject, newObject->GetPosition(), arrangement_id);
+        			std::shared_ptr<Object> removed_object = nullptr;
+        	        if(arrangement_id == -2)
+        	        	arrangement_id = static_cast<T*>(this)->GetAppropriateArrangementId(object);
+        
+        	        if (arrangement_id < 4)
+        	        {
+        	        	// Remove object in existing slot
+        	        	removed_object = slot_descriptor_[arrangement_id]->insert_object(object);
+        	        	if (removed_object)
+        	        	{
+        	        		// Transfer it out, put it in the place the replacing object came from
+                            std::static_pointer_cast<ContainerInterface<T>>(object->GetContainer())->AddObject(nullptr, removed_object, -2);
+        	        	}
+        	        }
+        	        else
+        	        {
+        	        	auto& arrangement = std::static_pointer_cast<ContainerInterface<T>>(object)->slot_arrangements_[arrangement_id-4];
+        	        	for (auto& i : arrangement)
+        	        	{
+        	        		slot_descriptor_[i]->insert_object(object);
+        	        	}
+        	        }
+
+        	        object->SetArrangementId(arrangement_id);
+        	        object->SetContainer(static_cast<T*>(this)->shared_from_this());
+        	        object->SetSceneId(static_cast<T*>(this)->GetSceneId());
+        
+        	        //Time to update the position to the new coordinates/update AABB
+        	        //object->SetPosition(new_position);
+        	        object->__InternalUpdateWorldCollisionBox();
+        	        object->UpdateAABB();
+        
+        	        //Because we may have calculated it internally, send the arrangement_id used back
+        	        //To the caller so it can send the appropriate update.
+        	        //return arrangement_id;
         		}
         	}
         }
@@ -83,40 +117,14 @@ namespace object {
             glm::vec3 position, 
             int32_t arrangement_id=-2)
         {
-        	if(	requester == nullptr || (
-        		this->GetPermissions()->canRemove(static_cast<T*>(this)->shared_from_this(), requester, object) && 
-        		newContainer->GetPermissions()->canInsert(newContainer, requester, object)))
+        	if(	requester == nullptr || this->GetPermissions()->canRemove(static_cast<T*>(this)->shared_from_this(), requester, object))
         	{
         		//boost::upgrade_lock<boost::shared_mutex> uplock(global_container_lock_);
         		
         		{
         			//boost::upgrade_to_unique_lock<boost::shared_mutex> unique(uplock);
-                    arrangement_id = std::static_pointer_cast<ContainerInterface<T>>(newContainer)->__InternalInsert(object, position, arrangement_id);
+                    std::static_pointer_cast<ContainerInterface<T>>(newContainer)->AddObject(nullptr, object, arrangement_id);
         		}
-        
-        		//Split into 3 groups -- only ours, only new, and both ours and new
-        		std::set<std::shared_ptr<Object>> oldObservers, newObservers, bothObservers;
-        
-        		std::static_pointer_cast<ContainerInterface<T>>(object)->__InternalViewAwareObjects([&] (const std::shared_ptr<Object>& observer) {
-        			oldObservers.insert(observer);
-        		});
-        	
-        		std::static_pointer_cast<ContainerInterface<T>>(newContainer)->__InternalViewAwareObjects([&] (const std::shared_ptr<Object>& observer) 
-        		{
-        			if(newContainer->GetPermissions()->canView(newContainer, observer))
-        			{
-        				auto itr = oldObservers.find(observer);
-        				if(itr != oldObservers.end())
-        				{
-        					oldObservers.erase(itr);
-        					bothObservers.insert(observer);
-        				} 
-        				else 
-        				{
-        					newObservers.insert(observer);
-        				}
-        			}
-        		}, requester);
         	}
         }
 		
@@ -133,12 +141,9 @@ namespace object {
         		{
         			slot.second->remove_object(object);
         		}
-        		__InternalInsert(object, object->GetPosition(), new_arrangement_id);
+
+        		AddObject(requester, object, new_arrangement_id);
         	}
-        
-        	__InternalViewAwareObjects([&] (const std::shared_ptr<Object>& aware_object) {
-        		object->SendUpdateContainmentMessage(object->GetController());
-        	});
         }
 
 		bool HasContainedObjects()
@@ -192,20 +197,6 @@ namespace object {
 	        container_permissions_ = obj; 
         }
         
-        bool HasAwareObject(const std::shared_ptr<Object>& object)
-        {
-            return aware_objects_.find(object) != aware_objects_.end();
-        }
-
-		//Call to View
-		void ViewAwareObjects(
-            std::function<void (const std::shared_ptr<T>&)> func, 
-            const std::shared_ptr<T>& hint=nullptr)
-        {
-	        //boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
-	        __InternalViewAwareObjects(func, hint);
-        }
-
 		virtual std::shared_ptr<Object> GetContainer() = 0;
 		virtual void SetContainer(const std::shared_ptr<T>& container) = 0;
 
@@ -312,7 +303,6 @@ namespace object {
 		//static boost::shared_mutex global_container_lock_;
 
     private:
-	    typedef std::set<std::shared_ptr<swganh::object::Object>> AwareObjectContainer;
 
 		void __InternalViewObjects(
             const std::shared_ptr<T>& requester, 
@@ -362,105 +352,6 @@ namespace object {
 	        pos = (rot * static_cast<T*>(this)->GetPosition()) + pos;
 	        rot = rot * static_cast<T*>(this)->GetOrientation();
         }
-
-		virtual void __InternalViewAwareObjects(
-            std::function<void (const std::shared_ptr<T>&)> func, 
-            const std::shared_ptr<T>& hint=nullptr)
-        {
-	        std::for_each(aware_objects_.begin(), aware_objects_.end(), func);
-        }
-
-		//FOR USE BY TRANSFER OBJECT ONLY. DO NOT CALL IN OUTSIDE CODE
-		void __InternalTransfer(
-            const std::shared_ptr<T>& requester,
-            const std::shared_ptr<T>& object, 
-            const std::shared_ptr<T>& newContainer,
-            int32_t arrangement_id=-2)
-        {
-        	try {
-        		// we are already locked
-        		if(	requester == nullptr || (
-        			this->GetPermissions()->canRemove(static_cast<T*>(this)->shared_from_this(), requester, object) && 
-        			newContainer->GetPermissions()->canInsert(newContainer, requester, object)))
-        		{
-        			arrangement_id = newContainer->__InternalInsert(object, object->GetPosition(), arrangement_id);
-        
-        			//Split into 3 groups -- only ours, only new, and both ours and new
-        			std::set<std::shared_ptr<Object>> oldObservers, newObservers, bothObservers;
-        
-        			std::static_pointer_cast<ContainerInterface<T>>(object)->__InternalViewAwareObjects([&] (const std::shared_ptr<Object>& observer) {
-        				oldObservers.insert(observer);
-        			});
-        	
-        			std::static_pointer_cast<ContainerInterface<T>>(newContainer)->__InternalViewAwareObjects([&] (const std::shared_ptr<Object>& observer) 
-        			{
-        				if(newContainer->GetPermissions()->canView(newContainer, observer))
-        				{
-        					auto itr = oldObservers.find(observer);
-        					if(itr != oldObservers.end())
-        					{
-        						oldObservers.erase(itr);
-        						bothObservers.insert(observer);
-        					} 
-        					else 
-        					{
-        						newObservers.insert(observer);
-        					}
-        				}
-        			}, requester);
-        		}
-        	} catch(const std::exception& e){
-        		LOG(error) << "Could not transfer object " << object->GetObjectId() << " to container :" << GetObjectId() << " with error " << e.what();
-        	}
-        }
-
-		int32_t __InternalInsert(
-            const std::shared_ptr<T>& object,
-            glm::vec3 new_position,
-            int32_t arrangement_id=-2)
-        {
-        	std::shared_ptr<Object> removed_object = nullptr;
-        	if(arrangement_id == -2)
-        		arrangement_id = static_cast<T*>(this)->GetAppropriateArrangementId(object);
-        
-        	if (arrangement_id < 4)
-        	{
-        		// Remove object in existing slot
-        		removed_object = slot_descriptor_[arrangement_id]->insert_object(object);
-        		if (removed_object)
-        		{
-        			// Transfer it out, put it in the place the replacing object came from
-        			std::static_pointer_cast<ContainerInterface<T>>(removed_object)->__InternalTransfer(nullptr, removed_object, object->GetContainer());
-        		}
-        	}
-        	else
-        	{
-        		auto& arrangement = std::static_pointer_cast<ContainerInterface<T>>(object)->slot_arrangements_[arrangement_id-4];
-        		for (auto& i : arrangement)
-        		{
-        			slot_descriptor_[i]->insert_object(object);			
-        			// Remove object in existing slot
-        			//removed_object = 
-        			//if (removed_object && removed_object != object)
-        			//{
-        			//	// Transfer it out, put it in the place the replacing object came from
-        			//	removed_object->__InternalTransfer(nullptr, removed_object, object->GetContainer());
-        			//}
-        		}
-        	}
-        	object->SetArrangementId(arrangement_id);
-        	object->SetContainer(static_cast<T*>(this)->shared_from_this());
-        	object->SetSceneId(static_cast<T*>(this)->GetSceneId());
-        
-        	//Time to update the position to the new coordinates/update AABB
-        	object->SetPosition(new_position);
-        	object->__InternalUpdateWorldCollisionBox();
-        	object->UpdateAABB();
-        
-        	//Because we may have calculated it internally, send the arrangement_id used back
-        	//To the caller so it can send the appropriate update.
-        	return arrangement_id;
-        }
         
 		void __InternalGetObjects(
             const std::shared_ptr<T>& requester,
@@ -493,8 +384,7 @@ namespace object {
         		}
         	}
         }
-
-	    AwareObjectContainer aware_objects_;        
+     
         ObjectSlots slot_descriptor_;
 	    ObjectArrangements slot_arrangements_;
 	};
