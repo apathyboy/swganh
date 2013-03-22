@@ -330,21 +330,6 @@ uint8_t Object::GetHeading()
 	return static_cast<uint8_t>(heading);
 }
 
-void Object::SetContainer(const std::shared_ptr<Object>& container)
-{
-    {
-	    boost::lock_guard<boost::mutex> lock(object_mutex_);
-        container_ = container;		
-    }
-	DISPATCH(Object, Container);
-}
-
-shared_ptr<Object> Object::GetContainer()
-{
-	boost::lock_guard<boost::mutex> lock(object_mutex_);
-	return container_;
-}
-
 void Object::SetComplexity(float complexity)
 {
     {

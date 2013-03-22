@@ -33,9 +33,9 @@ boost::python::tuple AddObject(std::shared_ptr<Object> requester, std::shared_pt
 	return boost::python::make_tuple(requester, newObject,  arrangement_id);
 }
 
-boost::python::tuple TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<Object> newContainer, glm::vec3 new_position, int32_t arrangement_id=-2)
+boost::python::tuple TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<Object> newContainer, int32_t arrangement_id=-2)
 {
-	return boost::python::make_tuple(requester, object, newContainer, new_position, arrangement_id);
+	return boost::python::make_tuple(requester, object, newContainer, arrangement_id);
 }
 
 void SendSystemMessage1(std::shared_ptr<Object> requester, std::string filename, std::string label)
@@ -135,7 +135,7 @@ void PlayMusic3(std::shared_ptr<swganh::object::Object> object, std::string musi
 BOOST_PYTHON_FUNCTION_OVERLOADS(PlayMusic3Overload, PlayMusic3, 3, 4);
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addObjectOverload, AddObject, 2, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(transferObjectOverload, TransferObject, 4, 5)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(transferObjectOverload, TransferObject, 4, 3)
 
 void UpdatePosition(std::shared_ptr<Object> self, glm::vec3 position, glm::quat orientation, std::shared_ptr<Object> parent=nullptr)
 {
@@ -184,6 +184,21 @@ void exportObject()
     
     ;
 	void (Object::*AddObject)(const shared_ptr<Object>&, shared_ptr<Object>, int32_t arrangement_id) = &Object::AddObject;
+    
+    void (Object::*TransferObject)(
+        const std::shared_ptr<Object>&,
+        const std::shared_ptr<Object>&,
+        const std::shared_ptr<Object>&,
+        int32_t) = &Object::TransferObject;
+
+    void (Object::*SwapSlots)(
+        const std::shared_ptr<Object>&,
+        const std::shared_ptr<Object>&,
+        int32_t) = &Object::SwapSlots;
+    
+    bool (Object::*HasContainedObjects)() = &Object::HasContainedObjects;
+
+    const std::shared_ptr<Object>& (Object::*GetContainer)() = &Object::GetContainer;
 
 	//class_<ContainerInterface, std::shared_ptr<ContainerInterface>, boost::noncopyable>("ContainerInterface", "Container interface", no_init)
 	//	.def("add", &ContainerInterface::AddObject, addObjectOverload(args("requester", "newObject", "arrangement_id"), "Adds an object to the current object"))
@@ -253,11 +268,10 @@ void exportObject()
 		.def("updatePosition", UpdatePosition, UpdatePosOverload(args("self", "position", "orientation", "parent"),"Updates the position and sends an update to the player"))
 		.def("add", AddObject, addObjectOverload(args("requester", "newObject", "arrangement_id"), "Adds an object to the current object"))
 		.def("remove", RemoveObject, "Removes an object fomr the current object")
-		.def("transfer", &Object::TransferObject, transferObjectOverload(args("object", "newContainer", "arrangement_id"), "Transfer an object to a different object"))
-		.def("swapSlots", &Object::SwapSlots, "Change an objects current arrangement")	
-		.def("container", &Object::GetContainer, "Gets the :class:`ContainerInterface` object of the current object")
-		.def("hasContainedObjects", &Object::HasContainedObjects, "Checks to see if container has any objects in it")
-		
+		.def("transfer", TransferObject, transferObjectOverload(args("object", "newContainer", "arrangement_id"), "Transfer an object to a different object"))
+		.def("swapSlots", SwapSlots, "Change an objects current arrangement")	
+		.def("container", GetContainer, return_internal_reference<>(), "Gets the :class:`ContainerInterface` object of the current object")
+		.def("hasContainedObjects", HasContainedObjects, "Checks to see if container has any objects in it")		
         ;
 
 	bp::class_<std::vector<int>>("IntVector")

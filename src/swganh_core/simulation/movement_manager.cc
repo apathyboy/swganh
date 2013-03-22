@@ -95,18 +95,16 @@ void MovementManager::HandleDataTransformWithParentServer(
 {
 	if(parent != nullptr)
 	{
+        object->SetPosition(new_position);
+	    object->UpdateWorldCollisionBox();
+		object->UpdateAABB();
+
 		//Perform the transfer if needed
 		if(object->GetContainer() != parent)
 		{
-			object->GetContainer()->TransferObject(object, object, parent, new_position);
+			object->GetContainer()->TransferObject(object, object, parent);
 		}
-		else
-		{
-			object->SetPosition(new_position);
-			object->UpdateWorldCollisionBox();
-			object->UpdateAABB();
-		}
-		
+				
 		//Send the update transform
 		SendDataTransformWithParentMessage(object);
 
@@ -188,17 +186,14 @@ void MovementManager::HandleDataTransformWithParent(
 
 		//Set the new position and orientation
 		object->SetOrientation(message.orientation);
-    
+        object->SetPosition(message.position);
+		object->UpdateWorldCollisionBox();
+		object->UpdateAABB();
+
 		//Perform the transfer
 		if(object->GetContainer() != container)
 		{
-			object->GetContainer()->TransferObject(object, object, container, message.position);
-		}
-		else
-		{
-			object->SetPosition(message.position);
-			object->UpdateWorldCollisionBox();
-			object->UpdateAABB();
+			object->GetContainer()->TransferObject(object, object, container);
 		}
 
 		//Send the update transform

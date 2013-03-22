@@ -288,34 +288,7 @@ public:
     /**
      * @return Heading of the object in (angle/0.0625) where angle is in radians.
      */
-    uint8_t GetHeading() ;
-
-    /**
-     * @return The container for the current object.
-     */
-    virtual std::shared_ptr<Object> GetContainer();
-
-    /**
-    *  @param Type of object to return
-     * @return The container for the current object.
-     */
-    template<typename T>
-    std::shared_ptr<T> GetContainer()
-    {
-        boost::lock_guard<boost::mutex> lock(object_mutex_);
-#ifdef _DEBUG
-            return std::dynamic_pointer_cast<T>(container_);
-#else
-            return std::static_pointer_cast<T>(container_);
-#endif
-    }
-
-    /**
-     * Sets the container for the current object.
-     *
-     * @param container The new object container.
-     */
-    void SetContainer(const std::shared_ptr<Object>& container);
+    uint8_t GetHeading();
 
     /**
      * Base complexity for this object (primarily used for crafting).
@@ -662,8 +635,6 @@ private:
 
     BaselinesCacheContainer baselines_;
     DeltasCacheContainer deltas_;
-
-    std::shared_ptr<Object> container_;
 
     bool is_dirty_;
 
