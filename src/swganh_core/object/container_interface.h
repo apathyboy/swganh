@@ -119,12 +119,7 @@ namespace object {
         {
         	if(	requester == nullptr || this->GetPermissions()->canRemove(static_cast<T*>(this)->shared_from_this(), requester, object))
         	{
-        		//boost::upgrade_lock<boost::shared_mutex> uplock(global_container_lock_);
-        		
-        		{
-        			//boost::upgrade_to_unique_lock<boost::shared_mutex> unique(uplock);
-                    std::static_pointer_cast<ContainerInterface<T>>(newContainer)->AddObject(nullptr, object, arrangement_id);
-        		}
+                std::static_pointer_cast<ContainerInterface<T>>(newContainer)->AddObject(nullptr, object, arrangement_id);
         	}
         }
 		
@@ -148,11 +143,9 @@ namespace object {
 
 		bool HasContainedObjects()
         {
-	        //boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
-            
 	        bool has_objects = false;
 	        std::list<std::shared_ptr<T>> out;
-	        __InternalGetObjects(nullptr, 1, true, out);
+	        GetObjects(nullptr, 1, true, out);
 	        return out.size() > 0;
         }
 
@@ -161,9 +154,8 @@ namespace object {
             uint32_t max_depth,
             bool topDown)
         {
-	        //boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
 	        std::list<std::shared_ptr<T>> out;
-	        __InternalGetObjects(requester, max_depth, topDown, out);
+	        GetObjects(requester, max_depth, topDown, out);
 	        return out;
         }
 
@@ -173,8 +165,11 @@ namespace object {
             bool topDown, 
             std::list<std::shared_ptr<T>>& out)
         {
-	        //boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
-	        __InternalGetObjects(requester, max_depth, topDown, out);
+            ViewObjects(requester, max_depth, topDown,
+                [&out, this] (const std::shared_ptr<T>& item)
+            {
+                out.push_back(item);
+            });
         }
         
 		void ViewObjects(
@@ -183,8 +178,30 @@ namespace object {
             bool topDown, 
             std::function<void (const std::shared_ptr<T>&)> func)
         {
-	        //boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
-	        __InternalViewObjects(requester, max_depth, topDown, func);
+        	if(requester == nullptr || container_permissions_->canView(static_cast<T*>(this)->shared_from_this(), requester))
+        	{
+        		uint32_t requester_instance = 0;
+        		if(requester)
+        			requester_instance = requester->GetInstanceId();
+        
+        		for(auto& slot : slot_descriptor_)
+        		{
+        			slot.second->view_objects([&] (const std::shared_ptr<Object>& object) {
+        				uint32_t object_instance = object->GetInstanceId();
+        				if(object_instance == 0 || object_instance == requester_instance)
+        				{
+        					if(topDown)
+        						func(object);
+        
+        					if(max_depth != 1)
+        						std::static_pointer_cast<ContainerInterface<T>>(object)->ViewObjects(requester, (max_depth == 0) ? 0 : max_depth-1, topDown, func);
+        
+        					if(!topDown)
+        						func(object);
+        				}
+        			});
+        		}
+        	}
         }
 
 		std::shared_ptr<ContainerPermissionsInterface> GetPermissions()
@@ -202,8 +219,20 @@ namespace object {
 
 		void GetAbsolutes(glm::vec3& pos, glm::quat& rot)
         {
-	        //boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);
-	        __InternalGetAbsolutes(pos, rot);
+	        //boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);	        
+	        auto parentContainer = GetContainer();
+	        if(parentContainer)
+	        {
+	        	 std::static_pointer_cast<ContainerInterface<T>>(parentContainer)->GetAbsolutes(pos, rot);
+	        }
+	        else
+	        {
+	        	pos = glm::vec3();
+	        	rot = glm::quat();
+	        }
+
+	        pos = (rot * static_cast<T*>(this)->GetPosition()) + pos;
+	        rot = rot * static_cast<T*>(this)->GetOrientation();
         }
         
         /// Slots
@@ -297,96 +326,11 @@ namespace object {
         	return found;
         }
         
-	protected:
-		std::shared_ptr<swganh::object::ContainerPermissionsInterface> container_permissions_;
-
-		//static boost::shared_mutex global_container_lock_;
-
     private:
 
-		void __InternalViewObjects(
-            const std::shared_ptr<T>& requester, 
-            uint32_t max_depth, 
-            bool topDown, 
-            std::function<void (const std::shared_ptr<T>&)> func)
-        {
-        	if(requester == nullptr || container_permissions_->canView(static_cast<T*>(this)->shared_from_this(), requester))
-        	{
-        		uint32_t requester_instance = 0;
-        		if(requester)
-        			requester_instance = requester->GetInstanceId();
-        
-        		for(auto& slot : slot_descriptor_)
-        		{
-        			slot.second->view_objects([&] (const std::shared_ptr<Object>& object) {
-        				uint32_t object_instance = object->GetInstanceId();
-        				if(object_instance == 0 || object_instance == requester_instance)
-        				{
-        					if(topDown)
-        						func(object);
-        
-        					if(max_depth != 1)
-        						std::static_pointer_cast<ContainerInterface<T>>(object)->__InternalViewObjects(requester, (max_depth == 0) ? 0 : max_depth-1, topDown, func);
-        
-        					if(!topDown)
-        						func(object);
-        				}
-        			});
-        		}
-        	}
-        }
-
-		virtual void __InternalGetAbsolutes(glm::vec3& pos, glm::quat& rot)
-        {
-	        auto parentContainer = GetContainer();
-	        if(parentContainer)
-	        {
-	        	 std::static_pointer_cast<ContainerInterface<T>>(parentContainer)->__InternalGetAbsolutes(pos, rot);
-	        }
-	        else
-	        {
-	        	pos = glm::vec3();
-	        	rot = glm::quat();
-	        }
-
-	        pos = (rot * static_cast<T*>(this)->GetPosition()) + pos;
-	        rot = rot * static_cast<T*>(this)->GetOrientation();
-        }
-        
-		void __InternalGetObjects(
-            const std::shared_ptr<T>& requester,
-            uint32_t max_depth,
-            bool topDown,
-            std::list<std::shared_ptr<T>>& out)
-        {
-        	if(requester == nullptr || container_permissions_->canView(static_cast<T*>(this)->shared_from_this(), requester))
-        	{
-        		uint32_t requester_instance = 0;
-        		if(requester)
-        			requester_instance = requester->GetInstanceId();
-        
-        		for(auto& slot : slot_descriptor_)
-        		{
-        			slot.second->view_objects([&] (const std::shared_ptr<Object>& object) {
-        				uint32_t object_instance = object->GetInstanceId();
-        				if(object_instance == 0 || object_instance == requester_instance)
-        				{
-        					if(topDown)
-        						out.push_back(object);
-        
-        					if(max_depth != 1)
-        						std::static_pointer_cast<ContainerInterface<T>>(object)->__InternalGetObjects(requester, (max_depth == 0) ? 0 : max_depth-1, topDown, out);
-        
-        					if(!topDown)
-        						out.push_back(object);
-        				}
-        			});
-        		}
-        	}
-        }
-     
         ObjectSlots slot_descriptor_;
 	    ObjectArrangements slot_arrangements_;
+		std::shared_ptr<swganh::object::ContainerPermissionsInterface> container_permissions_;
 	};
 
 }}
