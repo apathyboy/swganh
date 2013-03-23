@@ -109,7 +109,8 @@ void Object::SetObjectId(uint64_t object_id)
 {
     object_id_ = object_id;
 }
-uint64_t Object::GetObjectId()
+
+uint64_t Object::GetObjectId() const
 {
     return object_id_;
 }
@@ -452,7 +453,7 @@ void Object::SendUpdateContainmentMessage(std::shared_ptr<swganh::observer::Obse
 	uint64_t container_id = 0;
 	auto& container = GetContainer();
 	if (container)
-		container_id = GetContainer()->GetObjectId();
+		container_id = container->GetContainmentId();
 
 	//DLOG(info) << "CONTAINMENT " << GetObjectId() << ":" << GetTemplate() << " INTO " << container_id << " ARRANGEMENT " << arrangement_id_;
 
@@ -714,6 +715,12 @@ void Object::UpdateAABB()
 
 
 //Object Management
+
+uint64_t Object::GetContainmentId() const
+{
+    return GetObjectId();
+}
+
 void Object::AddObject(
     const std::shared_ptr<Object>& requester,
     std::shared_ptr<Object> object,
@@ -785,7 +792,7 @@ void Object::RemoveObject(
 void Object::TransferObject(
     const std::shared_ptr<Object>& requester,
     const std::shared_ptr<Object>& object,
-    const std::shared_ptr<Object>& newContainer,
+    const std::shared_ptr<ContainerInterface>& newContainer,
     int32_t arrangement_id)
 {
 	if(	requester == nullptr || this->GetPermissions()->canRemove(shared_from_this(), requester, object))
@@ -894,14 +901,14 @@ void Object::SetPermissions(std::shared_ptr<ContainerPermissionsInterface> obj)
     container_permissions_ = obj; 
 }
 
-void Object::SetContainer(const std::shared_ptr<Object>& container)
+void Object::SetContainer(const std::shared_ptr<ContainerInterface>& container)
 {
     boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
         
     container_ = container;
 }
 
-const std::shared_ptr<Object>& Object::GetContainer()
+const std::shared_ptr<ContainerInterface>& Object::GetContainer()
 {
     boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
         
@@ -1012,6 +1019,12 @@ bool Object::ClearSlot(int32_t slot_id)
 	}
 	return cleared;
 }
+
+void Object::AddSlotObject(
+        const std::shared_ptr<Object>& requester,
+        std::shared_ptr<Object> object,
+        int32_t arrangement_id)
+{}
 
 std::shared_ptr<Object> Object::GetSlotObject(int32_t slot_id)
 {

@@ -33,6 +33,8 @@ namespace object {
 	public:
         virtual ~ContainerInterface() {}
 
+        virtual uint64_t GetContainmentId() const = 0;
+
 		//Object Management
 		virtual void AddObject(
             const std::shared_ptr<Object>& requester,
@@ -46,7 +48,7 @@ namespace object {
         virtual void TransferObject(
             const std::shared_ptr<Object>& requester,
             const std::shared_ptr<Object>& object,
-            const std::shared_ptr<Object>& newContainer,
+            const std::shared_ptr<ContainerInterface>& newContainer,
             int32_t arrangement_id = -2) = 0;
 		
         virtual void SwapSlots(
@@ -77,9 +79,9 @@ namespace object {
 
 		virtual void SetPermissions(std::shared_ptr<ContainerPermissionsInterface> obj) = 0;
         
-        virtual void SetContainer(const std::shared_ptr<Object>& container) = 0;
+        virtual void SetContainer(const std::shared_ptr<ContainerInterface>& container) = 0;
         
-        virtual const std::shared_ptr<Object>& GetContainer() = 0;
+        virtual const std::shared_ptr<ContainerInterface>& GetContainer() = 0;
         
         template<typename T>
         std::shared_ptr<T> GetContainer()
@@ -95,14 +97,17 @@ namespace object {
         
         virtual void SetSlotInformation(ObjectSlots slots, ObjectArrangements arrangements) = 0;
         
-        virtual int32_t GetAppropriateArrangementId(std::shared_ptr<Object> other) = 0;
-        
         virtual ObjectSlots GetSlotDescriptor() = 0;
 
         virtual ObjectArrangements GetSlotArrangements() = 0;
 
         virtual bool ClearSlot(int32_t slot_id) = 0;
         
+        virtual void AddSlotObject(
+                const std::shared_ptr<Object>& requester,
+                std::shared_ptr<Object> object,
+                int32_t arrangement_id = -2) = 0;
+
         virtual std::shared_ptr<Object> GetSlotObject(int32_t slot_id) = 0;
 	};
 

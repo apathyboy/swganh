@@ -85,7 +85,7 @@ uint32_t ObjectFactory::PersistObject(const shared_ptr<Object>& object, bool per
 		if (object->GetContainer() != nullptr)
 		{
 			prepared_statement->setUInt(counter++, object->GetSceneId());
-			prepared_statement->setUInt64(counter++, object->GetContainer()->GetObjectId());
+			prepared_statement->setUInt64(counter++, object->GetContainer()->GetContainmentId());
 		}
         else
 		{

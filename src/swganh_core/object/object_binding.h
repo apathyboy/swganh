@@ -188,7 +188,7 @@ void exportObject()
     void (Object::*TransferObject)(
         const std::shared_ptr<Object>&,
         const std::shared_ptr<Object>&,
-        const std::shared_ptr<Object>&,
+        const std::shared_ptr<ContainerInterface>&,
         int32_t) = &Object::TransferObject;
 
     void (Object::*SwapSlots)(
@@ -198,7 +198,7 @@ void exportObject()
     
     bool (Object::*HasContainedObjects)() = &Object::HasContainedObjects;
 
-    const std::shared_ptr<Object>& (Object::*GetContainer)() = &Object::GetContainer;
+    const std::shared_ptr<ContainerInterface>& (Object::*GetContainer)() = &Object::GetContainer;
 
 	//class_<ContainerInterface, std::shared_ptr<ContainerInterface>, boost::noncopyable>("ContainerInterface", "Container interface", no_init)
 	//	.def("add", &ContainerInterface::AddObject, addObjectOverload(args("requester", "newObject", "arrangement_id"), "Adds an object to the current object"))

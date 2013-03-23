@@ -396,7 +396,7 @@ public:
     /**
      * @return The id of this Object instance.
      */
-    uint64_t GetObjectId();
+    uint64_t GetObjectId() const;
 
 	int32_t GetArrangementId();
 	void SetArrangementId(int32_t arrangement_id);
@@ -575,6 +575,8 @@ public:
 
 
     // Containment
+    uint64_t GetContainmentId() const;
+
     void AddObject(
             const std::shared_ptr<Object>& requester,
             std::shared_ptr<Object> object,
@@ -587,7 +589,7 @@ public:
     void TransferObject(
             const std::shared_ptr<Object>& requester,
             const std::shared_ptr<Object>& object,
-            const std::shared_ptr<Object>& newContainer,
+            const std::shared_ptr<ContainerInterface>& newContainer,
             int32_t arrangement_id = -2);
 
     void SwapSlots(
@@ -620,9 +622,9 @@ public:
 
     using ContainerInterface::GetContainer;
 
-    void SetContainer(const std::shared_ptr<Object>& container);
+    void SetContainer(const std::shared_ptr<ContainerInterface>& container);
 
-    const std::shared_ptr<Object>& GetContainer();
+    const std::shared_ptr<ContainerInterface>& GetContainer();
 
     void GetAbsolutes(glm::vec3& pos, glm::quat& rot);
 
@@ -635,6 +637,11 @@ public:
     ObjectArrangements GetSlotArrangements();
 
     bool ClearSlot(int32_t slot_id);
+    
+    void AddSlotObject(
+            const std::shared_ptr<Object>& requester,
+            std::shared_ptr<Object> object,
+            int32_t arrangement_id = -2);
 
     std::shared_ptr<Object> GetSlotObject(int32_t slot_id);
 
@@ -713,7 +720,7 @@ private:
     ObjectSlots slot_descriptor_;
     ObjectArrangements slot_arrangements_;
     std::shared_ptr<ContainerPermissionsInterface> container_permissions_;
-    std::shared_ptr<Object> container_;
+    std::shared_ptr<ContainerInterface> container_;
 };
 
 }}  // namespace

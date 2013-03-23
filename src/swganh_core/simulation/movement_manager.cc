@@ -234,7 +234,7 @@ void MovementManager::SendDataTransformWithParentMessage(const shared_ptr<Object
     auto creature = static_pointer_cast<Creature>(object);
 
     DataTransformWithParent transform;
-    transform.cell_id       = object->GetContainer()->GetObjectId();
+    transform.cell_id       = object->GetContainer()->GetContainmentId();
     transform.counter       = ++counter_map_[object->GetObjectId()];
     transform.orientation   = object->GetOrientation();
     transform.position      = object->GetPosition();
@@ -247,7 +247,7 @@ void MovementManager::SendUpdateDataTransformWithParentMessage(const shared_ptr<
 {    
     UpdateTransformWithParentMessage transform_update;
     transform_update.object_id = object->GetObjectId();
-    transform_update.cell_id = object->GetContainer()->GetObjectId();
+    transform_update.cell_id = object->GetContainer()->GetContainmentId();
     transform_update.heading = object->GetHeading();
     transform_update.position = object->GetPosition();
     transform_update.update_counter = ++counter_map_[object->GetObjectId()];
