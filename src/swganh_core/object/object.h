@@ -707,6 +707,8 @@ private:
 	bool in_snapshot_;
 
     std::set<std::string> flags_;
+
+    mutable boost::mutex containment_mutex_;
         
     ObjectSlots slot_descriptor_;
     ObjectArrangements slot_arrangements_;

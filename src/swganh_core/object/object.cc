@@ -728,7 +728,14 @@ void Object::AddObject(
 	    if (arrangement_id < 4)
 	    {
 	    	// Remove object in existing slot
-	    	removed_object = slot_descriptor_[arrangement_id]->insert_object(object);
+            {
+                boost::lock(object->containment_mutex_, containment_mutex_);
+                boost::lock_guard<boost::mutex> lock_obj(object->containment_mutex_, boost::adopt_lock);
+                boost::lock_guard<boost::mutex> lock_container(containment_mutex_, boost::adopt_lock);
+
+	    	    removed_object = slot_descriptor_[arrangement_id]->insert_object(object);
+            }
+
 	    	if (removed_object)
 	    	{
 	    		// Transfer it out, put it in the place the replacing object came from
@@ -737,6 +744,10 @@ void Object::AddObject(
 	    }
 	    else
 	    {
+            boost::lock(object->containment_mutex_, containment_mutex_);
+            boost::lock_guard<boost::mutex> lock_obj(object->containment_mutex_, boost::adopt_lock);
+            boost::lock_guard<boost::mutex> lock_container(containment_mutex_, boost::adopt_lock);
+
 	    	auto& arrangement = object->slot_arrangements_[arrangement_id-4];
 	    	for (auto& i : arrangement)
 	    	{
@@ -756,9 +767,15 @@ void Object::RemoveObject(
 {
 	if(requester == nullptr || container_permissions_->canRemove(shared_from_this(), requester, oldObject))
 	{
-        for(auto& slot : slot_descriptor_)
         {
-            slot.second->remove_object(oldObject);
+            boost::lock(oldObject->containment_mutex_, containment_mutex_);
+            boost::lock_guard<boost::mutex> lock_obj(oldObject->containment_mutex_, boost::adopt_lock);
+            boost::lock_guard<boost::mutex> lock_container(containment_mutex_, boost::adopt_lock);
+
+            for(auto& slot : slot_descriptor_)
+            {
+                slot.second->remove_object(oldObject);
+            }
         }
         
         oldObject->SetContainer(nullptr);
@@ -782,9 +799,13 @@ void Object::SwapSlots(
     const std::shared_ptr<Object>& object,
     int32_t new_arrangement_id)
 {
-    for(auto& slot : slot_descriptor_)
     {
-        slot.second->remove_object(object);
+        boost::lock_guard<boost::mutex> lk(containment_mutex_);
+        
+        for(auto& slot : slot_descriptor_)
+        {
+            slot.second->remove_object(object);
+        }
     }
     
     AddObject(requester, object, new_arrangement_id);
@@ -831,9 +852,13 @@ void Object::ViewObjects(
 		uint32_t requester_instance = 0;
 		if(requester)
 			requester_instance = requester->GetInstanceId();
-
+        
+        boost::unique_lock<boost::mutex> lock_container(containment_mutex_);
+        
 		for(auto& slot : slot_descriptor_)
 		{
+            lock_container.unlock();
+
 			slot.second->view_objects([&] (const std::shared_ptr<Object>& object) {
 				uint32_t object_instance = object->GetInstanceId();
 				if(object_instance == 0 || object_instance == requester_instance)
@@ -842,33 +867,44 @@ void Object::ViewObjects(
 						func(object);
 
 					if(max_depth != 1)
-						object->ViewObjects(requester, (max_depth == 0) ? 0 : max_depth-1, topDown, func);
-
+                    {
+						object->ViewObjects(requester, (max_depth == 0) ? 0 : max_depth-1, topDown, func);                        
+                    }
 					if(!topDown)
 						func(object);
 				}
 			});
+
+            lock_container.lock();
 		}
 	}
 }
 
 std::shared_ptr<ContainerPermissionsInterface> Object::GetPermissions()
 { 
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
+        
     return container_permissions_; 
 }
 
 void Object::SetPermissions(std::shared_ptr<ContainerPermissionsInterface> obj)
 { 
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
+        
     container_permissions_ = obj; 
 }
 
 void Object::SetContainer(const std::shared_ptr<Object>& container)
 {
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
+        
     container_ = container;
 }
 
 const std::shared_ptr<Object>& Object::GetContainer()
 {
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
+        
 	return container_;
 }
 
@@ -892,12 +928,18 @@ void Object::GetAbsolutes(glm::vec3& pos, glm::quat& rot)
 
 void Object::SetSlotInformation(ObjectSlots slots, ObjectArrangements arrangements)
 {
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
+        
 	slot_descriptor_ = slots;
 	slot_arrangements_ = arrangements;
 }
 
 int32_t Object::GetAppropriateArrangementId(std::shared_ptr<Object> other)
 {
+    boost::lock(other->containment_mutex_, containment_mutex_);
+    boost::lock_guard<boost::mutex> lock_obj(other->containment_mutex_, boost::adopt_lock);
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_, boost::adopt_lock);
+        
 	if (slot_descriptor_.size() == 1)
 		return -1;
 
@@ -938,16 +980,22 @@ int32_t Object::GetAppropriateArrangementId(std::shared_ptr<Object> other)
 
 ObjectSlots Object::GetSlotDescriptor()
 {
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
+        
 	return slot_descriptor_;
 }
 
 ObjectArrangements Object::GetSlotArrangements()
 {
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
+        
 	return slot_arrangements_;
 }
 
 bool Object::ClearSlot(int32_t slot_id)
 {
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
+        
 	bool cleared = false;
 	auto slot_iter = slot_descriptor_.find(slot_id);
 	if (slot_iter != slot_descriptor_.end())
@@ -967,6 +1015,8 @@ bool Object::ClearSlot(int32_t slot_id)
 
 std::shared_ptr<Object> Object::GetSlotObject(int32_t slot_id)
 {
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
+        
 	std::shared_ptr<Object> found = nullptr;
 	auto slot_iter = slot_descriptor_.find(slot_id);
 	if (slot_iter != slot_descriptor_.end())
