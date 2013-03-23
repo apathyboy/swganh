@@ -75,7 +75,7 @@ class ContainerPermissionsInterface;
 
 class Object : 
 	public swganh::observer::ObservableInterface, 
-	public swganh::object::ContainerInterface<Object>, 
+	public swganh::object::ContainerInterface, 
 	public std::enable_shared_from_this<Object>
 {
 public:
@@ -573,6 +573,71 @@ public:
 	void SetCollidable(bool collidable) { collidable_ = collidable; }
 	bool IsCollidable(void) const { return collidable_; }
 
+
+    // Containment
+    void AddObject(
+            const std::shared_ptr<Object>& requester,
+            std::shared_ptr<Object> object,
+            int32_t arrangement_id = -2);
+
+    void RemoveObject(
+            const std::shared_ptr<Object>& requester, 
+            const std::shared_ptr<Object>& oldObject);
+
+    void TransferObject(
+            const std::shared_ptr<Object>& requester,
+            const std::shared_ptr<Object>& object,
+            const std::shared_ptr<Object>& newContainer,
+            int32_t arrangement_id = -2);
+
+    void SwapSlots(
+            const std::shared_ptr<Object>& requester,
+            const std::shared_ptr<Object>& object,
+            int32_t new_arrangement_id);
+
+    bool HasContainedObjects();
+
+    std::list<std::shared_ptr<Object>> GetObjects(
+            const std::shared_ptr<Object>& requester, 
+            uint32_t max_depth,
+            bool topDown);
+
+    void GetObjects(
+            const std::shared_ptr<Object>& requester, 
+            uint32_t max_depth, 
+            bool topDown, 
+            std::list<std::shared_ptr<Object>>& out);
+
+    void ViewObjects(
+            const std::shared_ptr<Object>& requester, 
+            uint32_t max_depth,
+            bool topDown, 
+            std::function<void (const std::shared_ptr<Object>&)> func);
+
+    std::shared_ptr<ContainerPermissionsInterface> GetPermissions();
+
+    void SetPermissions(std::shared_ptr<ContainerPermissionsInterface> obj);
+
+    using ContainerInterface::GetContainer;
+
+    void SetContainer(const std::shared_ptr<Object>& container);
+
+    const std::shared_ptr<Object>& GetContainer();
+
+    void GetAbsolutes(glm::vec3& pos, glm::quat& rot);
+
+    void SetSlotInformation(ObjectSlots slots, ObjectArrangements arrangements);
+
+    int32_t GetAppropriateArrangementId(std::shared_ptr<Object> other);
+
+    ObjectSlots GetSlotDescriptor();
+
+    ObjectArrangements GetSlotArrangements();
+
+    bool ClearSlot(int32_t slot_id);
+
+    std::shared_ptr<Object> GetSlotObject(int32_t slot_id);
+
 protected:
 	std::atomic<uint64_t> object_id_;                // create
 	std::atomic<uint32_t> scene_id_;				 // create
@@ -642,6 +707,11 @@ private:
 	bool in_snapshot_;
 
     std::set<std::string> flags_;
+        
+    ObjectSlots slot_descriptor_;
+    ObjectArrangements slot_arrangements_;
+    std::shared_ptr<ContainerPermissionsInterface> container_permissions_;
+    std::shared_ptr<Object> container_;
 };
 
 }}  // namespace

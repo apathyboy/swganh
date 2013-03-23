@@ -709,3 +709,272 @@ void Object::UpdateAABB()
 { 
 	boost::geometry::envelope(world_collision_box_, aabb_);
 }
+
+// Containment
+
+
+//Object Management
+void Object::AddObject(
+    const std::shared_ptr<Object>& requester,
+    std::shared_ptr<Object> object,
+    int32_t arrangement_id)
+{
+    if(requester == nullptr || container_permissions_->canInsert(shared_from_this(), requester, object))
+	{
+		std::shared_ptr<Object> removed_object = nullptr;
+	    if(arrangement_id == -2)
+	    	arrangement_id = GetAppropriateArrangementId(object);
+
+	    if (arrangement_id < 4)
+	    {
+	    	// Remove object in existing slot
+	    	removed_object = slot_descriptor_[arrangement_id]->insert_object(object);
+	    	if (removed_object)
+	    	{
+	    		// Transfer it out, put it in the place the replacing object came from
+                object->GetContainer()->AddObject(nullptr, removed_object, -2);
+	    	}
+	    }
+	    else
+	    {
+	    	auto& arrangement = object->slot_arrangements_[arrangement_id-4];
+	    	for (auto& i : arrangement)
+	    	{
+	    		slot_descriptor_[i]->insert_object(object);
+	    	}
+	    }
+
+	    object->SetArrangementId(arrangement_id);
+	    object->SetContainer(shared_from_this());
+	    object->SetSceneId(GetSceneId());
+	}
+}
+
+void Object::RemoveObject(
+    const std::shared_ptr<Object>& requester, 
+    const std::shared_ptr<Object>& oldObject)
+{
+	if(requester == nullptr || container_permissions_->canRemove(shared_from_this(), requester, oldObject))
+	{
+        for(auto& slot : slot_descriptor_)
+        {
+            slot.second->remove_object(oldObject);
+        }
+        
+        oldObject->SetContainer(nullptr);
+    }
+}
+
+void Object::TransferObject(
+    const std::shared_ptr<Object>& requester,
+    const std::shared_ptr<Object>& object,
+    const std::shared_ptr<Object>& newContainer,
+    int32_t arrangement_id)
+{
+	if(	requester == nullptr || this->GetPermissions()->canRemove(shared_from_this(), requester, object))
+	{
+        newContainer->AddObject(nullptr, object, arrangement_id);
+	}
+}
+
+void Object::SwapSlots(
+    const std::shared_ptr<Object>& requester,
+    const std::shared_ptr<Object>& object,
+    int32_t new_arrangement_id)
+{
+    for(auto& slot : slot_descriptor_)
+    {
+        slot.second->remove_object(object);
+    }
+    
+    AddObject(requester, object, new_arrangement_id);
+}
+
+bool Object::HasContainedObjects()
+{
+    return GetObjects(nullptr, 1, true).size() > 0;
+}
+
+std::list<std::shared_ptr<Object>> Object::GetObjects(
+    const std::shared_ptr<Object>& requester, 
+    uint32_t max_depth,
+    bool topDown)
+{
+    std::list<std::shared_ptr<Object>> out;
+
+    GetObjects(requester, max_depth, topDown, out);
+
+    return out;
+}
+
+void Object::GetObjects(
+    const std::shared_ptr<Object>& requester, 
+    uint32_t max_depth, 
+    bool topDown, 
+    std::list<std::shared_ptr<Object>>& out)
+{
+    ViewObjects(requester, max_depth, topDown,
+        [&out, this] (const std::shared_ptr<Object>& item)
+    {
+        out.push_back(item);
+    });
+}
+
+void Object::ViewObjects(
+    const std::shared_ptr<Object>& requester, 
+    uint32_t max_depth,
+    bool topDown, 
+    std::function<void (const std::shared_ptr<Object>&)> func)
+{
+	if(requester == nullptr || container_permissions_->canView(shared_from_this(), requester))
+	{
+		uint32_t requester_instance = 0;
+		if(requester)
+			requester_instance = requester->GetInstanceId();
+
+		for(auto& slot : slot_descriptor_)
+		{
+			slot.second->view_objects([&] (const std::shared_ptr<Object>& object) {
+				uint32_t object_instance = object->GetInstanceId();
+				if(object_instance == 0 || object_instance == requester_instance)
+				{
+					if(topDown)
+						func(object);
+
+					if(max_depth != 1)
+						object->ViewObjects(requester, (max_depth == 0) ? 0 : max_depth-1, topDown, func);
+
+					if(!topDown)
+						func(object);
+				}
+			});
+		}
+	}
+}
+
+std::shared_ptr<ContainerPermissionsInterface> Object::GetPermissions()
+{ 
+    return container_permissions_; 
+}
+
+void Object::SetPermissions(std::shared_ptr<ContainerPermissionsInterface> obj)
+{ 
+    container_permissions_ = obj; 
+}
+
+void Object::SetContainer(const std::shared_ptr<Object>& container)
+{
+    container_ = container;
+}
+
+const std::shared_ptr<Object>& Object::GetContainer()
+{
+	return container_;
+}
+
+void Object::GetAbsolutes(glm::vec3& pos, glm::quat& rot)
+{
+    //boost::shared_lock<boost::shared_mutex> shared(global_container_lock_);	        
+    auto parentContainer = GetContainer();
+    if(parentContainer)
+    {
+    	 parentContainer->GetAbsolutes(pos, rot);
+    }
+    else
+    {
+    	pos = glm::vec3();
+    	rot = glm::quat();
+    }
+
+    pos = (rot * GetPosition()) + pos;
+    rot = rot * GetOrientation();
+}
+
+void Object::SetSlotInformation(ObjectSlots slots, ObjectArrangements arrangements)
+{
+	slot_descriptor_ = slots;
+	slot_arrangements_ = arrangements;
+}
+
+int32_t Object::GetAppropriateArrangementId(std::shared_ptr<Object> other)
+{
+	if (slot_descriptor_.size() == 1)
+		return -1;
+
+	// Find appropriate arrangement
+	int32_t arrangement_id = 4;
+	int32_t filled_arrangement_id = -1;
+	// In each arrangment
+	for ( auto& arrangement : other->slot_arrangements_)
+	{
+		bool passes_completely = true;
+		bool is_valid = true;
+		// Each Slot
+		for (auto& slot : arrangement)
+		{
+			// does slot exist in descriptor
+			auto descriptor_iter = slot_descriptor_.find(slot);
+			if (descriptor_iter == end(slot_descriptor_))
+			{
+				is_valid = false;
+				break;
+			}
+			// is slot filled?
+			else if (descriptor_iter->second->is_filled())
+			{
+				passes_completely = false;
+			}
+		}
+		// if not filled return arrangement
+		if (is_valid && passes_completely)
+			return arrangement_id;
+		else if (is_valid)
+			filled_arrangement_id = arrangement_id;
+
+		++arrangement_id;
+	}
+	return filled_arrangement_id;
+}
+
+ObjectSlots Object::GetSlotDescriptor()
+{
+	return slot_descriptor_;
+}
+
+ObjectArrangements Object::GetSlotArrangements()
+{
+	return slot_arrangements_;
+}
+
+bool Object::ClearSlot(int32_t slot_id)
+{
+	bool cleared = false;
+	auto slot_iter = slot_descriptor_.find(slot_id);
+	if (slot_iter != slot_descriptor_.end())
+	{
+		auto slot = slot_iter->second;
+		if (!slot->is_filled())
+		{
+			slot->view_objects([&](const std::shared_ptr<Object>& object){
+				slot->remove_object(object);
+				cleared = true;
+			});
+			
+		}
+	}
+	return cleared;
+}
+
+std::shared_ptr<Object> Object::GetSlotObject(int32_t slot_id)
+{
+	std::shared_ptr<Object> found = nullptr;
+	auto slot_iter = slot_descriptor_.find(slot_id);
+	if (slot_iter != slot_descriptor_.end())
+	{
+		auto slot = slot_iter->second;
+		slot->view_objects([&](const std::shared_ptr<Object>& object){
+			found = object;
+		});
+	}
+	return found;
+}
