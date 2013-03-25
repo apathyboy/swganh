@@ -370,45 +370,63 @@ string Object::GetStfNameString()
 
 void Object::SetVolume(uint32_t volume)
 {
-    volume_ = volume;
+    {
+	    boost::lock_guard<boost::mutex> lock(object_mutex_);
+        volume_ = volume;
+    }
 	DISPATCH(Object, Volume);
 }
 
 uint32_t Object::GetVolume()
 {
+	boost::lock_guard<boost::mutex> lock(object_mutex_);
 	return volume_;
 }
 
 void Object::SetSceneId(uint32_t scene_id)
 {
-    scene_id_ = scene_id;
+    {
+	    boost::lock_guard<boost::mutex> lock(object_mutex_);
+        scene_id_ = scene_id;
+    }
 	DISPATCH(Object, SceneId);
 }
 
 uint32_t Object::GetSceneId()
 {
+	boost::lock_guard<boost::mutex> lock(object_mutex_);
 	return scene_id_;
 }
 
 uint32_t Object::GetInstanceId()
 {
+	boost::lock_guard<boost::mutex> lock(object_mutex_);
 	return instance_id_;
 }
 
 void Object::SetInstanceId(uint32_t instance_id)
 {
-	instance_id_ = instance_id;
+    {
+        boost::lock_guard<boost::mutex> lock(object_mutex_);
+	    instance_id_ = instance_id;
+    }
+
 	DISPATCH(Object, InstanceId);
 }
 
 int32_t Object::GetArrangementId()
 {
+    
+	boost::lock_guard<boost::mutex> lock(object_mutex_);
 	return arrangement_id_;
 }
 
 void Object::SetArrangementId(int32_t arrangement_id)
 {
-	arrangement_id_ = arrangement_id;
+    {
+	    boost::lock_guard<boost::mutex> lock(object_mutex_);
+    	arrangement_id_ = arrangement_id;
+    }
 }
 
 swganh::EventDispatcher* Object::GetEventDispatcher()
@@ -919,6 +937,7 @@ bool Object::ClearSlot(int32_t slot_id)
 		{
 			slot->view_objects([&](const std::shared_ptr<Object>& object){
 				slot->remove_object(object);
+                object->SetArrangementId(0);
 				cleared = true;
 			});
 			
@@ -942,6 +961,8 @@ std::shared_ptr<Object> Object::AddSlotObject(std::shared_ptr<Object> object)
         for (auto& i : arrangement)
         {
         	removed_object = slot_descriptor_[i]->insert_object(object);
+            if (removed_object)
+                removed_object->SetArrangementId(-2);
         }
 
         SetArrangementId(arrangement_id);

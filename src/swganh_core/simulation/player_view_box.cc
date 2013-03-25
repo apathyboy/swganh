@@ -4,6 +4,8 @@
 
 #include <swganh_core/simulation/player_view_box.h>
 
+#include "swganh/logger.h"
+
 using namespace swganh::simulation;
 using namespace swganh::object;
 
@@ -32,6 +34,29 @@ void PlayerViewBox::OnCollisionEnter(std::shared_ptr<Object> collider)
 		collider->Subscribe(controller);
 		collider->SendCreateByCrc(controller);
 		collider->CreateBaselines(controller);
+
+        bool self_collision = (player_ == collider) ? true : false;
+
+        auto slots = collider->GetSlotDescriptor();
+        for(auto& slot : slots)
+        {
+            slot.second->view_objects([&controller, self_collision, this] (const std::shared_ptr<Object>& object)
+            {
+                object->Subscribe(controller);
+                object->SendCreateByCrc(controller);
+                object->CreateBaselines(controller);
+
+                if(self_collision)
+                {
+                    object->ViewObjects(player_, 0, true, [&controller] (const std::shared_ptr<Object>& object)
+                    {
+                        object->Subscribe(controller);
+                        object->SendCreateByCrc(controller);
+                        object->CreateBaselines(controller);
+                    });
+                }
+            });
+        }
 	}
 }
 
@@ -45,5 +70,26 @@ void PlayerViewBox::OnCollisionLeave(std::shared_ptr<Object> collider)
 		std::wcout << player_->GetCustomName() << std::endl;
 		collider->SendDestroy(controller);
 		collider->Unsubscribe(controller);
+
+        bool self_collision = (player_ == collider) ? true : false;
+                
+        auto slots = collider->GetSlotDescriptor();
+        for(auto& slot : slots)
+        {
+            slot.second->view_objects([&controller, self_collision, this] (const std::shared_ptr<Object>& object)
+            {
+                object->SendDestroy(controller);
+                object->Unsubscribe(controller);
+
+                if(self_collision)
+                {
+                    object->ViewObjects(player_, 0, true, [&controller] (const std::shared_ptr<Object>& object)
+                    {
+                        object->SendDestroy(controller);
+                        object->Unsubscribe(controller);
+                    });
+                }
+            });
+        }
 	}
 }

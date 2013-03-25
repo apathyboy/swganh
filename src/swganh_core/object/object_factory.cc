@@ -310,7 +310,7 @@ void ObjectFactory::LoadContainedObjects(
 			else 
 			{
 				//Put it back where it was persisted
-				std::cout << "Adding contained object... " << contained_object->GetTemplate() << std::endl;
+				std::cout << "Adding slotted object... " << contained_object->GetTemplate() << std::endl;
 				object->AddSlotObject(contained_object);
 			}
 
