@@ -299,7 +299,6 @@ void ObjectFactory::LoadContainedObjects(
 
             auto contained_object = object_manager_->CreateObjectFromStorage(contained_id, contained_type);
 
-			swganh::simulation::SimulationServiceInterface* simulation_service = kernel_->GetServiceManager()->GetService<SimulationServiceInterface>("SimulationService");
 			contained_object->SetCustomName(L"Contained object.");
 			if(contained_object->GetArrangementId() == -2)
 			{
@@ -312,7 +311,7 @@ void ObjectFactory::LoadContainedObjects(
 			{
 				//Put it back where it was persisted
 				std::cout << "Adding contained object... " << contained_object->GetTemplate() << std::endl;
-				object->AddObject(nullptr, contained_object, contained_object->GetArrangementId());
+				object->AddSlotObject(contained_object);
 			}
 
         }

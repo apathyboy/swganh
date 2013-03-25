@@ -134,8 +134,8 @@ void PlayMusic3(std::shared_ptr<swganh::object::Object> object, std::string musi
 }
 BOOST_PYTHON_FUNCTION_OVERLOADS(PlayMusic3Overload, PlayMusic3, 3, 4);
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addObjectOverload, AddObject, 2, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(transferObjectOverload, TransferObject, 4, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addObjectOverload, AddObject, 2, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(transferObjectOverload, TransferObject, 3, 3)
 
 void UpdatePosition(std::shared_ptr<Object> self, glm::vec3 position, glm::quat orientation, std::shared_ptr<Object> parent=nullptr)
 {
@@ -183,22 +183,26 @@ void exportObject()
 	void (Object::*RemoveObject)(const shared_ptr<Object>&, const shared_ptr<Object>&) = &Object::RemoveObject;
     
     ;
-	void (Object::*AddObject)(const shared_ptr<Object>&, shared_ptr<Object>, int32_t arrangement_id) = &Object::AddObject;
+	void (Object::*AddObject)(const shared_ptr<Object>&, shared_ptr<Object>) = &Object::AddObject;
     
     void (Object::*TransferObject)(
         const std::shared_ptr<Object>&,
         const std::shared_ptr<Object>&,
-        const std::shared_ptr<ContainerInterface>&,
-        int32_t) = &Object::TransferObject;
+        const std::shared_ptr<ContainerInterface>&) = &Object::TransferObject;
 
     void (Object::*SwapSlots)(
         const std::shared_ptr<Object>&,
-        const std::shared_ptr<Object>&,
-        int32_t) = &Object::SwapSlots;
+        const std::shared_ptr<Object>&) = &Object::SwapSlots;
     
     bool (Object::*HasContainedObjects)() = &Object::HasContainedObjects;
 
     const std::shared_ptr<ContainerInterface>& (Object::*GetContainer)() = &Object::GetContainer;
+    
+    bool (Object::*ClearSlot)(int32_t slot_id) = &Object::ClearSlot;
+    
+    std::shared_ptr<Object> (Object::*AddSlotObject)(std::shared_ptr<Object> object) = &Object::AddSlotObject;
+
+    std::shared_ptr<Object> (Object::*GetSlotObject)(int32_t slot_id) = &Object::GetSlotObject;
 
 	//class_<ContainerInterface, std::shared_ptr<ContainerInterface>, boost::noncopyable>("ContainerInterface", "Container interface", no_init)
 	//	.def("add", &ContainerInterface::AddObject, addObjectOverload(args("requester", "newObject", "arrangement_id"), "Adds an object to the current object"))
@@ -272,6 +276,9 @@ void exportObject()
 		.def("swapSlots", SwapSlots, "Change an objects current arrangement")	
 		.def("container", GetContainer, return_internal_reference<>(), "Gets the :class:`ContainerInterface` object of the current object")
 		.def("hasContainedObjects", HasContainedObjects, "Checks to see if container has any objects in it")		
+		.def("addToSlot", AddSlotObject, "Equips an object to its most appropriate slot")		
+		.def("getFromSlot", GetSlotObject, "Gets the object in the specified slot")		
+		.def("clearSlot", ClearSlot, "Clears any object in the specified slot")		
         ;
 
 	bp::class_<std::vector<int>>("IntVector")

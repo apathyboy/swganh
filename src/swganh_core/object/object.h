@@ -579,8 +579,7 @@ public:
 
     void AddObject(
             const std::shared_ptr<Object>& requester,
-            std::shared_ptr<Object> object,
-            int32_t arrangement_id = -2);
+            std::shared_ptr<Object> object);
 
     void RemoveObject(
             const std::shared_ptr<Object>& requester, 
@@ -589,13 +588,11 @@ public:
     void TransferObject(
             const std::shared_ptr<Object>& requester,
             const std::shared_ptr<Object>& object,
-            const std::shared_ptr<ContainerInterface>& newContainer,
-            int32_t arrangement_id = -2);
+            const std::shared_ptr<ContainerInterface>& newContainer);
 
     void SwapSlots(
             const std::shared_ptr<Object>& requester,
-            const std::shared_ptr<Object>& object,
-            int32_t new_arrangement_id);
+            const std::shared_ptr<Object>& object);
 
     bool HasContainedObjects();
 
@@ -630,18 +627,13 @@ public:
 
     void SetSlotInformation(ObjectSlots slots, ObjectArrangements arrangements);
 
-    int32_t GetAppropriateArrangementId(std::shared_ptr<Object> other);
-
     ObjectSlots GetSlotDescriptor();
 
     ObjectArrangements GetSlotArrangements();
 
     bool ClearSlot(int32_t slot_id);
     
-    void AddSlotObject(
-            const std::shared_ptr<Object>& requester,
-            std::shared_ptr<Object> object,
-            int32_t arrangement_id = -2);
+    std::shared_ptr<Object> AddSlotObject(std::shared_ptr<Object> object);
 
     std::shared_ptr<Object> GetSlotObject(int32_t slot_id);
 
@@ -698,6 +690,7 @@ protected:
 	swganh::EventDispatcher* event_dispatcher_;
 
 private:
+    int32_t GetAppropriateArrangementId_(const std::shared_ptr<Object>& other);
 
     typedef std::set<std::shared_ptr<swganh::observer::ObserverInterface>> ObserverContainer;
 
@@ -719,6 +712,7 @@ private:
         
     ObjectSlots slot_descriptor_;
     ObjectArrangements slot_arrangements_;
+    std::vector<std::shared_ptr<Object>> contained_objects_;
     std::shared_ptr<ContainerPermissionsInterface> container_permissions_;
     std::shared_ptr<ContainerInterface> container_;
 };

@@ -38,8 +38,7 @@ namespace object {
 		//Object Management
 		virtual void AddObject(
             const std::shared_ptr<Object>& requester,
-            std::shared_ptr<Object> object,
-            int32_t arrangement_id = -2) = 0;
+            std::shared_ptr<Object> object) = 0;
 
 		virtual void RemoveObject(
             const std::shared_ptr<Object>& requester, 
@@ -48,13 +47,11 @@ namespace object {
         virtual void TransferObject(
             const std::shared_ptr<Object>& requester,
             const std::shared_ptr<Object>& object,
-            const std::shared_ptr<ContainerInterface>& newContainer,
-            int32_t arrangement_id = -2) = 0;
+            const std::shared_ptr<ContainerInterface>& newContainer) = 0;
 		
         virtual void SwapSlots(
             const std::shared_ptr<Object>& requester,
-            const std::shared_ptr<Object>& object,
-            int32_t new_arrangement_id) = 0;
+            const std::shared_ptr<Object>& object) = 0;
 
 		virtual bool HasContainedObjects() = 0;
 
@@ -103,10 +100,7 @@ namespace object {
 
         virtual bool ClearSlot(int32_t slot_id) = 0;
         
-        virtual void AddSlotObject(
-                const std::shared_ptr<Object>& requester,
-                std::shared_ptr<Object> object,
-                int32_t arrangement_id = -2) = 0;
+        virtual std::shared_ptr<Object> AddSlotObject(std::shared_ptr<Object> object) = 0;
 
         virtual std::shared_ptr<Object> GetSlotObject(int32_t slot_id) = 0;
 	};
