@@ -577,65 +577,65 @@ public:
     // Containment
     uint64_t GetContainmentId() const;
 
-    void AddObject(
+    virtual void AddObject(
             const std::shared_ptr<Object>& requester,
             std::shared_ptr<Object> object);
 
-    void RemoveObject(
+    virtual void RemoveObject(
             const std::shared_ptr<Object>& requester, 
             const std::shared_ptr<Object>& oldObject);
 
-    void TransferObject(
+    virtual void TransferObject(
             const std::shared_ptr<Object>& requester,
             const std::shared_ptr<Object>& object,
             const std::shared_ptr<ContainerInterface>& newContainer);
 
-    void SwapSlots(
+    virtual void SwapSlots(
             const std::shared_ptr<Object>& requester,
             const std::shared_ptr<Object>& object);
 
-    bool HasContainedObjects();
+    virtual bool HasContainedObjects();
 
-    std::list<std::shared_ptr<Object>> GetObjects(
+    virtual std::list<std::shared_ptr<Object>> GetObjects(
             const std::shared_ptr<Object>& requester, 
             uint32_t max_depth,
             bool topDown);
 
-    void GetObjects(
+    virtual void GetObjects(
             const std::shared_ptr<Object>& requester, 
             uint32_t max_depth, 
             bool topDown, 
             std::list<std::shared_ptr<Object>>& out);
 
-    void ViewObjects(
+    virtual void ViewObjects(
             const std::shared_ptr<Object>& requester, 
             uint32_t max_depth,
             bool topDown, 
             std::function<void (const std::shared_ptr<Object>&)> func);
 
-    std::shared_ptr<ContainerPermissionsInterface> GetPermissions();
+    virtual std::shared_ptr<ContainerPermissionsInterface> GetPermissions();
 
-    void SetPermissions(std::shared_ptr<ContainerPermissionsInterface> obj);
+    virtual void SetPermissions(std::shared_ptr<ContainerPermissionsInterface> obj);
 
     using ContainerInterface::GetContainer;
 
-    void SetContainer(const std::shared_ptr<ContainerInterface>& container);
+    virtual void SetContainer(const std::shared_ptr<ContainerInterface>& container);
 
-    const std::shared_ptr<ContainerInterface>& GetContainer();
+    virtual const std::shared_ptr<ContainerInterface>& GetContainer();
 
-    void GetAbsolutes(glm::vec3& pos, glm::quat& rot);
+    virtual void GetAbsolutes(glm::vec3& pos, glm::quat& rot);
 
-    void SetSlotInformation(ObjectSlots slots, ObjectArrangements arrangements);
+    virtual void SetSlotInformation(ObjectSlots slots, ObjectArrangements arrangements);
 
-    ObjectSlots GetSlotDescriptor();
+    virtual ObjectSlots GetSlotDescriptor();
 
-    ObjectArrangements GetSlotArrangements();
+    virtual ObjectArrangements GetSlotArrangements();
 
-    bool ClearSlot(int32_t slot_id);
+    virtual boost::optional<std::shared_ptr<Object>> ClearSlot(int32_t slot_id);
     
-    std::shared_ptr<Object> AddSlotObject(std::shared_ptr<Object> object);
+    virtual std::pair<bool, boost::optional<std::shared_ptr<Object>>> AddSlotObject(std::shared_ptr<Object> object);
 
-    std::shared_ptr<Object> GetSlotObject(int32_t slot_id);
+    virtual std::shared_ptr<Object> GetSlotObject(int32_t slot_id);
 
 protected:
 	std::atomic<uint64_t> object_id_;                // create

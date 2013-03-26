@@ -38,6 +38,17 @@ boost::python::tuple TransferObject(std::shared_ptr<Object> requester, std::shar
 	return boost::python::make_tuple(requester, object, newContainer, arrangement_id);
 }
 
+bool ClearSlotWrapper(Object* this_obj, uint32_t slot_id)
+{
+    return this_obj->ClearSlot(slot_id);
+} 
+
+std::shared_ptr<Object> AddSlotObjectWrapper(Object* this_obj, std::shared_ptr<Object> object)
+{
+    return *(this_obj->AddSlotObject(object).second);
+}
+
+
 void SendSystemMessage1(std::shared_ptr<Object> requester, std::string filename, std::string label)
 {
 	SystemMessage::Send(requester, filename, label);
@@ -198,9 +209,9 @@ void exportObject()
 
     const std::shared_ptr<ContainerInterface>& (Object::*GetContainer)() = &Object::GetContainer;
     
-    bool (Object::*ClearSlot)(int32_t slot_id) = &Object::ClearSlot;
+    boost::optional<std::shared_ptr<Object>> (Object::*ClearSlot)(int32_t slot_id) = &Object::ClearSlot;
     
-    std::shared_ptr<Object> (Object::*AddSlotObject)(std::shared_ptr<Object> object) = &Object::AddSlotObject;
+    std::pair<bool, boost::optional<std::shared_ptr<Object>>> (Object::*AddSlotObject)(std::shared_ptr<Object> object) = &Object::AddSlotObject;
 
     std::shared_ptr<Object> (Object::*GetSlotObject)(int32_t slot_id) = &Object::GetSlotObject;
 
@@ -276,9 +287,9 @@ void exportObject()
 		.def("swapSlots", SwapSlots, "Change an objects current arrangement")	
 		.def("container", GetContainer, return_internal_reference<>(), "Gets the :class:`ContainerInterface` object of the current object")
 		.def("hasContainedObjects", HasContainedObjects, "Checks to see if container has any objects in it")		
-		.def("addToSlot", AddSlotObject, "Equips an object to its most appropriate slot")		
+		.def("addToSlot", AddSlotObjectWrapper, "Equips an object to its most appropriate slot")		
 		.def("getFromSlot", GetSlotObject, "Gets the object in the specified slot")		
-		.def("clearSlot", ClearSlot, "Clears any object in the specified slot")		
+		.def("clearSlot", ClearSlotWrapper, "Clears any object in the specified slot")		
         ;
 
 	bp::class_<std::vector<int>>("IntVector")

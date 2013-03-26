@@ -103,11 +103,8 @@ void exportCreature()
 		;
 
 	class_<EquipmentItem>("EquipmentItem", "The Equipment Object")
-		.def(init<uint64_t, uint32_t, std::string, uint32_t>())
-		.def_readwrite("object_id", &EquipmentItem::object_id)
-		.def_readwrite("template_crc", &EquipmentItem::template_crc)
-		.def_readwrite("customization", &EquipmentItem::customization)
-		.def_readwrite("containment_type", &EquipmentItem::containment_type)
+		.def(init<std::shared_ptr<Tangible>>())
+		.def_readwrite("item", &EquipmentItem::item)
 		;
 	class_<SkillMod>("SkillMod", "The Skill Mod Object")
 		.def(init<std::string, uint32_t, uint32_t>())

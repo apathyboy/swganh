@@ -11,6 +11,7 @@
 #include <memory>
 #include <vector>
 
+#include <boost/optional.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -98,9 +99,9 @@ namespace object {
 
         virtual ObjectArrangements GetSlotArrangements() = 0;
 
-        virtual bool ClearSlot(int32_t slot_id) = 0;
+        virtual boost::optional<std::shared_ptr<Object>> ClearSlot(int32_t slot_id) = 0;
         
-        virtual std::shared_ptr<Object> AddSlotObject(std::shared_ptr<Object> object) = 0;
+        virtual std::pair<bool, boost::optional<std::shared_ptr<Object>>> AddSlotObject(std::shared_ptr<Object> object) = 0;
 
         virtual std::shared_ptr<Object> GetSlotObject(int32_t slot_id) = 0;
 	};

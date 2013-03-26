@@ -7,6 +7,7 @@
 
 #include <boost/thread/mutex.hpp>
 
+#include "swganh/crc.h"
 #include "swganh_core/object/tangible/tangible.h"
 
 #include "swganh_core/messages/containers/network_array.h"
@@ -235,43 +236,29 @@ struct EquipmentItem
     {
     }
 
-    EquipmentItem(uint64_t object_id_, uint32_t template_crc_ = 0, std::string customization_ = std::string(""), uint32_t containment_type_ = 4)
-        : customization(customization_)
-        , containment_type(containment_type_)
-        , object_id(object_id_)
-        , template_crc(template_crc_)
-    {
-    }
+    explicit EquipmentItem(const std::shared_ptr<Tangible>& item_)
+        : item(item_)
+    {}
 
     ~EquipmentItem()
     {
     }
 
-    void Serialize(swganh::messages::BaselinesMessage& message)
+    template<typename T>
+    void Serialize(T& message)
     {
-        message.data.write<std::string>(customization);
-        message.data.write<uint32_t>(containment_type);
-        message.data.write<uint64_t>(object_id);
-        message.data.write<uint32_t>(template_crc);
-    }
-
-    void Serialize(swganh::messages::DeltasMessage& message)
-    {
-        message.data.write<std::string>(customization);
-        message.data.write<uint32_t>(containment_type);
-        message.data.write<uint64_t>(object_id);
-        message.data.write<uint32_t>(template_crc);
+        message.data.write<std::string>(item->GetCustomization());
+        message.data.write<uint32_t>(item->GetArrangementId());
+        message.data.write<uint64_t>(item->GetObjectId());
+        message.data.write<uint32_t>(swganh::memcrc(item->GetTemplate()));
     }
 
     bool operator==(const EquipmentItem& other)
     {
-        return (object_id != other.object_id);
+        return (item != other.item);
     }
 
-    std::string customization;
-    uint32_t containment_type;
-    uint64_t object_id;
-    uint32_t template_crc;
+    std::shared_ptr<Tangible> item;
 };
 
 /**
@@ -581,11 +568,11 @@ public:
 	void SerializeMaxStats(swganh::messages::BaseSwgMessage* message);
 
     // Equipment List
-    void AddEquipmentItem(EquipmentItem& item);
-    void RemoveEquipmentItem(uint64_t object_id);
-    void UpdateEquipmentItem(EquipmentItem& item);
-    std::list<EquipmentItem> GetEquipment();
-    EquipmentItem GetEquipmentItem(uint64_t object_id);
+    
+    virtual boost::optional<std::shared_ptr<Object>> ClearSlot(int32_t slot_id);
+        
+    virtual std::pair<bool, boost::optional<std::shared_ptr<Object>>> AddSlotObject(std::shared_ptr<Object> object);
+
 	void SerializeEquipment(swganh::messages::BaseSwgMessage* message);
 
     // Disguise

@@ -972,63 +972,55 @@ int32_t Creature::GetStatMax(StatIndex stat_index)
     return stat_max_list_.At(stat_index).value;
 }
 
-void Creature::AddEquipmentItem(EquipmentItem& item)
+boost::optional<std::shared_ptr<Object>> Creature::ClearSlot(int32_t slot_id)
 {
-    {
-        boost::lock_guard<boost::mutex> lock(object_mutex_);
-        equipment_list_.Add(item);
-    }
-	DISPATCH(Creature, EquipmentItem);
-}
+    auto item = Object::ClearSlot(slot_id);
 
-void Creature::RemoveEquipmentItem(uint64_t object_id)
-{
+    if (item)
     {
-        boost::lock_guard<boost::mutex> lock(object_mutex_);
-        auto iter = std::find_if(begin(equipment_list_), end(equipment_list_), [=](std::pair<uint16_t, EquipmentItem> item)->bool {
-            return (object_id == item.second.object_id);
-        });
-
-        if(iter != end(equipment_list_))
         {
-            return;
+            boost::lock_guard<boost::mutex> lock(object_mutex_);
+            auto iter = std::find_if(
+                std::begin(equipment_list_),
+                std::end(equipment_list_),
+                [&item] (const std::pair<uint16_t, EquipmentItem>& iter) 
+            {
+                return (*item == iter.second.item);
+            });
+
+            if (iter != std::end(equipment_list_))
+            {
+                equipment_list_.Remove(iter);
+                DISPATCH(Creature, EquipmentItem);
+            }
         }
-        equipment_list_.Remove(iter);
     }
-	DISPATCH(Creature, EquipmentItem);
+
+    return item;
 }
 
-void Creature::UpdateEquipmentItem(EquipmentItem& item)
+std::pair<bool, boost::optional<std::shared_ptr<Object>>> Creature::AddSlotObject(std::shared_ptr<Object> object)
 {
+    auto& tangible = std::dynamic_pointer_cast<Tangible>(object);
+
+    if (!tangible)
     {
-        boost::lock_guard<boost::mutex> lock(object_mutex_);
-        auto iter = equipment_list_.Find(item);
-        if(iter != end(equipment_list_))
-            equipment_list_.Update(iter->first, item);
+        return std::make_pair(false, boost::optional<std::shared_ptr<Object>>());
     }
-	DISPATCH(Creature, EquipmentItem);
-}
 
-std::list<EquipmentItem> Creature::GetEquipment(void)
-{
-    boost::lock_guard<boost::mutex> lock(object_mutex_);
-	std::list<EquipmentItem> result;
-	for(auto& v : equipment_list_)
-		result.push_back(v.second);
-    return std::move(result);
-}
+    auto result = Object::AddSlotObject(tangible);
 
-EquipmentItem Creature::GetEquipmentItem(uint64_t object_id)
-{
-    boost::lock_guard<boost::mutex> lock(object_mutex_);
-    auto iter = std::find_if(begin(equipment_list_), end(equipment_list_), [=](std::pair<uint16_t, EquipmentItem> pair) {
-        return pair.second.object_id == object_id;
-    });
+    if (result.first)
+    {
+        {
+            boost::lock_guard<boost::mutex> lock(object_mutex_);
+            equipment_list_.Add(EquipmentItem(tangible));
+        }
 
-    if(iter != end(equipment_list_))
-        return iter->second;
-    else
-        return EquipmentItem();
+        DISPATCH(Creature, EquipmentItem);
+    }
+
+    return result;
 }
 
 void Creature::SetDisguise(std::string disguise)

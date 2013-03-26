@@ -924,11 +924,13 @@ ObjectArrangements Object::GetSlotArrangements()
 	return slot_arrangements_;
 }
 
-bool Object::ClearSlot(int32_t slot_id)
+boost::optional<std::shared_ptr<Object>> Object::ClearSlot(int32_t slot_id)
 {
     boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
         
 	bool cleared = false;
+    boost::optional<std::shared_ptr<Object>> cleared_object;
+
 	auto slot_iter = slot_descriptor_.find(slot_id);
 	if (slot_iter != slot_descriptor_.end())
 	{
@@ -938,17 +940,19 @@ bool Object::ClearSlot(int32_t slot_id)
 			slot->view_objects([&](const std::shared_ptr<Object>& object){
 				slot->remove_object(object);
                 object->SetArrangementId(0);
+                cleared_object = object;
 				cleared = true;
 			});
 			
 		}
 	}
-	return cleared;
+	return cleared_object;
 }
 
-std::shared_ptr<Object> Object::AddSlotObject(std::shared_ptr<Object> object)
+std::pair<bool, boost::optional<std::shared_ptr<Object>>> Object::AddSlotObject(std::shared_ptr<Object> object)
 {
-    std::shared_ptr<Object> removed_object = nullptr;
+    bool added = false;
+    boost::optional<std::shared_ptr<Object>> removed_object = nullptr;
     
     {
         boost::lock(object->containment_mutex_, containment_mutex_);
@@ -961,8 +965,9 @@ std::shared_ptr<Object> Object::AddSlotObject(std::shared_ptr<Object> object)
         for (auto& i : arrangement)
         {
         	removed_object = slot_descriptor_[i]->insert_object(object);
-            if (removed_object)
-                removed_object->SetArrangementId(-2);
+            if (*removed_object)
+                (*removed_object)->SetArrangementId(-2);
+            added = true;
         }
 
         SetArrangementId(arrangement_id);
@@ -971,7 +976,7 @@ std::shared_ptr<Object> Object::AddSlotObject(std::shared_ptr<Object> object)
     object->SetContainer(shared_from_this());
     object->SetSceneId(GetSceneId());
 
-    return removed_object;
+    return std::make_pair(added, removed_object);
 }
 
 std::shared_ptr<Object> Object::GetSlotObject(int32_t slot_id)
