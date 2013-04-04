@@ -38,9 +38,9 @@ uint64_t PyCharacterCreate::CreateCharacter(
 			std::vector<int> char_customization(customization.begin(), customization.end());
 			std::vector<int> hair_custom(hair_customization.begin(), hair_customization.end());
 			auto return_creature = createFunc(bp::ptr(kernel_), height, iff_template, char_customization, full_name, profession, hair_iff, hair_custom, location);			
-			swganh::object::Creature* created_creature = bp::extract<swganh::object::Creature*>(return_creature);
+			std::shared_ptr<swganh::object::Object> created_creature = bp::extract<std::shared_ptr<swganh::object::Object>>(return_creature);
 			auto simulation = kernel_->GetServiceManager()->GetService<swganh::simulation::SimulationService>("SimulationService");
-			simulation->PersistRelatedObjects(created_creature->GetObjectId(), true);
+			simulation->PersistRelatedObjects(created_creature, true);
 			return created_creature->GetObjectId();
 		}
 	}

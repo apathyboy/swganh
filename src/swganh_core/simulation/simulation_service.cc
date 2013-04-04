@@ -157,6 +157,12 @@ public:
     {
         object_manager_->PersistObject(object_id, persist_inherited);
     }
+
+    void PersistRelatedObjects(const std::shared_ptr<Object>& object, bool persist_inherited)
+    {
+        object_manager_->PersistRelatedObjects(object, persist_inherited);
+    }
+
 	void PersistRelatedObjects(uint64_t parent_object_id, bool persist_inherited)
 	{
         object_manager_->PersistRelatedObjects(parent_object_id, persist_inherited);
@@ -544,6 +550,10 @@ void SimulationService::PersistObject(uint64_t object_id, bool persist_inherited
 {
     impl_->PersistObject(object_id, persist_inherited);
 }
+void SimulationService::PersistRelatedObjects(const std::shared_ptr<Object>& object, bool persist_inherited)
+{
+    impl_->PersistRelatedObjects(object, persist_inherited);
+}
 void SimulationService::PersistRelatedObjects(uint64_t parent_object_id, bool persist_inherited)
 {
 	impl_->PersistRelatedObjects(parent_object_id, persist_inherited);
@@ -708,10 +718,10 @@ void SimulationService::Startup()
 	command_service->AddCommandCreator("addfriend", swganh::command::PythonCommandCreator("commands.addfriend", "AddFriendCommand"));
 	command_service->AddCommandCreator("removefriend", swganh::command::PythonCommandCreator("commands.removefriend", "RemoveFriendCommand"));
 	command_service->AddCommandCreator("setmoodinternal", swganh::command::PythonCommandCreator("commands.setmoodinternal", "SetMoodInternalCommand"));
-	command_service->AddCommandCreator("transferitemmisc", swganh::command::PythonCommandCreator("commands.transferItemMisc", "TransferItem"));
+	command_service->AddCommandCreator("transferitemmisc", swganh::command::PythonCommandCreator("commands.transferItem", "TransferItem"));
 	command_service->AddCommandCreator("transferitem", swganh::command::PythonCommandCreator("commands.transferItem", "TransferItem"));
-	command_service->AddCommandCreator("transferitemarmor", swganh::command::PythonCommandCreator("commands.transferItemArmor", "TransferItemArmor"));
-	command_service->AddCommandCreator("transferitemweapon", swganh::command::PythonCommandCreator("commands.transferItemWeapon", "TransferItemWeapon"));
+	command_service->AddCommandCreator("transferitemarmor", swganh::command::PythonCommandCreator("commands.transferItem", "TransferItem"));
+	command_service->AddCommandCreator("transferitemweapon", swganh::command::PythonCommandCreator("commands.transferItem", "TransferItem"));
 	command_service->AddCommandCreator("tip", swganh::command::PythonCommandCreator("commands.tip", "TipCommand"));
 }
 

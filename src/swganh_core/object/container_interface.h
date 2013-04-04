@@ -100,6 +100,7 @@ namespace object {
         virtual ObjectArrangements GetSlotArrangements() = 0;
 
         virtual boost::optional<std::shared_ptr<Object>> ClearSlot(int32_t slot_id) = 0;
+        virtual bool ClearSlot(std::shared_ptr<Object> object) = 0;
         
         virtual std::pair<bool, boost::optional<std::shared_ptr<Object>>> AddSlotObject(std::shared_ptr<Object> object) = 0;
 

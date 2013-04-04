@@ -357,20 +357,16 @@ void ObjectManager::DeleteObjectFromStorage(const std::shared_ptr<Object>& objec
 }
 
 void ObjectManager::PersistObject(const std::shared_ptr<Object>& object, bool persist_inherited)
-{
-	std::shared_ptr<ObjectFactoryInterface> factory;
-	{
+{	
+	if(object->IsDatabasePersisted())
+    {
 		boost::shared_lock<boost::shared_mutex> lock(object_factories_mutex_);
 		auto find_iter = factories_.find(object->GetType());
 		if (find_iter == factories_.end())
 		{
 			throw InvalidObjectType("Cannot delete object from storage for an unregistered type.");
 		}
-		factory = find_iter->second;
-	}
-
-	if(object->IsDatabasePersisted())
-    {
+		auto factory = find_iter->second;
 		factory->PersistObject(object, persist_inherited);
 	}
 }
@@ -396,6 +392,22 @@ void ObjectManager::PersistRelatedObjects(const std::shared_ptr<Object>& object,
 		{
 			PersistObject(contained, persist_inherited);
 		});
+
+        for (auto& descriptor : object->GetSlotDescriptor())
+        {
+            auto slot = descriptor.second;
+            if (slot->is_filled())
+            {
+                slot->view_objects([this, &persist_inherited] (std::shared_ptr<Object> slot_object)
+                {
+			        PersistObject(slot_object, persist_inherited);
+                    slot_object->ViewObjects(nullptr, 0, true, [&](const std::shared_ptr<Object>& contained)
+		            {
+		            	PersistObject(contained, persist_inherited);
+		            });
+                });
+            }
+        }
     }
 }
 	

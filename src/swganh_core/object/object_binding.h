@@ -43,6 +43,11 @@ bool ClearSlotWrapper(Object* this_obj, uint32_t slot_id)
     return this_obj->ClearSlot(slot_id);
 } 
 
+bool ClearFromSlotWrapper(Object* this_obj, std::shared_ptr<Object> object)
+{
+    return this_obj->ClearSlot(object);
+} 
+
 std::shared_ptr<Object> AddSlotObjectWrapper(Object* this_obj, std::shared_ptr<Object> object)
 {
     return *(this_obj->AddSlotObject(object).second);
@@ -214,6 +219,7 @@ void exportObject()
     std::pair<bool, boost::optional<std::shared_ptr<Object>>> (Object::*AddSlotObject)(std::shared_ptr<Object> object) = &Object::AddSlotObject;
 
     std::shared_ptr<Object> (Object::*GetSlotObject)(int32_t slot_id) = &Object::GetSlotObject;
+    bool (Object::*ClearFromSlot)(std::shared_ptr<Object> object) = &Object::ClearSlot;
 
 	//class_<ContainerInterface, std::shared_ptr<ContainerInterface>, boost::noncopyable>("ContainerInterface", "Container interface", no_init)
 	//	.def("add", &ContainerInterface::AddObject, addObjectOverload(args("requester", "newObject", "arrangement_id"), "Adds an object to the current object"))
@@ -289,7 +295,8 @@ void exportObject()
 		.def("hasContainedObjects", HasContainedObjects, "Checks to see if container has any objects in it")		
 		.def("addToSlot", AddSlotObjectWrapper, "Equips an object to its most appropriate slot")		
 		.def("getFromSlot", GetSlotObject, "Gets the object in the specified slot")		
-		.def("clearSlot", ClearSlotWrapper, "Clears any object in the specified slot")		
+		.def("clearSlot", ClearSlotWrapper, "Clears any object in the specified slot")	
+        .def("clearFromSlot", ClearFromSlot, "Clears specified object from any slot")		
         ;
 
 	bp::class_<std::vector<int>>("IntVector")

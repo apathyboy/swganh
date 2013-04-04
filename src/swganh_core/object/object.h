@@ -633,6 +633,8 @@ public:
 
     virtual boost::optional<std::shared_ptr<Object>> ClearSlot(int32_t slot_id);
     
+    virtual bool ClearSlot(std::shared_ptr<Object> object);
+
     virtual std::pair<bool, boost::optional<std::shared_ptr<Object>>> AddSlotObject(std::shared_ptr<Object> object);
 
     virtual std::shared_ptr<Object> GetSlotObject(int32_t slot_id);

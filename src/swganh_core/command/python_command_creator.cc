@@ -60,11 +60,14 @@ std::shared_ptr<CommandInterface> PythonCommandCreator::operator() (
 		}
 #endif
         
-        auto new_instance = command_module_.attr(class_name_.c_str())(bp::ptr(kernel), boost::ref(properties));
+        auto new_instance = 
+            std::shared_ptr<bp::object>(new bp::object(
+            command_module_.attr(class_name_.c_str())(bp::ptr(kernel), boost::ref(properties))), [] (bp::object* object)
+        { ScopedGilLock lock; delete object; });
 
-        if (!new_instance.is_none())
+        if (!new_instance->is_none())
         {
-            CommandInterface* obj_pointer = bp::extract<CommandInterface*>(new_instance);
+            CommandInterface* obj_pointer = bp::extract<CommandInterface*>(*new_instance);
             command.reset(obj_pointer, [new_instance] (CommandInterface*) {});
 			command->SetCommandProperties(properties);
         }

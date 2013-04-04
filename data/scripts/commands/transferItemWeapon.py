@@ -7,4 +7,12 @@ class TransferItemWeapon(BaseSwgCommand):
         split = re.split('\W+', self.getCommandString())
         container_id = split[1]
         container = self.getKernel().serviceManager().simulationService().findObjectById(int(container_id))
-        self.getActor().container().transfer(self.getActor(), self.getTarget(), container, vector3(0, 0, 0))
+
+        if self.getActor() is container:
+            container.remove(self.getActor(), self.getTarget())
+            self.getActor().addToSlot(self.getTarget())
+        else:
+            print('Unequipped item start weao')
+            self.getActor().clearFromSlot(self.getTarget())
+            #print('Unequipped item end')
+            #container.add(self.getActor(), self.getTarget())

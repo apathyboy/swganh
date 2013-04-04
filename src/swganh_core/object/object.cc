@@ -937,7 +937,7 @@ boost::optional<std::shared_ptr<Object>> Object::ClearSlot(int32_t slot_id)
 		auto slot = slot_iter->second;
 		if (!slot->is_filled())
 		{
-			slot->view_objects([&](const std::shared_ptr<Object>& object){
+			slot->view_objects([&](std::shared_ptr<Object> object){
 				slot->remove_object(object);
                 object->SetArrangementId(0);
                 cleared_object = object;
@@ -947,6 +947,32 @@ boost::optional<std::shared_ptr<Object>> Object::ClearSlot(int32_t slot_id)
 		}
 	}
 	return cleared_object;
+}
+
+bool Object::ClearSlot(std::shared_ptr<Object> object)
+{
+    boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
+        
+	bool cleared = false;
+
+    //for (auto& descriptor : slot_descriptor_)
+    //{
+    //    auto slot = descriptor.second;
+    //    if (slot->is_filled())
+    //    {
+    //        slot->view_objects([&object, &cleared, &slot] (std::shared_ptr<Object> slot_object)
+    //        {
+    //            if (slot_object == object)
+    //            {
+    //                slot_object->SetArrangementId(0);
+    //                slot->remove_object(slot_object);
+    //                cleared = true;
+    //            }
+    //        });
+    //    }
+    //}
+
+	return cleared;
 }
 
 std::pair<bool, boost::optional<std::shared_ptr<Object>>> Object::AddSlotObject(std::shared_ptr<Object> object)

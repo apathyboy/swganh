@@ -70,6 +70,7 @@ namespace simulation {
 		/*
 		*	\brief this persists the given object and all related objects (ie: everything contained inside this object)
 		*/
+        virtual void PersistRelatedObjects(const std::shared_ptr<swganh::object::Object>& object, bool persist_inherited = false) = 0;
 		virtual void PersistRelatedObjects(uint64_t parent_object_id, bool persist_inherited = false) = 0;
         
         virtual std::shared_ptr<swganh::object::Object> LoadObjectById(uint64_t object_id) = 0;
