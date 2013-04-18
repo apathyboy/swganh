@@ -52,10 +52,6 @@ typedef std::vector<
     swganh::messages::BaselinesMessage
 > BaselinesCacheContainer;
 
-typedef std::vector<
-    swganh::messages::DeltasMessage
-> DeltasCacheContainer;
-
 typedef std::map<
 	swganh::HashString,
 	boost::variant<float, int64_t, std::wstring>
@@ -253,15 +249,6 @@ public:
      * @return The most recently generated baselines.
      */
     BaselinesCacheContainer GetBaselines() ;
-
-    /**
-     * Returns the deltas messages generated since the last time the
-     * object was made clean.
-     *
-     * @param viewer_id The id of the object viewing this Object instance.
-     * @return The most recently generated deltas.
-     */
-    DeltasCacheContainer GetDeltas(uint64_t viewer_id) ;
 
     /**
      * Return the client iff template file that describes this Object.
@@ -503,7 +490,7 @@ public:
 	/**
 	 * @brief sends the update containment message for the given observer of this object
 	 */
-	virtual void SendUpdateContainmentMessage(std::shared_ptr<swganh::observer::ObserverInterface> observer);
+	virtual void SendUpdateContainmentMessage(std::shared_ptr<swganh::observer::ObserverInterface> observer, bool send_on_no_parent=true);
 	/**
 	 * @brief sends the destroy message for the given observer of this object
 	 */
@@ -754,7 +741,6 @@ private:
 	AwareObjectContainer aware_objects_;
 
     BaselinesCacheContainer baselines_;
-    DeltasCacheContainer deltas_;
 
     std::shared_ptr<ContainerInterface> container_;
 

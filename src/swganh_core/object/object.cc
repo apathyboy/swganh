@@ -41,15 +41,15 @@ Object::Object()
     , custom_name_(L"")
     , volume_(1)
 	, arrangement_id_(-2)
-	, database_persisted_(true)
-	, in_snapshot_(false)
-	, collision_height_(0.0f)
-	, collision_length_(0.0f)
-	, collidable_(false)
 	, attributes_template_id(-1)
-	, event_dispatcher_(nullptr)
+	, collision_length_(0.0f)
+	, collision_height_(0.0f)
+	, collidable_(false)
 	, controller_(nullptr)
 	, view_box_(nullptr)
+	, event_dispatcher_(nullptr)
+	, database_persisted_(true)
+	, in_snapshot_(false)
 {
 }
 
@@ -93,6 +93,7 @@ void Object::ClearController()
 }
 void Object::AddObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> obj, int32_t arrangement_id)
 {
+	//// CHECK PERMISSIONS ////
 	if(requester == nullptr || container_permissions_->canInsert(shared_from_this(), requester, obj))
 	{	
 		boost::upgrade_lock<boost::shared_mutex> lock(global_container_lock_);
@@ -118,12 +119,14 @@ void Object::AddObject(std::shared_ptr<Object> requester, std::shared_ptr<Object
 
 void Object::RemoveObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> oldObject)
 {
+	//// CHECK PERMISSIONS ////
 	if(requester == nullptr || container_permissions_->canRemove(shared_from_this(), requester, oldObject))
 	{
 		boost::upgrade_lock<boost::shared_mutex> lock(global_container_lock_);
 
 		{
 			boost::upgrade_to_unique_lock<boost::shared_mutex> unique_lock(lock);
+			
 			//Remove Object from Datastructure
 			for(auto& slot : slot_descriptor_)
 			{
@@ -146,6 +149,7 @@ void Object::RemoveObject(std::shared_ptr<Object> requester, std::shared_ptr<Obj
 
 void Object::TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<ContainerInterface> newContainer, glm::vec3 new_position, int32_t arrangement_id)
 {
+	//// CHECK PERMISSIONS ////
 	if(	requester == nullptr || (
 		this->GetPermissions()->canRemove(shared_from_this(), requester, object) && 
 		newContainer->GetPermissions()->canInsert(newContainer, requester, object)))
@@ -174,12 +178,14 @@ void Object::TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<O
 
 void Object::__InternalViewObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<Object>)> func)
 {
+	//// CHECK PERMISSIONS ////
 	if(requester == nullptr || container_permissions_->canView(shared_from_this(), requester))
 	{
 		uint32_t requester_instance = 0;
 		if(requester)
 			requester_instance = requester->GetInstanceId();
 
+		//// ITERATE THROUGH ALL SLOTS ////
 		for(auto& slot : slot_descriptor_)
 		{
 			slot.second->view_objects([&] (const std::shared_ptr<Object>& object) {
@@ -202,12 +208,14 @@ void Object::__InternalViewObjects(std::shared_ptr<Object> requester, uint32_t m
 
 void Object::__InternalGetObjects(std::shared_ptr<Object> requester, uint32_t max_depth, bool topDown, std::list<std::shared_ptr<Object>>& out)
 {
+	//// CHECK PERMISSIONS ////
 	if(requester == nullptr || container_permissions_->canView(shared_from_this(), requester))
 	{
 		uint32_t requester_instance = 0;
 		if(requester)
 			requester_instance = requester->GetInstanceId();
 
+		//// ITERATE THROUGH ALL OBJECT SLOTS ////
 		for(auto& slot : slot_descriptor_)
 		{
 			slot.second->view_objects([&] (const std::shared_ptr<Object>& object) {
@@ -308,8 +316,6 @@ void Object::__InternalTransfer(std::shared_ptr<Object> requester, std::shared_p
 				}
 				*/
 		}
-	} catch(const std::exception& e){
-		LOG(error) << "Could not transfer object " << object->GetObjectId() << " to container :" << GetObjectId() << " with error " << e.what();
 	}
 }
 
@@ -429,20 +435,10 @@ void Object::NotifyObservers(swganh::messages::BaseSwgMessage* message)
     });
 }
 
-bool Object::IsDirty()
-{
-	boost::lock_guard<boost::mutex> lock(object_mutex_);
-    return !deltas_.empty();
-}
 void Object::ClearBaselines()
 {
     boost::lock_guard<boost::mutex> lock(object_mutex_);
     baselines_.clear();
-}
-void Object::ClearDeltas()
-{
-    boost::lock_guard<boost::mutex> lock(object_mutex_);
-    deltas_.clear();
 }
 
 BaselinesCacheContainer Object::GetBaselines()
@@ -451,18 +447,9 @@ BaselinesCacheContainer Object::GetBaselines()
     return baselines_;
 }
 
-DeltasCacheContainer Object::GetDeltas(uint64_t viewer_id)
-{
-	boost::lock_guard<boost::mutex> lock(object_mutex_);
-    return deltas_;
-}
-
 void Object::AddDeltasUpdate(DeltasMessage* message)
 {
     NotifyObservers(message);
-
-	boost::lock_guard<boost::mutex> lock(object_mutex_);
-    deltas_.push_back(*message);
 }
 void Object::AddBaselineToCache(swganh::messages::BaselinesMessage* baseline)
 {
@@ -712,18 +699,21 @@ void Object::SendCreateByCrc(std::shared_ptr<swganh::observer::ObserverInterface
     scene_object.byte_flag = 0;
     observer->Notify(&scene_object);
 
-	SendUpdateContainmentMessage(observer);
+	SendUpdateContainmentMessage(observer, false);
 }
 
-void Object::SendUpdateContainmentMessage(std::shared_ptr<swganh::observer::ObserverInterface> observer)
+void Object::SendUpdateContainmentMessage(std::shared_ptr<swganh::observer::ObserverInterface> observer, bool send_on_no_parent)
 {
 	if(observer == nullptr)
 		return;
 
 	uint64_t container_id = 0;
+
 	auto& container = GetContainer();
 	if (container)
-		container_id = GetContainer()->GetObjectId();
+	{
+		container_id = container->GetObjectId();
+	}
 
 	//DLOG(info) << "CONTAINMENT " << GetObjectId() << ":" << GetTemplate() << " INTO " << container_id << " ARRANGEMENT " << arrangement_id_;
 

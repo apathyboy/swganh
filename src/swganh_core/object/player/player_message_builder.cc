@@ -21,11 +21,13 @@ using namespace swganh::messages;
 
 void PlayerMessageBuilder::RegisterEventHandlers()
 {
+    
     event_dispatcher->Subscribe("Player::Baselines", [this] (shared_ptr<EventInterface> incoming_event)
     {
         auto controller_event = static_pointer_cast<ObserverEvent>(incoming_event);
         SendBaselines(static_pointer_cast<Player>(controller_event->object), controller_event->observer);
     });
+
     event_dispatcher->Subscribe("Player::StatusBitmask", [this] (shared_ptr<EventInterface> incoming_event)
     {
         auto value_event = static_pointer_cast<PlayerEvent>(incoming_event);
@@ -173,21 +175,6 @@ void PlayerMessageBuilder::RegisterEventHandlers()
     });
 }
 
-void PlayerMessageBuilder::SendBaselines(const shared_ptr<Player>& player, const shared_ptr<swganh::observer::ObserverInterface>& observer)
-{
-    observer->Notify(&BuildBaseline3(player));
-    observer->Notify(&BuildBaseline6(player));
-    observer->Notify(&BuildBaseline8(player));
-    observer->Notify(&BuildBaseline9(player));
-    
-   
-    /**for (auto& baseline : player->GetBaselines())
-    {
-        observer->Notify(&baseline);
-    }*/
-        
-    SendEndBaselines(player, observer);
-}
 void PlayerMessageBuilder::BuildStatusBitmaskDelta(const shared_ptr<Player>& object)
 {
     if (object->HasObservers())
@@ -480,11 +467,12 @@ void PlayerMessageBuilder::BuildJediStateDelta(const shared_ptr<Player>& object)
         object->AddDeltasUpdate(&message);
     }
 }
+
 // baselines
-BaselinesMessage PlayerMessageBuilder::BuildBaseline3(const shared_ptr<Player>& object)
+boost::optional<BaselinesMessage> PlayerMessageBuilder::BuildBaseline3(const shared_ptr<Player>& object)
 {
     auto message = CreateBaselinesMessage(object, Object::VIEW_3, 10);
-    message.data.append(IntangibleMessageBuilder::BuildBaseline3(object).data);
+    message.data.append((*IntangibleMessageBuilder::BuildBaseline3(object)).data);
     
     auto status_flags = object->GetStatusFlags();
 
@@ -514,15 +502,15 @@ BaselinesMessage PlayerMessageBuilder::BuildBaseline3(const shared_ptr<Player>& 
     return BaselinesMessage(move(message));
 }
 
-BaselinesMessage PlayerMessageBuilder::BuildBaseline6(const shared_ptr<Player>& object)
+boost::optional<BaselinesMessage> PlayerMessageBuilder::BuildBaseline6(const shared_ptr<Player>& object)
 {
     auto message = CreateBaselinesMessage(object, Object::VIEW_6, 2);
-    message.data.append(IntangibleMessageBuilder::BuildBaseline6(object).data);
+    message.data.append((*IntangibleMessageBuilder::BuildBaseline6(object)).data);
     message.data.write<uint8_t>(object->GetAdminTag());     // Admin Tag
     return BaselinesMessage(move(message));
 }
 
-BaselinesMessage PlayerMessageBuilder::BuildBaseline8(const shared_ptr<Player>& object)
+boost::optional<BaselinesMessage> PlayerMessageBuilder::BuildBaseline8(const shared_ptr<Player>& object)
 {
     auto message = CreateBaselinesMessage(object, Object::VIEW_8, 7);
     object->SerializeXp(&message);
@@ -542,7 +530,7 @@ BaselinesMessage PlayerMessageBuilder::BuildBaseline8(const shared_ptr<Player>& 
     return BaselinesMessage(move(message));
 }
 
-BaselinesMessage PlayerMessageBuilder::BuildBaseline9(const shared_ptr<Player>& object)
+boost::optional<BaselinesMessage> PlayerMessageBuilder::BuildBaseline9(const shared_ptr<Player>& object)
 {
     auto message = CreateBaselinesMessage(object, Object::VIEW_9, 17);
     

@@ -1,6 +1,10 @@
 // This file is part of SWGANH which is released under the MIT license.
 // See file LICENSE or go to http://swganh.com/LICENSE
 
+#ifndef WIN32
+#include <Python.h>
+#endif
+
 #include "simulation_service.h"
 
 #include <boost/algorithm/string.hpp>
@@ -13,12 +17,11 @@
 #include "swganh/network/soe/server_interface.h"
 #include "swganh/plugin/plugin_manager.h"
 #include "swganh_core/object/object_controller.h"
-
+#include "swganh/scripting/python_instance_creator.h"
 #include "swganh/app/swganh_kernel.h"
 
 #include "swganh_core/command/command_interface.h"
 #include "swganh_core/command/command_service_interface.h"
-#include "swganh_core/command/python_command_creator.h"
 
 #include "swganh_core/connection/connection_client_interface.h"
 #include "swganh_core/connection/connection_service_interface.h"
@@ -72,6 +75,8 @@ using swganh::network::soe::ServerInterface;
 using swganh::network::soe::Session;
 using swganh::service::ServiceDescription;
 using swganh::app::SwganhKernel;
+using swganh::command::CommandInterface;
+using swganh::scripting::PythonInstanceCreator;
 
 namespace swganh {
 namespace simulation {
@@ -496,7 +501,7 @@ private:
     shared_ptr<MovementManagerInterface> movement_manager_;
 	shared_ptr<swganh::equipment::EquipmentServiceInterface> equipment_service_;
     SwganhKernel* kernel_;
-	ServerInterface* server_;
+	//ServerInterface* server_;
 	
     ObjControllerHandlerMap controller_handlers_;
 
@@ -511,24 +516,19 @@ SimulationService::SimulationService(SwganhKernel* kernel)
     , kernel_(kernel)
 {
     impl_->GetSceneManager()->LoadSceneDescriptionsFromDatabase(kernel_->GetDatabaseManager()->getConnection("galaxy"));
-}
 
-SimulationService::~SimulationService()
-{}
-
-ServiceDescription SimulationService::GetServiceDescription()
-{
-    ServiceDescription service_description(
+    SetServiceDescription(ServiceDescription(
         "SimulationService",
         "simulation",
         "0.1",
         "127.0.0.1",
         0,
         0,
-        0);
-
-    return service_description;
+        0));
 }
+
+SimulationService::~SimulationService()
+{}
 
 void SimulationService::StartScene(const std::string& scene_label)
 {
@@ -667,6 +667,9 @@ std::set<std::pair<float, std::shared_ptr<swganh::object::Object>>> SimulationSe
 	return impl_->FindObjectsInRangeByTag(requester, tag, range);
 }
 
+void SimulationService::Initialize()
+{}
+
 void SimulationService::Startup()
 {
 	RegisterObjectFactories();
@@ -711,18 +714,6 @@ void SimulationService::Startup()
             StartScene(scene);
         }
 	});
-
-	auto command_service = kernel_->GetServiceManager()->GetService<swganh::command::CommandServiceInterface>("CommandService");
-
-    command_service->AddCommandCreator("burstrun", swganh::command::PythonCommandCreator("commands.burstrun", "BurstRunCommand"));
-	command_service->AddCommandCreator("addfriend", swganh::command::PythonCommandCreator("commands.addfriend", "AddFriendCommand"));
-	command_service->AddCommandCreator("removefriend", swganh::command::PythonCommandCreator("commands.removefriend", "RemoveFriendCommand"));
-	command_service->AddCommandCreator("setmoodinternal", swganh::command::PythonCommandCreator("commands.setmoodinternal", "SetMoodInternalCommand"));
-	command_service->AddCommandCreator("transferitemmisc", swganh::command::PythonCommandCreator("commands.transferItemMisc", "TransferItem"));
-	command_service->AddCommandCreator("transferitem", swganh::command::PythonCommandCreator("commands.transferItem", "TransferItem"));
-	command_service->AddCommandCreator("transferitemarmor", swganh::command::PythonCommandCreator("commands.transferItemArmor", "TransferItemArmor"));
-	command_service->AddCommandCreator("transferitemweapon", swganh::command::PythonCommandCreator("commands.transferItemWeapon", "TransferItemWeapon"));
-	command_service->AddCommandCreator("tip", swganh::command::PythonCommandCreator("commands.tip", "TipCommand"));
 }
 
 shared_ptr<Object> SimulationService::CreateObjectFromTemplate(const string& template_name, PermissionType type, 

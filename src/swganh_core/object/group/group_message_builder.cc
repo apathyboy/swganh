@@ -61,30 +61,17 @@ void GroupMessageBuilder::BuildLootMasterDelta(const shared_ptr<Group>& group)
     }
 }
 
-void GroupMessageBuilder::SendBaselines(const std::shared_ptr<Group>& group, const std::shared_ptr<swganh::observer::ObserverInterface>& observer)
-{
-	observer->Notify(&BuildBaseline3(group));
-    observer->Notify(&BuildBaseline6(group));
-
-	/**for (auto& baseline : group->GetBaselines())
-    {
-        observer->Notify(&baseline);
-    }*/
-        
-    SendEndBaselines(group, observer);
-}
-
-BaselinesMessage GroupMessageBuilder::BuildBaseline3(const std::shared_ptr<Group>& group)
+boost::optional<BaselinesMessage> GroupMessageBuilder::BuildBaseline3(const std::shared_ptr<Group>& group)
 {
 	auto message = CreateBaselinesMessage(group, Object::VIEW_3, 8);
-	message.data.append(ObjectMessageBuilder::BuildBaseline3(group).data);
+	message.data.append((*ObjectMessageBuilder::BuildBaseline3(group)).data);
 	return BaselinesMessage(std::move(message));
 }
 
-BaselinesMessage GroupMessageBuilder::BuildBaseline6(const std::shared_ptr<Group>& group)
+boost::optional<BaselinesMessage> GroupMessageBuilder::BuildBaseline6(const std::shared_ptr<Group>& group)
 {
 	auto message = CreateBaselinesMessage(group, Object::VIEW_6, 6);
-	message.data.append(ObjectMessageBuilder::BuildBaseline6(group).data);
+	message.data.append((*ObjectMessageBuilder::BuildBaseline6(group)).data);
     group->GetGroupMembers().Serialize(message);
 	
 	//Unknown List

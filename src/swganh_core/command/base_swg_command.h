@@ -35,11 +35,7 @@ namespace command {
     class BaseSwgCommand : public CommandInterface
     {
     public:
-        BaseSwgCommand(
-            swganh::app::SwganhKernel* kernel,
-            const CommandProperties& properties);
-
-        ~BaseSwgCommand();
+        virtual void Initialize(swganh::app::SwganhKernel* kernel, const CommandProperties& properties);
 
         const std::shared_ptr<swganh::observer::ObserverInterface> GetController() const;
 		void SetController(std::shared_ptr<swganh::observer::ObserverInterface> controller);
@@ -47,8 +43,6 @@ namespace command {
         virtual bool Validate();
         
         swganh::app::SwganhKernel* GetKernel() const;
-
-        std::string GetCommandName() const;
 
         uint32_t GetActionCounter() const;
 

@@ -37,7 +37,8 @@ set "PROJECT_DRIVE=%~d0"
 set "BUILD_DIR=%PROJECT_BASE%build\deps\"
 set "VENDOR_DIR=%PROJECT_BASE%vendor\"
 set MSVC_VERSION=11
-set BOOST_VERSION=1.52.0
+set BOOST_VERSION=1.53.0
+set BOOST_LOG_REVISION=737
 set TURTLE_VERSION=1.2.0
 set GLM_VERSION=0.9.4.1
 set ZLIB_VERSION=1.2.7
@@ -125,11 +126,6 @@ rem ----------------------------------------------------------------------------
 rem --- Start of BUILD_ENVIRONMENT ---------------------------------------------
 :BUILD_ENVIRONMENT
 
-call where svn /Q | findstr /c:"svn.exe" >nul && (
-    echo ***** SVN required and not found in system PATH *****
-    exit /b 1
-)
-
 call where git /Q | findstr /c:"git.exe" >nul && (
     echo ***** Git required and not found in system PATH *****
     exit /b 1
@@ -169,7 +165,7 @@ if not exist %BOOST_DIR% (
 )
 
 if not exist boost-log (
-    svn co https://boost-log.svn.sourceforge.net/svnroot/boost-log/trunk/boost-log/ -r 799
+    git svn clone -r %BOOST_LOG_REVISION% https://boost-log.svn.sourceforge.net/svnroot/boost-log/trunk/boost-log
 )
 
 if not exist "%BOOST_DIR%\boost\log" (
@@ -183,7 +179,7 @@ if not exist b2.exe (
     cmd /c bootstrap.bat
 )
 
-cmd /c "b2.exe" --toolset=msvc-%MSVC_VERSION%.0 --with-program_options --with-system --with-thread --with-filesystem --with-log --with-python --with-test --with-date_time variant=debug,release link=shared runtime-link=shared threading=multi define=_SCL_SECURE_NO_WARNINGS=0 define=_ITERATOR_DEBUG_LEVEL=0
+cmd /c "b2.exe" --toolset=msvc-%MSVC_VERSION%.0 --with-serialization --with-iostreams --with-program_options --with-system --with-thread --with-filesystem --with-log --with-python --with-test --with-date_time variant=debug,release link=shared runtime-link=shared threading=multi define=_SCL_SECURE_NO_WARNINGS=0 define=_ITERATOR_DEBUG_LEVEL=0
 
 if not exist %VENDOR_DIR%include\boost (
     xcopy "boost" "%VENDOR_DIR%include\boost" /s /i /y
@@ -324,7 +320,7 @@ if not exist "%MYSQL_C_DIR%" (
 
 cd "%MYSQL_C_DIR%"
 
-cmake .
+cmake -G"Visual Studio 11" .
 cmake --build . --target mysqlclient --config Debug
 cmake --build . --target libmysql --config Debug
 cmake --build . --target mysqlclient --config Release

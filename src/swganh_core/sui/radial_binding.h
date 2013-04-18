@@ -34,8 +34,8 @@ namespace sui {
 
 	struct RadialWrap : RadialInterface, bp::wrapper<RadialInterface>
 	{
-		RadialWrap(PyObject* obj, swganh::app::SwganhKernel* kernel)
-			: RadialInterface(kernel), self_(bp::handle<>(bp::borrowed(obj)))
+		RadialWrap(PyObject* obj)
+			: self_(bp::handle<>(bp::borrowed(obj)))
 		{
 			ScopedGilLock lock;
 			bp::detail::initialize_wrapper(obj, this);
@@ -48,9 +48,9 @@ namespace sui {
 			{
 				return this->get_override("buildRadial")(static_pointer_cast<swganh::object::Creature>(owner), target, radials);
 			}
-			catch (bp::error_already_set& )
+			catch (bp::error_already_set&)
 			{
-				PyErr_Print();
+				swganh::scripting::logPythonException();
 			}
 			return std::vector<RadialOptions>();
 		}
@@ -61,9 +61,9 @@ namespace sui {
 			{				
 				this->get_override("handleRadial")(static_pointer_cast<swganh::object::Creature>(owner), target, action);
 			}
-			catch (bp::error_already_set& )
+			catch (bp::error_already_set&)
 			{
-				PyErr_Print();				
+				swganh::scripting::logPythonException();
 			}
 		}
 	private:
@@ -72,7 +72,7 @@ namespace sui {
 
 	void exportRadial()
 	{
-		bp::class_<RadialInterface, RadialWrap, boost::noncopyable>("RadialMenu", bp::init<swganh::app::SwganhKernel*>())
+		bp::class_<RadialInterface, RadialWrap, boost::noncopyable>("RadialMenu")
 			.def("buildRadial", bp::pure_virtual(&RadialWrap::BuildRadial), "Builds a radial for the target :class:`Object`")
 			.def("handleRadial", bp::pure_virtual(&RadialWrap::HandleRadial), "Handles a specific radial action")
 			.def("getKernel", &RadialInterface::GetKernel, bp::return_internal_reference<>());

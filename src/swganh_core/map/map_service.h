@@ -10,6 +10,10 @@
 #include <swganh_core/messages/get_map_locations_response_message.h>
 #include <swganh_core/messages/get_map_locations_request_message.h>
 
+namespace sql {
+    class Connection;
+}
+
 namespace swganh {
 namespace app {
 	class SwganhKernel;
@@ -18,6 +22,10 @@ namespace app {
 namespace connection {
 	class ConnectionClientInterface;
 } // namespace swganh::connection
+
+namespace database {
+    class DatabaseManager;
+}
 
 namespace object {
 	class Object;
@@ -35,7 +43,8 @@ namespace map {
 		MapService(swganh::app::SwganhKernel* kernel);
 		~MapService();
 
-		void Startup();
+        virtual void Initialize();
+		virtual void Startup();
 
 		virtual void AddLocation(std::string scene, std::wstring name, float x, float z, uint32_t category, uint32_t sub_category);
 		virtual void RemoveLocation(std::string scene, std::wstring name);
@@ -45,8 +54,6 @@ namespace map {
 		virtual void RemoveLocation(uint32_t scene_id, std::wstring name);
 		virtual bool LocationExists(uint32_t scene_id, std::wstring name);
 
-		swganh::service::ServiceDescription GetServiceDescription();
-
 	private:
 		void InsertLocation(uint32_t scene_id, swganh::messages::MapLocation& location);
 		void SyncAddLocation(uint32_t scene_id, swganh::messages::MapLocation& location);
@@ -55,7 +62,8 @@ namespace map {
 		void LoadStaticLocations();
 		void LoadDynamicLocations();
 		void LoadHighestLocationId();
-		void PersistLocations();
+        void AddLocationToStorage(const std::shared_ptr<sql::Connection>& connection, uint32_t scene_id, swganh::messages::MapLocation location);
+        void RemoveLocationFromStorage(const std::shared_ptr<sql::Connection>& connection, uint32_t scene_id, swganh::messages::MapLocation location);
 
 		void HandleRequestMapLocationsMessage(
 			const std::shared_ptr<swganh::connection::ConnectionClientInterface>& client, 
@@ -63,11 +71,8 @@ namespace map {
 
 		swganh::app::SwganhKernel* kernel_;
 		swganh::simulation::SimulationService* simulation_;
+		swganh::database::DatabaseManager* database_manager_;
 		std::map<uint32_t, std::list<swganh::messages::MapLocation>> locations_;
-
-		std::queue<
-			std::tuple<uint32_t /* scene_id */, uint32_t /* add, remove, update */, swganh::messages::MapLocation>
-			> changed_locations_;
 
 		uint32_t next_location_id_;
 	};

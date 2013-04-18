@@ -188,6 +188,15 @@ void QuadtreeSpatialProvider::UpdateObject(shared_ptr<Object> obj, const swganh:
     std::cout << "SpatialProvider::UpdateObject Duration: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop_time - start_time).count() << "ms" << std::endl;
 }
 
+QueryBox QuadtreeSpatialProvider::GetQueryBoxViewRange(std::shared_ptr<Object> object)
+{
+	glm::vec3 position;
+	glm::quat orientation;
+	object->__InternalGetAbsolutes(position, orientation);
+	return QueryBox(quadtree::Point(position.x - VIEWING_RANGE, position.z - VIEWING_RANGE), 
+					quadtree::Point(position.x + VIEWING_RANGE, position.z + VIEWING_RANGE));	
+}
+
 swganh::object::Object::ObjectPtrSet QuadtreeSpatialProvider::Query(boost::geometry::model::polygon<swganh::object::Point> query_box)
 {
 	swganh::object::Object::ObjectPtrSet return_vector;
@@ -246,8 +255,9 @@ std::set<std::pair<float, std::shared_ptr<swganh::object::Object>>> QuadtreeSpat
 		if(object->HasFlag(tag))
 		{
 			glm::vec3 pos1, pos2;
-			requester->GetAbsolutes(pos1, glm::quat());
-			object->GetAbsolutes(pos2, glm::quat());
+			glm::quat o1, o2;
+			requester->GetAbsolutes(pos1, o1);
+			object->GetAbsolutes(pos2, o2);
 
 			obj_map.insert(std::pair<float, std::shared_ptr<swganh::object::Object>>(glm::distance(pos1, pos2),object));
 		}

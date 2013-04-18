@@ -47,9 +47,13 @@ private:
 
 	std::string scene_name_;
 	uint32_t scene_id_;
+	
 	std::shared_ptr<WorldContainer> world_container_;
 
 	boost::shared_mutex lock_;
+
+	quadtree::QueryBox GetQueryBoxViewRange(std::shared_ptr<swganh::object::Object> object);
+	quadtree::QueryBox GetQueryBoxViewRange(const swganh::object::AABB& box);
 
 	void CheckCollisions(std::shared_ptr<swganh::object::Object> object);
 };

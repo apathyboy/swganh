@@ -32,11 +32,10 @@ uint8_t GetBadgeBitmaskBitById2(uint32_t id)
 	return (id)%32;
 }
 
-RequestBadgesCommand::RequestBadgesCommand(SwganhKernel* kernel, const CommandProperties& properties)
-	: BaseSwgCommand(kernel, properties)
-	, kernel_(kernel)
+void RequestBadgesCommand::Initialize(SwganhKernel* kernel, const CommandProperties& properties)
 {
-	equipment_service_ = kernel_->GetServiceManager()->GetService<EquipmentService>("EquipmentService");
+    BaseSwgCommand::Initialize(kernel, properties);
+	equipment_service_ = kernel->GetServiceManager()->GetService<EquipmentService>("EquipmentService");
 }
 
 boost::optional<std::shared_ptr<CommandCallback>> RequestBadgesCommand::Run()
@@ -49,7 +48,7 @@ boost::optional<std::shared_ptr<CommandCallback>> RequestBadgesCommand::Run()
 
 	auto badges = player->GetBadges();
 	std::for_each(badges.begin(), badges.end(), [=, &badges_response](const uint32_t id) {
-		badges_response.badge_flags[GetBadgeBitmaskIndexById2(id)].at(GetBadgeBitmaskBitById2(id)) = true;
+		badges_response.badge_flags.at(GetBadgeBitmaskBitById2(id)) = true;
 	});
 
 	GetActor()->GetController()->Notify(&badges_response);

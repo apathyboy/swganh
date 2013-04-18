@@ -19,11 +19,6 @@ using namespace swganh::messages;
 
 void ResourceContainerMessageBuilder::RegisterEventHandlers()
 {
-	event_dispatcher->Subscribe("ResourceContainer::Baselines", [this] (shared_ptr<EventInterface> incoming_event)
-    {
-        auto controller_event = static_pointer_cast<ObserverEvent>(incoming_event);
-        SendBaselines(static_pointer_cast<ResourceContainer>(controller_event->object), controller_event->observer);
-    });
 	event_dispatcher->Subscribe("ResourceContainer::CurrentQuantity", [this] (shared_ptr<EventInterface> incoming_event)
     {
         auto value_event = static_pointer_cast<ResourceContainerEvent>(incoming_event);
@@ -101,33 +96,20 @@ void ResourceContainerMessageBuilder::BuildVariationNameDelta(const std::shared_
 	}
 }
 
-void ResourceContainerMessageBuilder::SendBaselines(const std::shared_ptr<ResourceContainer>& resource_container, const std::shared_ptr<swganh::observer::ObserverInterface>& observer)
-{
-	observer->Notify(&BuildBaseline3(resource_container));
-    observer->Notify(&BuildBaseline6(resource_container));
-    
-    /**for (auto& baseline : resource_container->GetBaselines())
-    {
-        observer->Notify(&baseline);
-    }*/
-        
-    SendEndBaselines(resource_container, observer);
-}
-
 // baselines
-BaselinesMessage ResourceContainerMessageBuilder::BuildBaseline3(const std::shared_ptr<ResourceContainer>& resource_container)
+boost::optional<BaselinesMessage> ResourceContainerMessageBuilder::BuildBaseline3(const std::shared_ptr<ResourceContainer>& resource_container)
 {
 	auto message = CreateBaselinesMessage(resource_container, Object::VIEW_3, 13);
-	message.data.append(TangibleMessageBuilder::BuildBaseline3(resource_container).data);
+	message.data.append((*TangibleMessageBuilder::BuildBaseline3(resource_container)).data);
 	message.data.write(resource_container->GetCurrentQuantity());
 	message.data.write(resource_container->GetGlobalResource());
     return BaselinesMessage(move(message));
 }
 
-BaselinesMessage ResourceContainerMessageBuilder::BuildBaseline6(const std::shared_ptr<ResourceContainer>& resource_container)
+boost::optional<BaselinesMessage> ResourceContainerMessageBuilder::BuildBaseline6(const std::shared_ptr<ResourceContainer>& resource_container)
 {
 	auto message = CreateBaselinesMessage(resource_container, Object::VIEW_6, 5);
-	message.data.append(TangibleMessageBuilder::BuildBaseline6(resource_container).data);
+	message.data.append((*TangibleMessageBuilder::BuildBaseline6(resource_container)).data);
 	message.data.write(resource_container->GetMaxQuantity());
 	message.data.write(resource_container->GetResourceType());
 	message.data.write(resource_container->GetResourceName());

@@ -1,6 +1,10 @@
 // This file is part of SWGANH which is released under the MIT license.
 // See file LICENSE or go to http://swganh.com/LICENSE
 
+#ifndef WIN32
+#include <Python.h>
+#endif
+
 #include "object_manager.h"
 
 #include <boost/asio.hpp>
@@ -13,6 +17,7 @@
 
 #include "object_factory.h"
 #include "swganh/event_dispatcher.h"
+#include "swganh/scripting/python_script.h"
 #include "swganh/tre/resource_manager.h"
 #include "swganh/tre/visitors/objects/object_visitor.h"
 #include "swganh/tre/visitors/slots/slot_arrangement_visitor.h"
@@ -20,8 +25,6 @@
 #include "swganh_core/object/slot_exclusive.h"
 #include "swganh_core/object/slot_container.h"
 #include "swganh_core/object/template_interface.h"
-
-#include "swganh/scripting/utilities.h"
 
 #include "swganh/database/database_manager.h"
 #include <cppconn/exception.h>
@@ -138,7 +141,6 @@ void ObjectManager::PersistObjectsByTimer(const boost::system::error_code& e)
 		}
 		persist_timer_->expires_from_now(boost::posix_time::minutes(5));
 		persist_timer_->async_wait(boost::bind(&ObjectManager::PersistObjectsByTimer, this, boost::asio::placeholders::error));
-		kernel_->GetEventDispatcher()->Dispatch(std::make_shared<BaseEvent>("ObjectManager::PersistObjectsByTimer"));
 	}
 	else
 	{
@@ -504,15 +506,11 @@ void ObjectManager::PrepareToAccomodate(uint32_t delta)
 
 void ObjectManager::LoadPythonObjectTemplates()
 {
-	swganh::scripting::ScopedGilLock lock;
-	try {		
-		LOG(info) << "Loading Template Objects";
-		auto module = bp::import("load_objects");
-		auto python_template = module.attr("templates");
-		object_templates_ = bp::extract<PythonTemplateMap>(python_template);
-	}
-	catch(bp::error_already_set&)
-	{
-		PyErr_Print();		
-	}
+    LOG(info) << "Loading Template Objects";
+    swganh::scripting::PythonScript script(kernel_->GetAppConfig().script_directory + "/load_objects.py", true);
+    
+    script.SetGlobal("kernel", bp::ptr(kernel_));
+    script.Run();
+
+    object_templates_ = script.GetGlobalAs<PythonTemplateMap>("templates");
 }

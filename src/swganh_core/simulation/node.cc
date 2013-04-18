@@ -22,8 +22,8 @@ Node::Node(NodeQuadrant quadrant, Region region, uint32_t level, uint32_t max_le
 	, level_(level)
 	, max_level_(max_level)
 	, state_(LEAF)
-	, parent_(parent)
 	, leaf_nodes_()
+	, parent_(parent)
 {
 	// If this is the root node, we need to do an initial split.
 	if(quadrant_ == ROOT)
@@ -352,7 +352,9 @@ void Node::SvgDumpObjects(std::ofstream& file)
 		auto bounding_volume = obj->GetAABB();
 		auto collision_box = obj->GetWorldCollisionBox();
 
-		current_collision_points = std::stringstream();
+                current_collision_points.str("");
+                current_collision_points.clear();
+                
 		boost::geometry::for_each_point(collision_box, GetCollisionBoxPoints<Point>);
 		
 		boost::geometry::box_view<swganh::object::AABB> bounding_volume_view(bounding_volume);

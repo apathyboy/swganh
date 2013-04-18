@@ -1,18 +1,21 @@
 // This file is part of SWGANH which is released under the MIT license.
 // See file LICENSE or go to http://swganh.com/LICENSE
+
+#ifndef WIN32
+#include <Python.h>
+#endif
+
 #include "spawn_service.h"
 
 #include <algorithm>
 #include <memory>
-
-#include <boost/python.hpp>
 
 #include "swganh/scripting/utilities.h"
 
 #include "swganh/logger.h"
 
 #include "swganh/service/service_manager.h"
-
+#include "swganh/scripting/python_script.h"
 #include "swganh_core/simulation/simulation_service.h"
 #include "swganh_core/simulation/scene_events.h"
 
@@ -42,10 +45,18 @@ using namespace swganh::simulation;
 using namespace swganh::scripting;
 
 SpawnService::SpawnService(SwganhKernel* kernel) 
-	: kernel_(kernel)
-	, fsm_manager_(kernel->GetEventDispatcher())
+	: fsm_manager_(kernel->GetEventDispatcher())
+        , kernel_(kernel)
 	, timer_(kernel_->GetCpuThreadPool(), boost::posix_time::seconds(60))
 {
+    SetServiceDescription(ServiceDescription(
+        "SpawnService",
+        "spawn",
+        "0.1",
+        "127.0.0.1",
+        0,
+        0,
+        0));
 }
 
 SpawnService::~SpawnService()
@@ -53,19 +64,8 @@ SpawnService::~SpawnService()
 	timer_.cancel();
 }
 
-ServiceDescription SpawnService::GetServiceDescription()
-{
-    ServiceDescription service_description(
-        "SpawnService",
-        "spawn",
-        "0.1",
-        "127.0.0.1",
-        0,
-        0,
-        0);
-
-    return service_description;
-}
+void SpawnService::Initialize()
+{}
 
 void SpawnService::Startup()
 {
@@ -73,18 +73,10 @@ void SpawnService::Startup()
 	uint32_t SHUTTLE_AWAY_TIME_SECONDS = 300;
 	uint32_t SHUTTLE_IN_PORT_TIME_SECONDS = 300;
 
-	ScopedGilLock lock;
-    try 
-    {
-        auto config = boost::python::import("spawn_config");
+    PythonScript script(kernel_->GetAppConfig().script_directory + "/spawn_config.py");
 
-		SHUTTLE_AWAY_TIME_SECONDS = boost::python::extract<uint32_t>(config.attr("SHUTTLE_AWAY_TIME_SECONDS"));
-		SHUTTLE_IN_PORT_TIME_SECONDS = boost::python::extract<uint32_t>(config.attr("SHUTTLE_IN_PORT_TIME_SECONDS"));
-    }
-    catch(boost::python::error_already_set& /*e*/)
-    {
-        PyErr_Print();
-    }
+    SHUTTLE_AWAY_TIME_SECONDS = script.GetGlobalAs<uint32_t>("SHUTTLE_AWAY_TIME_SECONDS");
+    SHUTTLE_IN_PORT_TIME_SECONDS = script.GetGlobalAs<uint32_t>("SHUTTLE_IN_PORT_TIME_SECONDS");
 
 	//Build the default machines
 	//_buildCreatureMachine(kernel_, fsm_manager_);
