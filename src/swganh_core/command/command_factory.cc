@@ -3,6 +3,8 @@
 
 #include "command_factory.h"
 
+#include <boost/thread/lock_guard.hpp>
+
 #include "swganh/service/service_manager.h"
 
 #include "swganh/app/swganh_kernel.h"
