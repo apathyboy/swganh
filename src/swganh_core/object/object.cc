@@ -301,21 +301,19 @@ void Object::SwapSlots(std::shared_ptr<Object> requester, std::shared_ptr<Object
 
 void Object::__InternalTransfer(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<ContainerInterface> newContainer, int32_t arrangement_id)
 {
-	try {
-		// we are already locked
-		if(	requester == nullptr || (
-			this->GetPermissions()->canRemove(shared_from_this(), requester, object) && 
-			newContainer->GetPermissions()->canInsert(newContainer, requester, object)))
-			{
-				arrangement_id = newContainer->__InternalInsert(object, object->GetPosition(), arrangement_id);
+	// we are already locked
+	if(	requester == nullptr || (
+		this->GetPermissions()->canRemove(shared_from_this(), requester, object) && 
+		newContainer->GetPermissions()->canInsert(newContainer, requester, object)))
+		{
+			arrangement_id = newContainer->__InternalInsert(object, object->GetPosition(), arrangement_id);
 
-				/**
-				//Send update containment message to controllers in view.
-				for(auto& observer : bothObservers) {
-					object->SendUpdateContainmentMessage(observer->GetController());
-				}
-				*/
-		}
+			/**
+			//Send update containment message to controllers in view.
+			for(auto& observer : bothObservers) {
+				object->SendUpdateContainmentMessage(observer->GetController());
+			}
+			*/
 	}
 }
 
