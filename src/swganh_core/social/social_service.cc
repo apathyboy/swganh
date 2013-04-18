@@ -1,6 +1,10 @@
 // This file is part of SWGANH which is released under the MIT license.
 // See file LICENSE or go to http://swganh.com/LICENSE
 
+#ifndef WIN32
+#include <Python.h>
+#endif
+
 #include "social_service.h"
 
 #include "swganh/logger.h"
@@ -36,24 +40,22 @@ using swganh::character::CharacterProviderInterface;
 SocialService::SocialService(SwganhKernel* kernel)
     : kernel_(kernel)
 {
-    character_provider_ = kernel->GetPluginManager()->CreateObject<CharacterProviderInterface>("Character::CharacterProvider");
-}
-
-SocialService::~SocialService()
-{}
-
-ServiceDescription SocialService::GetServiceDescription()
-{
-    ServiceDescription service_description(
+    SetServiceDescription(ServiceDescription(
         "SocialService",
         "social",
         "0.1",
         "127.0.0.1",
         0,
         0,
-        0);
+        0));
+}
 
-    return service_description;
+SocialService::~SocialService()
+{}
+
+void SocialService::Initialize()
+{
+    character_provider_ = kernel_->GetPluginManager()->CreateObject<CharacterProviderInterface>("Character::CharacterProvider");
 }
 
 bool SocialService::AddFriend(const shared_ptr<Player>& player, const string& friend_name)

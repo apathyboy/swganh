@@ -34,15 +34,10 @@ public:
 	*/
 	PlayerService(swganh::app::SwganhKernel* kernel);
 		
-	/**
-	* Called on startup
-	*/
-	void Startup();
+    ~PlayerService();
 
-	/**
-	* @return the service description for this service
-	*/
-	swganh::service::ServiceDescription GetServiceDescription();
+	void Initialize();
+	void Startup();
 
 	/**
 	* Called when a player enters the game
@@ -80,7 +75,7 @@ private:
 	swganh::app::SwganhKernel* kernel_;
 	swganh::equipment::EquipmentService* equipment_service_;
 	swganh::simulation::SimulationServiceInterface* simulation_service_;
-	swganh::CallbackId player_selected_callback_;
+	//swganh::CallbackId player_selected_callback_;
 	swganh::CallbackId player_removed_;
 };
 

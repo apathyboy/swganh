@@ -69,38 +69,35 @@ BadgeService::BadgeService(swganh::app::SwganhKernel* kernel)
 			}
 		});
 	});
-}
-
-BadgeService::~BadgeService(void)
-{
-}
-
-void BadgeService::Startup()
-{
-	command_service_ = kernel_->GetServiceManager()->GetService<swganh::command::CommandServiceInterface>("CommandService");
-	equipment_service_ = kernel_->GetServiceManager()->GetService<EquipmentService>("EquipmentService");
-
-    kernel_->GetDatabaseManager()->ExecuteAsync(&BadgeService::LoadBadges_, this, "swganh_static");
-
-	LoadBadgeRegions_();
-	
-	// Subscribe to requestbadges CommandQueueEnqueue.
-	command_service_->AddCommandCreator("requestbadges", [] (swganh::app::SwganhKernel* kernel, const CommandProperties& properties)
-	{
-		return std::make_shared<RequestBadgesCommand>(kernel, properties);
-	});
-}
-
-swganh::service::ServiceDescription BadgeService::GetServiceDescription()
-{
-	return swganh::service::ServiceDescription(
+        
+    SetServiceDescription(swganh::service::ServiceDescription(
 		"BadgeService", // namve
 		"badge", // type
 		"0.1", // version
 		"127.0.0.1", // address
 		0, // tcp port
 		0, // udp port
-		0); // status
+		0));
+}
+
+BadgeService::~BadgeService(void)
+{
+}
+
+void BadgeService::Initialize()
+{
+	command_service_ = kernel_->GetServiceManager()->GetService<swganh::command::CommandServiceInterface>("CommandService");
+	equipment_service_ = kernel_->GetServiceManager()->GetService<EquipmentService>("EquipmentService");
+}
+
+void BadgeService::Startup()
+{
+    kernel_->GetDatabaseManager()->ExecuteAsync(&BadgeService::LoadBadges_, this, "swganh_static");
+
+	LoadBadgeRegions_();
+	
+	// Subscribe to requestbadges CommandQueueEnqueue.
+	command_service_->AddCommandCreator<RequestBadgesCommand>("requestbadges");
 }
 
 void BadgeService::GiveBadge(std::shared_ptr<Object> object, std::string name)
@@ -144,7 +141,7 @@ void BadgeService::RemoveBadge(std::shared_ptr<Object> object, uint32_t id)
 	auto player = std::static_pointer_cast<Player>(equipment_service_->GetEquippedObject(object, "ghost"));
 	auto badge = FindBadge(id);
 
-	if(!object->HasController() || badge == nullptr && player->HasBadge(id))
+	if(!object->HasController() || badge == nullptr || !player->HasBadge(id))
 		return;
 
 	player->RemoveBadge(id);
@@ -256,7 +253,7 @@ void BadgeService::LoadBadgeRegions_()
 		while(result->next())
 		{
 			std::shared_ptr<swganh::badge::BadgeRegion> badge_region = std::make_shared<swganh::badge::BadgeRegion>(result->getString("name"), this);
-			
+			badge_region->SetEventDispatcher(kernel_->GetEventDispatcher());
 			badge_region->SetPosition(glm::vec3(result->getDouble("x"), 0.0f, result->getDouble("z")));
 			badge_region->SetSceneId(result->getUInt("planet_id") + 1);
 			badge_region->SetDatabasePersisted(false);
@@ -270,7 +267,6 @@ void BadgeService::LoadBadgeRegions_()
 			
 			badge_region->SetCollisionBoxSize((float)result->getDouble("width"), (float)result->getDouble("length"));
 			badge_region->SetPermissions(std::make_shared<swganh::object::WorldPermission>());
-			badge_region->SetEventDispatcher(kernel_->GetEventDispatcher());
 			badge_regions_.push_back(badge_region);
 		} while(statement->getMoreResults());
 	}

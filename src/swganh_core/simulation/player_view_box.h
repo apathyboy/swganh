@@ -14,10 +14,12 @@ namespace simulation {
 		~PlayerViewBox();
 
 		void OnCollisionEnter(std::shared_ptr<swganh::object::Object> collider);
+		void OnCollisionStay(std::shared_ptr<swganh::object::Object> collider);
 		void OnCollisionLeave(std::shared_ptr<swganh::object::Object> collider);
 
 	private:
 		std::shared_ptr<swganh::object::Object> player_;
+		std::set<std::shared_ptr<swganh::object::Object>> aware_of_;
 	};
 
 }} // namespace swganh::simulation

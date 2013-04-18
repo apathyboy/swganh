@@ -84,58 +84,45 @@ vector<ByteBuffer> Session::GetUnacknowledgedMessages() const {
     return unacknowledged_messages;
 }
 
-void Session::Update() {
-    // Exit as quickly as possible if there is no work currently.
-    if (outgoing_data_messages_.empty()) {
-        return;
-    }
-
-    // Build up a list of data messages to process
-    uint32_t message_count = outgoing_data_messages_.unsafe_size();
-    list<ByteBuffer> process_list;
-	SequencedCallbacks callbacks;
-    OutgoingMessage tmp;
-
-    for (uint32_t i = 0; i < message_count; ++i) {
-        if (outgoing_data_messages_.try_pop(tmp)) {
-			process_list.push_back(tmp.first);
-			if(tmp.second.is_initialized())
-				callbacks.push_back(tmp.second.get());
-        }
-    }
-
-    // Pack the message list into a single data channel payload and send it.
-    ByteBuffer data_channel_payload = PackDataChannelMessages(std::move(process_list));
-
-    // Split up the message if it's too big
-    // \note: in determining the max size 3 is the size of the soe header + the compression flag.
+void Session::SendFragmentedPacket_(ByteBuffer message, SequencedCallbacks callbacks)
+{
     uint32_t max_data_channel_size = receive_buffer_size_ - crc_length_ - 3;
 
-    if (data_channel_payload.size() > max_data_channel_size) {
-        list<ByteBuffer> fragmented_message = SplitDataChannelMessage(
-            data_channel_payload,
+    list<ByteBuffer> fragmented_message = SplitDataChannelMessage(
+            message,
             max_data_channel_size);
 
-		uint16_t frag_list_size = fragmented_message.size();
-        for_each(fragmented_message.begin(), fragmented_message.end(), [this, &callbacks, &frag_list_size] (ByteBuffer& fragment) {
- 
-			if(frag_list_size > 1) {
-				SendSequencedMessage_(&BuildFragmentedDataChannelHeader, move(fragment), SequencedCallbacks());
-			}
-			else
-			{
-				SendSequencedMessage_(&BuildFragmentedDataChannelHeader, move(fragment), callbacks);
-			}
-			frag_list_size--;
-        });
-    } else {
-        SendSequencedMessage_(&BuildDataChannelHeader, move(data_channel_payload), callbacks);
+    auto list_size = fragmented_message.size();
+    for (auto& fragment : fragmented_message)
+    {
+        if (list_size == 1)
+        {
+            SendSequencedMessage_(&BuildFragmentedDataChannelHeader, move(fragment), callbacks);            
+        }
+        else
+        {
+            SendSequencedMessage_(&BuildFragmentedDataChannelHeader, move(fragment), SequencedCallbacks());
+        }
+
+        --list_size;
     }
 }
 
 void Session::SendTo(ByteBuffer message, boost::optional<SequencedCallback> callback)
-{
-    outgoing_data_messages_.push(OutgoingMessage(move(message), callback));
+{    
+    uint32_t max_data_channel_size = receive_buffer_size_ - crc_length_ - 3;
+
+    SequencedCallbacks callbacks;
+    if (callback)
+    {
+        callbacks.push_back(*callback);
+    }
+
+    if (message.size() > max_data_channel_size) {
+        SendFragmentedPacket_(message, std::move(callbacks));
+    } else {
+        SendSequencedMessage_(&BuildDataChannelHeader, move(message), std::move(callbacks));
+    }
 }
 
 void Session::Close(void)
@@ -240,12 +227,10 @@ void Session::SendSequencedMessage_(HeaderBuilder header_builder, ByteBuffer mes
     data_channel_message.append(move(message));
 
     // Send it over the wire
-    SendSoePacket_(data_channel_message);
+    SendSoePacket_(data_channel_message, message_sequence);
 
 	if(callbacks.get().size() > 0)
 		QueueSequencedCallback(message_sequence, callbacks.get());
-
-    sent_messages_.push_back(make_pair(message_sequence, std::move(message)));
 }
 
 void Session::handleSessionRequest_(SessionRequest packet)
@@ -389,18 +374,24 @@ void Session::handleOutOfOrderA_(OutOfOrderA packet)
     });
 }
 
-void Session::SendSoePacket_(swganh::ByteBuffer message)
+void Session::SendSoePacket_(swganh::ByteBuffer message, boost::optional<uint16_t> sequence)
 {
-    strand_.post(bind(&Session::SendSoePacketInternal, shared_from_this(), std::move(message)));
+    strand_.post(bind(&Session::SendSoePacketInternal, shared_from_this(), std::move(message), sequence));
 }
 
-void Session::SendSoePacketInternal(swganh::ByteBuffer message)
+void Session::SendSoePacketInternal(swganh::ByteBuffer message, boost::optional<uint16_t> sequence)
 {
 	LOG_NET << "Server -> Client: \n" << message;
 
     compression_filter_(this, &message);
     encryption_filter_(this, &message);
     crc_output_filter_(this, &message);
+	
+    // Store it for resending later if necessary
+    if (sequence)
+    {
+        sent_messages_.push_back(make_pair(*sequence, message));
+    } 
 
     server_->SendTo(remote_endpoint(), move(message));
 }
@@ -428,9 +419,8 @@ bool Session::SequenceIsValid_(const uint16_t& sequence)
 		SendSoePacket_(move(buffer));        
     }
 
-	LOG(warning) << "Invalid sequence: [" << sequence << "] Current sequence [" << next_client_sequence_ << "]";
-	
-    return false;
+    DLOG(warning) << "Invalid sequence: [" << sequence << "] Current sequence [" << next_client_sequence_ << "]";
+	return false;
 }
 
 void Session::AcknowledgeSequence_(const uint16_t& sequence)

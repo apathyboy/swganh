@@ -21,6 +21,7 @@
 #include "swganh_core/simulation/spatial_provider_interface.h"
 #include "swganh_core/simulation/simulation_service_interface.h"
 #include "swganh_core/simulation/player_view_box.h"
+#include "swganh_core/simulation/world_container.h"
 
 using namespace swganh::event_dispatcher;
 using namespace std;
@@ -32,8 +33,8 @@ using namespace swganh::simulation;
 using namespace swganh::simulation;
 
 MovementManager::MovementManager(swganh::app::SwganhKernel* kernel, std::string scene_name)
-	: kernel_(kernel)
-	, scene_name_(scene_name)
+	: scene_name_(scene_name)
+        , kernel_(kernel)	 
 {
 	simulation_service_ = kernel_->GetServiceManager()->GetService<SimulationServiceInterface>("SimulationService");
 
@@ -51,29 +52,33 @@ void MovementManager::HandleDataTransformServer(
 	AABB view_box_old_bounding_volume = view_box->GetAABB();
 
 	//If the object was inside a container we need to move it out
-	/* if(object->GetContainer() != spatial_provider_)
+    if(object->GetContainer() != spatial_provider_->GetWorldContainer())
 	{
 		std::shared_ptr<Object> old_container = std::static_pointer_cast<Object>(object->GetContainer());
 		if(old_container->GetTemplate().compare("object/cell/shared_cell.iff") == 0) 
 		{
-			LOG(warning) << "Entering Cells... cells are under construction.";
+			old_container->TransferObject(nullptr, object, spatial_provider_->GetWorldContainer(), new_position);
 		} 
-		else 
+		else
 		{
+			// We are mounted move our parent.
 			AABB old_parent_bounding_volume = old_container->GetAABB();
 			old_container->SetPosition(new_position);
 			old_container->UpdateWorldCollisionBox();
 			old_container->UpdateAABB();
+			view_box->SetPosition(old_container->GetPosition());
+			view_box->UpdateWorldCollisionBox();
+			view_box->UpdateAABB();
 
 			object->UpdateWorldCollisionBox();
 			object->UpdateAABB();
 			
-			spatial_provider_->UpdateObject(old_container, old_parent_bounding_volume, old_container->GetAABB());
+			spatial_provider_->UpdateObject(old_container, old_parent_bounding_volume, old_container->GetAABB(), view_box, view_box_old_bounding_volume, view_box->GetAABB());
 			SendDataTransformMessage(old_container);
 		}
 	}
 	else
-	{*/
+	{
 		object->SetPosition(new_position);
 		view_box->SetPosition(object->GetPosition());
 
@@ -84,7 +89,7 @@ void MovementManager::HandleDataTransformServer(
 
 		spatial_provider_->UpdateObject(object, old_bounding_volume, object->GetAABB(), view_box, view_box_old_bounding_volume, view_box->GetAABB());
 		SendDataTransformMessage(object);
-	//}
+	}
 }
 
 void MovementManager::HandleDataTransformWithParentServer(
@@ -93,18 +98,36 @@ void MovementManager::HandleDataTransformWithParentServer(
 	const glm::vec3& new_position)
 	
 {
-	if(parent != nullptr)
+	if((std::static_pointer_cast<ContainerInterface> (parent)) != spatial_provider_->GetWorldContainer())
 	{
-        object->SetPosition(new_position);
-	    object->UpdateWorldCollisionBox();
-		object->UpdateAABB();
+		auto& view_box = object->GetViewBox();
+		AABB view_box_old_bounding_volume = view_box->GetAABB();
+		AABB old_bounding_volume = object->GetAABB();
 
 		//Perform the transfer if needed
 		if(object->GetContainer() != parent)
 		{
 			object->GetContainer()->TransferObject(object, object, parent);
 		}
-				
+		else
+		{
+			object->SetPosition(new_position);
+
+			// Get Absolutes for ViewBox
+			auto abs_position = glm::vec3();
+			auto abs_orientation = glm::quat();
+			object->GetAbsolutes(abs_position, abs_orientation);
+
+			view_box->SetPosition(abs_position);
+
+			object->UpdateWorldCollisionBox();
+			object->UpdateAABB();
+			view_box->UpdateWorldCollisionBox();
+			view_box->UpdateAABB();
+
+			spatial_provider_->UpdateObject(object, old_bounding_volume, object->GetAABB(), view_box, view_box_old_bounding_volume, view_box->GetAABB());
+		}
+		
 		//Send the update transform
 		SendDataTransformWithParentMessage(object);
 
@@ -120,10 +143,7 @@ void MovementManager::HandleDataTransform(
     DataTransform message)
 {    
     if (!ValidateCounter_(object->GetObjectId(), message.counter))
-    {
-		LOG(error) << "Movement Counter is " << message.counter << " should be " << (counter_map_[object->GetObjectId()] + 1) << ".";
         return;
-    }
 
     counter_map_[object->GetObjectId()] = message.counter;
 
@@ -132,30 +152,32 @@ void MovementManager::HandleDataTransform(
 	AABB old_bounding_volume = object->GetAABB();
 
 	//If the object was inside a container we need to move it out
-	/* if(object->GetContainer() != spatial_provider_)
+	if(object->GetContainer() != spatial_provider_->GetWorldContainer())
 	{
 		std::shared_ptr<Object> old_container = std::static_pointer_cast<Object>(object->GetContainer());
 		if(old_container->GetTemplate().compare("object/cell/shared_cell.iff") == 0) 
 		{
-			LOG(warning) << "Entering cell.... cells are underconstruction.";
+			old_container->TransferObject(nullptr, object, spatial_provider_->GetWorldContainer(), message.position);
 		} 
 		else 
 		{
+			// We are mounted move our parent.
 			AABB old_parent_bounding_volume = old_container->GetAABB();
-			old_container->SetOrientation(message.orientation);
 			old_container->SetPosition(message.position);
+			old_container->SetOrientation(message.orientation);
+			view_box->SetPosition(old_container->GetPosition());
+			
 			old_container->UpdateWorldCollisionBox();
 			old_container->UpdateAABB();
+			view_box->UpdateWorldCollisionBox();
+			view_box->UpdateAABB();
 			
-			object->UpdateWorldCollisionBox();
-			object->UpdateAABB();
-
-			spatial_provider_->UpdateObject(old_container, old_parent_bounding_volume, old_container->GetAABB());
+			spatial_provider_->UpdateObject(old_container, old_parent_bounding_volume, old_container->GetAABB(), view_box, view_box_old_bounding_volume, view_box->GetAABB());
 			SendUpdateDataTransformMessage(old_container);
 		}
 	}
 	else
-	{*/
+	{
 		object->SetPosition(message.position);
 		object->SetOrientation(message.orientation);
 		view_box->SetPosition(object->GetPosition());
@@ -165,24 +187,24 @@ void MovementManager::HandleDataTransform(
 		view_box->UpdateAABB();
 		spatial_provider_->UpdateObject(object, old_bounding_volume, object->GetAABB(), view_box, view_box_old_bounding_volume, view_box->GetAABB());
 		SendUpdateDataTransformMessage(object);
-	//}
+	}
 }
 
 void MovementManager::HandleDataTransformWithParent(
     const shared_ptr<Object>& object, 
     DataTransformWithParent message)
 {
-    return; // to implement....
 	auto container = simulation_service_->GetObjectById(message.cell_id);
-	if(container != nullptr)
+	if((std::static_pointer_cast<ContainerInterface> (container)) != spatial_provider_->GetWorldContainer())
 	{
 		if (!ValidateCounter_(object->GetObjectId(), message.counter))
-		{
-			LOG(error) << "Movement Counter is " << message.counter << " should be " << (counter_map_[object->GetObjectId()] + 1) << ".";
 			return;
-		}
 
 		counter_map_[object->GetObjectId()] = message.counter;
+
+		auto& view_box = object->GetViewBox();
+		AABB view_box_old_bounding_volume = view_box->GetAABB();
+		AABB old_bounding_volume = object->GetAABB();
 
 		//Set the new position and orientation
 		object->SetOrientation(message.orientation);
@@ -193,7 +215,26 @@ void MovementManager::HandleDataTransformWithParent(
 		//Perform the transfer
 		if(object->GetContainer() != container)
 		{
-			object->GetContainer()->TransferObject(object, object, container);
+			object->GetContainer()->TransferObject(object, object, container, message.position);
+		}
+		else
+		{
+			object->SetPosition(message.position);
+
+			// Get Absolutes for ViewBox
+			auto abs_position = glm::vec3();
+			auto abs_orientation = glm::quat();
+			object->GetAbsolutes(abs_position, abs_orientation);
+
+			view_box->SetPosition(abs_position);
+
+			object->UpdateWorldCollisionBox();
+			object->UpdateAABB();
+			view_box->UpdateWorldCollisionBox();
+			view_box->UpdateAABB();
+
+			spatial_provider_->UpdateObject(object, old_bounding_volume, object->GetAABB(), view_box, view_box_old_bounding_volume, view_box->GetAABB());
+
 		}
 
 		//Send the update transform
@@ -271,6 +312,13 @@ void MovementManager::RegisterEvents(swganh::EventDispatcher* event_dispatcher)
 		[this] (shared_ptr<swganh::EventInterface> incoming_event)
 	{
 		spatial_provider_->SvgToFile();
+	});
+
+	event_dispatcher->Subscribe(
+		"Object::SetPosition",
+		[this] (shared_ptr<swganh::EventInterface> incoming_event)
+	{
+		auto event = static_pointer_cast<swganh::object::SetPositionEvent>(incoming_event);
 	});
 }
 

@@ -102,4 +102,3 @@ def SetStartingSkills(creature, species, profession):
     creature.addSkill(profession + '_novice')
     for skill in baseSpeciesSkills[species]:
         creature.addSkill(skill)
-

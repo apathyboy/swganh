@@ -1,9 +1,13 @@
 import re
-import swgpy
 from swgpy.command import BaseSwgCommand
+from swgpy.utility import *
+
 
 
 class TransferItemArmor(BaseSwgCommand):
+    def getCommandName(self):
+        return 'transferitemarmor'
+
     def run(self):
         split = re.split('\W+', self.getCommandString())
         container_id = split[1]
@@ -18,3 +22,4 @@ class TransferItemArmor(BaseSwgCommand):
             self.getActor().clearFromSlot(self.getTarget())
             #print('Unequipped item end')
             #container.add(self.getActor(), self.getTarget())
+

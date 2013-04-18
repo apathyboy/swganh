@@ -64,15 +64,15 @@ public:
 	void SvgDumpRegions(std::ofstream& file);
 	void SvgDumpObjects(std::ofstream& file);
 
-	std::set<std::shared_ptr<swganh::object::Object>> Query(QueryBox query_box);
+	swganh::object::Object::ObjectPtrSet Query(QueryBox query_box);
 
 	const NodeQuadrant& GetQuadrant(void) { return quadrant_; }
 	const uint32_t& GetLevel(void) { return level_; }
 	const NodeState& GetState(void) { return state_; }
 	const Region& GetRegion(void) { return region_; }
 	const boost::array<std::shared_ptr<Node>, 4>& GetLeafNodes(void) { return leaf_nodes_; }
-	const std::set<std::shared_ptr<swganh::object::Object>>& GetObjects(void) { return objects_; }
-	std::set<std::shared_ptr<swganh::object::Object>> GetContainedObjects(void);
+	const swganh::object::Object::ObjectPtrSet& GetObjects(void) { return objects_; }
+	swganh::object::Object::ObjectPtrSet GetContainedObjects(void);
 
 protected:
 	void InsertObject_(std::shared_ptr<swganh::object::Object> obj);
@@ -93,7 +93,7 @@ private:
 	uint32_t level_;
 	uint32_t max_level_;
 	NodeState state_;
-	std::set<std::shared_ptr<swganh::object::Object>> objects_;
+	swganh::object::Object::ObjectPtrSet objects_;
 	boost::array<std::shared_ptr<Node>, 4> leaf_nodes_;
 	Node* parent_;
 };

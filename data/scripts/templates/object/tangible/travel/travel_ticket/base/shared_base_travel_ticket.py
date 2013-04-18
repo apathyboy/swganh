@@ -12,6 +12,7 @@ def create(kernel):
 	result.stfName("travel","base_ticket")		
 	
 	#### BEGIN MODIFICATIONS ####
+	result.setStringAttribute("radial_filename", "radials.ticket")
 	####  END MODIFICATIONS  ####
 	
 	return result

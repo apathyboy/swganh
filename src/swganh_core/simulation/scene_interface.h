@@ -34,9 +34,13 @@ namespace controllers {
 namespace swganh {
 namespace simulation {
 
+class WorldContainer;
+
 class SceneInterface : boost::noncopyable
 {
 public:
+    
+    virtual ~SceneInterface() {}
         
 	virtual uint32_t GetSceneId() const = 0;
         
@@ -47,6 +51,8 @@ public:
 	virtual const std::string& GetDescription() const = 0;
 		
 	virtual const std::string& GetTerrainMap() const =  0;
+
+	virtual const std::shared_ptr<WorldContainer>& GetWorldContainer() const = 0;
 
     virtual void AddObject(std::shared_ptr<swganh::object::Object> object) = 0;
         

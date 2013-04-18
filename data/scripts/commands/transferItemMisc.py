@@ -1,10 +1,15 @@
 import re
-import swgpy
 from swgpy.command import BaseSwgCommand
+from swgpy.utility import *
 
-class TransferItem(BaseSwgCommand):
+
+class TransferItemMisc(BaseSwgCommand):
+    def getCommandName(self):
+        return 'transferitemmisc'
+
     def run(self):
         split = re.split('\W+', self.getCommandString())
+
 #        container_id = split[1]
 #        container = self.getKernel().serviceManager().simulationService().findObjectById(int(container_id))
 #
@@ -16,3 +21,4 @@ class TransferItem(BaseSwgCommand):
 #            #self.getActor().clearFromSlot(self.getTarget())
 #            #print('Unequipped item end')
 #            #container.add(self.getActor(), self.getTarget())
+

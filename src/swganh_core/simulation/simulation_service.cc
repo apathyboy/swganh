@@ -1,6 +1,10 @@
 // This file is part of SWGANH which is released under the MIT license.
 // See file LICENSE or go to http://swganh.com/LICENSE
 
+#ifndef WIN32
+#include <Python.h>
+#endif
+
 #include "simulation_service.h"
 
 #include <boost/algorithm/string.hpp>
@@ -13,12 +17,11 @@
 #include "swganh/network/soe/server_interface.h"
 #include "swganh/plugin/plugin_manager.h"
 #include "swganh_core/object/object_controller.h"
-
+#include "swganh/scripting/python_instance_creator.h"
 #include "swganh/app/swganh_kernel.h"
 
 #include "swganh_core/command/command_interface.h"
 #include "swganh_core/command/command_service_interface.h"
-#include "swganh_core/command/python_command_creator.h"
 
 #include "swganh_core/connection/connection_client_interface.h"
 #include "swganh_core/connection/connection_service_interface.h"
@@ -52,6 +55,7 @@
 #include "swganh_core/simulation/movement_manager_interface.h"
 #include "player_view_box.h"
 #include "swganh_core/object/permissions/default_permission.h"
+#include "swganh_core/simulation/world_container.h"
 
 using namespace swganh;
 using namespace std;
@@ -71,6 +75,8 @@ using swganh::network::soe::ServerInterface;
 using swganh::network::soe::Session;
 using swganh::service::ServiceDescription;
 using swganh::app::SwganhKernel;
+using swganh::command::CommandInterface;
+using swganh::scripting::PythonInstanceCreator;
 
 namespace swganh {
 namespace simulation {
@@ -253,7 +259,16 @@ public:
 		if(old_scene)
 		{
 			old_scene->RemoveObject(obj);
+
+			// Remove View Box
+			auto view_box = obj->GetViewBox();
+			if(view_box != nullptr)
+			{
+				old_scene->RemoveObject(view_box);
+				obj->SetViewBox(nullptr);
+			}
 		}
+
 
 		//Update the object's scene_id
 		obj->SetSceneId(scene_obj->GetSceneId());	
@@ -263,9 +278,13 @@ public:
 		obj->UpdateWorldCollisionBox();
 		obj->UpdateAABB();
 
-		// CmdStartScene
+		// We are transfering a player
 		if(controller != nullptr)
 		{
+
+			std::shared_ptr<PlayerViewBox> view_box = std::make_shared<PlayerViewBox>(obj);
+			obj->SetViewBox(view_box);
+
 			CmdStartScene start_scene;
 			start_scene.ignore_layout = 0;
 			start_scene.character_id = obj->GetObjectId();
@@ -277,11 +296,15 @@ public:
 
 			controller->Notify(&start_scene, [=](uint16_t sequence) {
 
+				// Temp manual set of containers
+				//obj->SetContainer(scene_obj->GetWorldContainer());
+				//obj->SetContainer(scene_obj->GetWorldContainer());
+
 				// Reset Controller
 				obj->SetController(controller);
 
-				// Add object to scene and send baselines
 				scene_obj->AddObject(obj);
+				scene_obj->AddObject(obj->GetViewBox());
 			});
 		}
 		else
@@ -309,7 +332,8 @@ public:
         if (find_iter != controlled_objects_.end())
         {
             controller = find_iter->second;
-            controller->SetRemoteClient(client);			
+            controller->SetRemoteClient(client);
+			object->SetController(controller);
         }
         else
         {
@@ -399,8 +423,6 @@ public:
             throw std::runtime_error("Invalid scene selected for object");
         }
 
-		object->SetCollidable(false);
-
 		// CmdStartScene
         CmdStartScene start_scene;
         start_scene.ignore_layout = 0;
@@ -416,26 +438,19 @@ public:
 				//Attach the controller
 				StartControllingObject(object, client);
 
-				object->SetCollidable(true);
-
-				if(object->GetContainer() == nullptr)
+				// Create View Box if we don't have one.
+				if(object->GetViewBox() == nullptr)
 				{
-					// Create View Box
 					std::shared_ptr<PlayerViewBox> view_box = std::make_shared<PlayerViewBox>(object);
-					view_box->SetPosition(object->GetPosition());
-					view_box->SetObjectId(object->GetObjectId() + 16);
-					view_box->SetDatabasePersisted(false);
-					view_box->SetInSnapshot(false);
-					view_box->SetTemplate("anh/view_box");
-					view_box->SetCollidable(true);
-					view_box->SetPermissions(std::make_shared<swganh::object::DefaultPermission>());
 					object->SetViewBox(view_box);
-
-					// Add to scene.
-					// note: View Box will later be attached to player.
-					scene->AddObject(object);
-					scene->AddObject(view_box);
 				}
+
+				// Add to scene.
+				// note: View Box will later be attached to player.
+				if(object->GetContainer() == nullptr) // Out container shouldn't be set yet unless we where loaded into a container.
+					scene->AddObject(object);
+
+				scene->AddObject(object->GetViewBox());
 		}));
     }
 
@@ -492,7 +507,7 @@ private:
     shared_ptr<MovementManagerInterface> movement_manager_;
 	shared_ptr<swganh::equipment::EquipmentServiceInterface> equipment_service_;
     SwganhKernel* kernel_;
-	ServerInterface* server_;
+	//ServerInterface* server_;
 	
     ObjControllerHandlerMap controller_handlers_;
 
@@ -507,24 +522,19 @@ SimulationService::SimulationService(SwganhKernel* kernel)
     , kernel_(kernel)
 {
     impl_->GetSceneManager()->LoadSceneDescriptionsFromDatabase(kernel_->GetDatabaseManager()->getConnection("galaxy"));
-}
 
-SimulationService::~SimulationService()
-{}
-
-ServiceDescription SimulationService::GetServiceDescription()
-{
-    ServiceDescription service_description(
+    SetServiceDescription(ServiceDescription(
         "SimulationService",
         "simulation",
         "0.1",
         "127.0.0.1",
         0,
         0,
-        0);
-
-    return service_description;
+        0));
 }
+
+SimulationService::~SimulationService()
+{}
 
 void SimulationService::StartScene(const std::string& scene_label)
 {
@@ -667,6 +677,9 @@ std::set<std::pair<float, std::shared_ptr<swganh::object::Object>>> SimulationSe
 	return impl_->FindObjectsInRangeByTag(requester, tag, range);
 }
 
+void SimulationService::Initialize()
+{}
+
 void SimulationService::Startup()
 {
 	RegisterObjectFactories();
@@ -711,18 +724,6 @@ void SimulationService::Startup()
             StartScene(scene);
         }
 	});
-
-	auto command_service = kernel_->GetServiceManager()->GetService<swganh::command::CommandServiceInterface>("CommandService");
-
-    command_service->AddCommandCreator("burstrun", swganh::command::PythonCommandCreator("commands.burstrun", "BurstRunCommand"));
-	command_service->AddCommandCreator("addfriend", swganh::command::PythonCommandCreator("commands.addfriend", "AddFriendCommand"));
-	command_service->AddCommandCreator("removefriend", swganh::command::PythonCommandCreator("commands.removefriend", "RemoveFriendCommand"));
-	command_service->AddCommandCreator("setmoodinternal", swganh::command::PythonCommandCreator("commands.setmoodinternal", "SetMoodInternalCommand"));
-	command_service->AddCommandCreator("transferitemmisc", swganh::command::PythonCommandCreator("commands.transferItem", "TransferItem"));
-	command_service->AddCommandCreator("transferitem", swganh::command::PythonCommandCreator("commands.transferItem", "TransferItem"));
-	command_service->AddCommandCreator("transferitemarmor", swganh::command::PythonCommandCreator("commands.transferItem", "TransferItem"));
-	command_service->AddCommandCreator("transferitemweapon", swganh::command::PythonCommandCreator("commands.transferItem", "TransferItem"));
-	command_service->AddCommandCreator("tip", swganh::command::PythonCommandCreator("commands.tip", "TipCommand"));
 }
 
 shared_ptr<Object> SimulationService::CreateObjectFromTemplate(const string& template_name, PermissionType type, 

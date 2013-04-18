@@ -12,7 +12,6 @@
 #include "swganh/crc.h"
 #include "swganh/observer/observer_interface.h"
 
-
 #include "swganh_core/messages/scene_create_object_by_crc.h"
 #include "swganh_core/messages/update_containment_message.h"
 #include "swganh_core/messages/scene_destroy_object.h"
@@ -23,6 +22,7 @@
 
 #include "swganh_core/object/permissions/container_permissions_interface.h"
 #include "swganh_core/simulation/player_view_box.h"
+#include "swganh_core/simulation/world_container.h"
 
 using namespace swganh::observer;
 using namespace std;
@@ -41,17 +41,16 @@ Object::Object()
     , custom_name_(L"")
     , volume_(1)
 	, arrangement_id_(-2)
-	, database_persisted_(true)
-	, in_snapshot_(false)
-	, collision_height_(1.0f)
-	, collision_length_(1.0f)
-	, collidable_(true)
 	, attributes_template_id(-1)
-	, event_dispatcher_(nullptr)
+	, collision_length_(0.0f)
+	, collision_height_(0.0f)
+	, collidable_(false)
 	, controller_(nullptr)
 	, view_box_(nullptr)
-{
-}
+	, event_dispatcher_(nullptr)
+	, database_persisted_(true)
+	, in_snapshot_(false)
+{}
 
 Object::~Object()
 {
@@ -185,20 +184,10 @@ void Object::NotifyObservers(swganh::messages::BaseSwgMessage* message)
     });
 }
 
-bool Object::IsDirty()
-{
-	boost::lock_guard<boost::mutex> lock(object_mutex_);
-    return !deltas_.empty();
-}
 void Object::ClearBaselines()
 {
     boost::lock_guard<boost::mutex> lock(object_mutex_);
     baselines_.clear();
-}
-void Object::ClearDeltas()
-{
-    boost::lock_guard<boost::mutex> lock(object_mutex_);
-    deltas_.clear();
 }
 
 BaselinesCacheContainer Object::GetBaselines()
@@ -207,18 +196,9 @@ BaselinesCacheContainer Object::GetBaselines()
     return baselines_;
 }
 
-DeltasCacheContainer Object::GetDeltas(uint64_t viewer_id)
-{
-	boost::lock_guard<boost::mutex> lock(object_mutex_);
-    return deltas_;
-}
-
 void Object::AddDeltasUpdate(DeltasMessage* message)
 {
     NotifyObservers(message);
-
-	boost::lock_guard<boost::mutex> lock(object_mutex_);
-    deltas_.push_back(*message);
 }
 void Object::AddBaselineToCache(swganh::messages::BaselinesMessage* baseline)
 {
@@ -228,10 +208,21 @@ void Object::AddBaselineToCache(swganh::messages::BaselinesMessage* baseline)
 
 void Object::SetPosition(glm::vec3 position)
 {
+	//glm::vec3 old_position;
+	//AABB old_aabb;
+
     {
 	    boost::lock_guard<boost::mutex> lock(object_mutex_);
-        position_ = position;
+		//old_position = position;
+		//old_aabb = aabb_;
+		position_ = position;
 	}
+
+	//__InternalUpdateWorldCollisionBox();
+	//UpdateAABB();
+
+	//GetEventDispatcher()->Dispatch(make_shared<SetPositionEvent>("Object::SetPosition", shared_from_this(), old_position, old_aabb, position, aabb_));
+
 	DISPATCH(Object, Position);
 }
 
@@ -460,15 +451,16 @@ void Object::SendCreateByCrc(std::shared_ptr<swganh::observer::ObserverInterface
     scene_object.byte_flag = 0;
     observer->Notify(&scene_object);
 
-	SendUpdateContainmentMessage(observer);
+	SendUpdateContainmentMessage(observer, false);
 }
 
-void Object::SendUpdateContainmentMessage(std::shared_ptr<swganh::observer::ObserverInterface> observer)
+void Object::SendUpdateContainmentMessage(std::shared_ptr<swganh::observer::ObserverInterface> observer, bool send_on_no_parent)
 {
 	if(observer == nullptr)
 		return;
 
 	uint64_t container_id = 0;
+
 	auto& container = GetContainer();
 	if (container)
 		container_id = container->GetContainmentId();
@@ -1061,4 +1053,30 @@ int32_t Object::GetAppropriateArrangementId_(const std::shared_ptr<Object>& othe
     }
 
     return filled_arrangement_id;
+}
+
+const Object::ObjectPtrSet& Object::GetObjectsInView()
+{
+	auto objs = ObjectPtrSet();
+	if(view_box_ == nullptr)
+		return std::move(objs);
+	else
+		return view_box_->GetCollidedObjects();
+}
+
+Object::ObserverContainer Object::GetControllersInView()
+{		
+	/**
+	auto controllers = std::vector<std::shared_ptr<swganh::observer::ObserverInterface>>();
+	if(view_box_ == nullptr)
+		return controllers;
+
+	auto& objects_in_view = view_box_->GetCollidedObjects();
+	for(auto& object : objects_in_view)
+	{
+		if(object->HasController())
+			controllers.push_back(object->GetController());
+	}
+	*/
+	return observers_;
 }

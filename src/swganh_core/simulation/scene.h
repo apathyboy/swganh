@@ -36,12 +36,15 @@ namespace simulation {
             std::string description,
             std::string terrain,
 			swganh::app::SwganhKernel* kernel);
+        
+        virtual ~Scene() {}
 
         uint32_t GetSceneId() const;
         const std::string& GetName() const;
         const std::string& GetLabel() const;
         const std::string& GetDescription() const;
 		const std::string& GetTerrainMap() const;
+		const std::shared_ptr<WorldContainer>& GetWorldContainer() const;
 
         void AddObject(std::shared_ptr<swganh::object::Object> object);
         void RemoveObject(std::shared_ptr<swganh::object::Object> object);

@@ -28,26 +28,14 @@
 #include <cppconn/prepared_statement.h>
 #include <cppconn/sqlstring.h>
 
+#include "swganh_core/simulation/player_view_box.h"
+
 using namespace std;
 using namespace swganh;
 using namespace swganh::service;
 using namespace swganh::player;
 using namespace swganh::object;
 using namespace swganh::messages;
-
-ServiceDescription PlayerService::GetServiceDescription()
-{
-    ServiceDescription service_description(
-        "PlayerService",
-        "player",
-        "0.1",
-        "127.0.0.1", 
-        0, 
-        0, 
-        0);
-
-    return service_description;
-}
 
 PlayerService::PlayerService(swganh::app::SwganhKernel* kernel)
 	: kernel_(kernel)
@@ -95,9 +83,21 @@ PlayerService::PlayerService(swganh::app::SwganhKernel* kernel)
 		const auto& player = static_pointer_cast<ValueEvent<shared_ptr<Player>>>(incoming_event)->Get();
 		OnPlayerExit(player);
 	});
+    
+    SetServiceDescription(ServiceDescription(
+        "PlayerService",
+        "player",
+        "0.1",
+        "127.0.0.1", 
+        0, 
+        0, 
+        0));
 }
 
-void PlayerService::Startup()
+PlayerService::~PlayerService()
+{}
+
+void PlayerService::Initialize()
 {
 	simulation_service_ = kernel_->GetServiceManager()->
 		GetService<swganh::simulation::SimulationServiceInterface>("SimulationService");
@@ -105,6 +105,9 @@ void PlayerService::Startup()
 	equipment_service_ = kernel_->GetServiceManager()->
 		GetService<swganh::equipment::EquipmentService>("EquipmentService");
 }
+
+void PlayerService::Startup()
+{}
 
 void PlayerService::OnPlayerEnter(shared_ptr<swganh::object::Player> player)
 {
@@ -128,6 +131,13 @@ void PlayerService::OnPlayerExit(shared_ptr<swganh::object::Player> player)
 		if(object_controller != nullptr)
 		{
 			deadline_timer->async_wait(boost::bind(&PlayerService::RemoveClientTimerHandler_, this, boost::asio::placeholders::error, deadline_timer, 30, object_controller));
+		}
+
+		// Remove View Box
+		auto view_box = parent->GetViewBox();
+		if(view_box != nullptr){
+			parent->SetViewBox(nullptr);
+			simulation_service_->RemoveObject(view_box);
 		}
     }
 }
