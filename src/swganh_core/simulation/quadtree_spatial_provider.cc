@@ -34,7 +34,9 @@ void QuadtreeSpatialProvider::AddObject(shared_ptr<Object> object, int32_t arran
 {
 	boost::upgrade_lock<boost::shared_mutex> uplock(lock_);
 	
+#ifdef SI_DEBUG
 	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+#endif
 
 	root_node_.InsertObject(object);
 	object->SetArrangementId(arrangement_id);
@@ -60,17 +62,20 @@ void QuadtreeSpatialProvider::AddObject(shared_ptr<Object> object, int32_t arran
 		CheckCollisions(child);
 	});
 
+#ifdef SI_DEBUG
 	std::chrono::high_resolution_clock::time_point stop_time = std::chrono::high_resolution_clock::now();
 
 	std::cout << "SpatialProvider::AddObject Duration: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop_time - start_time).count() << "ms" << std::endl;
-
+#endif
 }
 
 void QuadtreeSpatialProvider::InsertObject(shared_ptr<Object> object)
 {
 	boost::upgrade_lock<boost::shared_mutex> uplock(lock_);
 	
+#ifdef SI_DEBUG
 	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+#endif
 
 	root_node_.InsertObject(object);
 	object->SetArrangementId(2);
@@ -84,16 +89,21 @@ void QuadtreeSpatialProvider::InsertObject(shared_ptr<Object> object)
 		root_node_.InsertObject(child);
 		#endif
 	});
-
+    
+#ifdef SI_DEBUG
 	std::chrono::high_resolution_clock::time_point stop_time = std::chrono::high_resolution_clock::now();
 
 	std::cout << "SpatialProvider::InsertObject Duration: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop_time - start_time).count() << "ms" << std::endl;
+#endif
 }
 
 void QuadtreeSpatialProvider::DeleteObject(shared_ptr<Object> object)
 {
 	boost::upgrade_lock<boost::shared_mutex> uplock(lock_);
+
+#ifdef SI_DEBUG
 	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+#endif
 
 	#ifdef SI_METHOD_ONE
 	// Remove our children.
@@ -104,16 +114,21 @@ void QuadtreeSpatialProvider::DeleteObject(shared_ptr<Object> object)
 
 	root_node_.RemoveObject(object);
 	object->SetContainer(nullptr);
-
+    
+#ifdef SI_DEBUG
 	std::chrono::high_resolution_clock::time_point stop_time = std::chrono::high_resolution_clock::now();
 
 	std::cout << "SpatialProvider::DeleteObject Duration: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop_time - start_time).count() << "ms" << std::endl;
+#endif
 }
 
 void QuadtreeSpatialProvider::RemoveObject(shared_ptr<Object> object)
 {
 	boost::upgrade_lock<boost::shared_mutex> uplock(lock_);
+    
+#ifdef SI_DEBUG
 	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+#endif
 
 	// Remove our children.
 	object->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
@@ -148,18 +163,23 @@ void QuadtreeSpatialProvider::RemoveObject(shared_ptr<Object> object)
 
 	object->SetContainer(nullptr);
 
-
+    
+#ifdef SI_DEBUG
 	std::chrono::high_resolution_clock::time_point stop_time = std::chrono::high_resolution_clock::now();
 
 	std::cout << "SpatialProvider::RemoveObject Duration: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop_time - start_time).count() << "ms" << std::endl;
+#endif
 }
 
 void QuadtreeSpatialProvider::UpdateObject(shared_ptr<Object> obj, const swganh::object::AABB& old_bounding_volume, const swganh::object::AABB& new_bounding_volume, std::shared_ptr<swganh::object::Object> view_box,
 										   const swganh::object::AABB view_box_old_bounding_volume, const swganh::object::AABB view_box_new_bounding_volume)
 {
 	boost::upgrade_lock<boost::shared_mutex> uplock(lock_);
-
+    
+#ifdef SI_DEBUG
 	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+#endif
+
 	root_node_.UpdateObject(obj, old_bounding_volume, new_bounding_volume);
 	
 	// Update children
@@ -182,10 +202,12 @@ void QuadtreeSpatialProvider::UpdateObject(shared_ptr<Object> obj, const swganh:
 	obj->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
 		CheckCollisions(child);
 	});
-
+    
+#ifdef SI_DEBUG
 	auto stop_time = std::chrono::high_resolution_clock::now();
 
     std::cout << "SpatialProvider::UpdateObject Duration: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop_time - start_time).count() << "ms" << std::endl;
+#endif
 }
 
 QueryBox QuadtreeSpatialProvider::GetQueryBoxViewRange(std::shared_ptr<Object> object)
