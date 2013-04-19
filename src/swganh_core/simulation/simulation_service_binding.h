@@ -32,6 +32,7 @@ void exportSimulationService()
 	typedef void (SimulationServiceInterface::*TransferObjectToSceneObjectBinding)(shared_ptr<swganh::object::Object>, const std::string&);
 	typedef void (SimulationServiceInterface::*TransferObjectToSceneAndPositionBinding)(uint64_t, const std::string&, float, float, float);
 	typedef void (SimulationServiceInterface::*TransferObjectToSceneObjectAndPositionBinding)(shared_ptr<swganh::object::Object>, const std::string&, float, float, float);
+    typedef void (SimulationServiceInterface::*PersistRelatedObjectsBinding)(const std::shared_ptr<Object>&, bool);
 
 	enum_<PermissionType>("ContainerPermission")
 		.value("DEFAULT", DEFAULT_PERMISSION)
@@ -46,6 +47,7 @@ void exportSimulationService()
 
     class_<SimulationServiceInterface, std::shared_ptr<SimulationServiceInterface>, boost::noncopyable>("SimulationService", "The simulation service handles the current scenes aka planets", no_init)
         .def("persist", &SimulationServiceInterface::PersistObject, "persists the specified object and it's containing objects")
+        .def("persistRelated", PersistRelatedObjectsBinding(&SimulationServiceInterface::PersistRelatedObjects), "persists the specified object and it's containing objects")
         .def("findObjectById", GetObjectByIdBinding(&SimulationServiceInterface::GetObjectById), "Finds an object by its id")
 		.def("transfer", TransferObjectToSceneBinding(&SimulationServiceInterface::TransferObjectToScene), "transfers the object to a new scene")
 		.def("transfer", TransferObjectToSceneObjectBinding(&SimulationServiceInterface::TransferObjectToScene), "transfers the object to a new scene")
@@ -55,6 +57,7 @@ void exportSimulationService()
 		.def("addObjectToScene", &SimulationServiceInterface::AddObjectToScene, "Adds the Object to the specified scene")
         .def("startScene", &SimulationServiceInterface::StartScene, "starts a scene by its label")
         .def("stopScene", &SimulationServiceInterface::StopScene, "stops a scene by the given label")
+        .def("getSceneId", &SimulationServiceInterface::SceneIdByName, "gets a scene id from a given name")
 		.def("createObject", &SimulationServiceInterface::CreateObjectFromTemplate, CreateOverload(args("template_name", "permission_type", "is_persisted", "object_id"), "Creates an object of the given template"))
 		.def("removeObject", &SimulationServiceInterface::RemoveObject, "Removes an object from the simulation (delete).")
 		.def("removeObjectById", &SimulationServiceInterface::RemoveObjectById, "Removes an object from the simulation by id (delete).")

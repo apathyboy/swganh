@@ -65,7 +65,11 @@ def CreateStartingCharacter(kernel, scale, base_model, customization, full_name,
             creature.addToSlot(item_obj)
         else:
             inventory.add(creature, item_obj)
-    simulation.addObjectToScene(creature, startLoc.name)
+
+    creature.scene_id = simulation.getSceneId(startLoc.name)
+
+    simulation.persistRelated(creature, True)
+
     return creature
 
 

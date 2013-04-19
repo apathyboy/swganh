@@ -392,23 +392,18 @@ void ObjectManager::PersistRelatedObjects(const std::shared_ptr<Object>& object,
 		// Now related objects
 		object->ViewObjects(nullptr, 0, true, [&](const std::shared_ptr<Object>& contained)
 		{
-			PersistObject(contained, persist_inherited);
+			PersistRelatedObjects(contained, persist_inherited);
 		});
 
-        for (auto& descriptor : object->GetSlotDescriptor())
+        auto descriptors = object->GetSlotDescriptor();
+
+        for (auto& descriptor : descriptors)
         {
-            auto slot = descriptor.second;
-            if (slot->is_filled())
+            auto& slot = descriptor.second;
+            slot->view_objects([this, &persist_inherited] (std::shared_ptr<Object> slot_object)
             {
-                slot->view_objects([this, &persist_inherited] (std::shared_ptr<Object> slot_object)
-                {
-			        PersistObject(slot_object, persist_inherited);
-                    slot_object->ViewObjects(nullptr, 0, true, [&](const std::shared_ptr<Object>& contained)
-		            {
-		            	PersistObject(contained, persist_inherited);
-		            });
-                });
-            }
+                PersistRelatedObjects(slot_object, persist_inherited);
+            });
         }
     }
 }

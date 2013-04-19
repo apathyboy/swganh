@@ -30,7 +30,7 @@ QuadtreeSpatialProvider::~QuadtreeSpatialProvider(void)
 {
 }
 
-void QuadtreeSpatialProvider::AddObject(shared_ptr<Object> object, int32_t arrangement_id)
+void QuadtreeSpatialProvider::AddObject(shared_ptr<Object> object)
 {
 	boost::upgrade_lock<boost::shared_mutex> uplock(lock_);
 
@@ -39,7 +39,6 @@ void QuadtreeSpatialProvider::AddObject(shared_ptr<Object> object, int32_t arran
 	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
 #endif
 	root_node_.InsertObject(object);
-	object->SetArrangementId(arrangement_id);
 	object->SetSceneId(scene_id_);
 
 	if(object->GetContainer() == nullptr)
@@ -48,12 +47,10 @@ void QuadtreeSpatialProvider::AddObject(shared_ptr<Object> object, int32_t arran
 	// Add our children.
 	object->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
 		child->SetSceneId(scene_id_);
-		#ifdef SI_METHOD_ONE
 		child->BuildSpatialProfile();
 		child->UpdateWorldCollisionBox();
 		child->UpdateAABB();
 		root_node_.InsertObject(child);
-		#endif
 	});
 
 	CheckCollisions(object);
@@ -85,9 +82,7 @@ void QuadtreeSpatialProvider::InsertObject(shared_ptr<Object> object)
 	// Add our children.
 	object->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
 		child->SetSceneId(scene_id_);
-		#ifdef SI_METHOD_ONE
 		root_node_.InsertObject(child);
-		#endif
 	});
     
 #ifdef SI_DEBUG
@@ -105,12 +100,10 @@ void QuadtreeSpatialProvider::DeleteObject(shared_ptr<Object> object)
 	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
 #endif
 
-	#ifdef SI_METHOD_ONE
 	// Remove our children.
 	object->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
 		root_node_.RemoveObject(child);
 	});
-	#endif
 
 	root_node_.RemoveObject(object);
 	object->SetContainer(nullptr);
@@ -134,9 +127,7 @@ void QuadtreeSpatialProvider::RemoveObject(shared_ptr<Object> object)
 	object->ViewObjects(nullptr, 0, true, [=](std::shared_ptr<swganh::object::Object> child) {
 		auto collided_objects = child->GetCollidedObjects();
 
-		#ifdef SI_METHOD_ONE
 		root_node_.RemoveObject(child);
-		#endif
 	
 		for(auto& collided_object : collided_objects)
 		{
@@ -187,9 +178,7 @@ void QuadtreeSpatialProvider::UpdateObject(shared_ptr<Object> obj, const swganh:
 		auto child_old_aabb = child->GetAABB();
 		child->UpdateWorldCollisionBox();
 		child->UpdateAABB();
-		#ifdef SI_METHOD_ONE
 		root_node_.UpdateObject(child, child_old_aabb, child->GetAABB());
-		#endif
 	});
 
 	if(view_box != nullptr) {

@@ -308,7 +308,14 @@ void ObjectFactory::LoadContainedObjects(
     
         auto contained_object = object_manager_->CreateObjectFromStorage(contained_id, contained_type);
         
-        object->AddObject(nullptr, contained_object);
+        if (contained_object->GetArrangementId() == -2)
+        {
+            object->AddObject(nullptr, contained_object);
+        }
+        else
+        {
+            object->AddSlotObject(contained_object);
+        }
     }
 }
 

@@ -111,6 +111,7 @@ StaticService::StaticService(SwganhKernel* kernel)
                 statement->getMoreResults();
                 _loadShuttles(simulation_service, spawn_service, std::unique_ptr<sql::ResultSet>(statement->getResultSet()),
             	real_event->scene_id, real_event->scene_label);
+            	LOG(warning) << "Loading static data COMPLETE for: " << real_event->scene_label;
             
             } catch(std::exception& e) {
             	LOG(warning) << e.what();
@@ -226,19 +227,11 @@ void StaticService::_loadCells(SimulationServiceInterface* simulation_service, s
 
 		uint64_t parent_id = result->getInt64(2);
 		auto parent = simulation_service->GetObjectById(parent_id);
-#ifdef SI_METHOD_ONE
+
 		if(parent_id != 0 && parent != nullptr)
 			parent->AddObject(nullptr, object);
 
 		simulation_service->AddObjectToScene(object, scene_name);
-#elif SI_METHOD_TWO
-		if(parent_id != 0 && parent != nullptr)
-			parent->AddObject(nullptr, object);
-		else
-			simulation_service->AddObjectToScene(object, scene_name);
-#else
-		simulation_service->AddObjectToScene(object, scene_name);
-#endif
 	}
 }
 
@@ -290,19 +283,11 @@ void StaticService::_loadTerminals(SimulationServiceInterface* simulation_servic
 		//Put it into the scene
 		uint64_t parent_id = result->getUInt64(2);
 		auto parent = simulation_service->GetObjectById(parent_id);
-#ifdef SI_METHOD_ONE
+
 		if(parent_id != 0 && parent != nullptr)
 			parent->AddObject(nullptr, object);
 
 		simulation_service->AddObjectToScene(object, scene_name);
-#elif SI_METHOD_TWO
-		if(parent_id != 0 && parent != nullptr)
-			parent->AddObject(nullptr, object);
-		else
-			simulation_service->AddObjectToScene(object, scene_name);
-#else
-		simulation_service->AddObjectToScene(object, scene_name);
-#endif		
 	}
 }
 
@@ -373,19 +358,11 @@ void StaticService::_loadTicketCollectors(SimulationServiceInterface* simulation
 
 		uint64_t parent_id = result->getUInt64(2);
 		auto parent = simulation_service->GetObjectById(parent_id);
-#ifdef SI_METHOD_ONE
+
 		if(parent_id != 0 && parent != nullptr)
 			parent->AddObject(nullptr, object);
 
 		simulation_service->AddObjectToScene(object, scene_name);
-#elif SI_METHOD_TWO
-		if(parent_id != 0 && parent != nullptr)
-			parent->AddObject(nullptr, object);
-		else
-			simulation_service->AddObjectToScene(object, scene_name);
-#else
-		simulation_service->AddObjectToScene(object, scene_name);
-#endif
 
 		simulation_service->TransferObjectToScene(object, scene_name);
 
@@ -464,19 +441,10 @@ void StaticService::_loadNPCS(SimulationServiceInterface* simulation_service, Sp
 
 		auto parent = simulation_service->GetObjectById(parent_id);
 
-#ifdef SI_METHOD_ONE
 		if(parent_id != 0 && parent != nullptr)
 			parent->AddObject(nullptr, object);
 
 		simulation_service->AddObjectToScene(object, scene_name);
-#elif SI_METHOD_TWO
-		if(parent_id != 0 && parent != nullptr)
-			parent->AddObject(nullptr, object);
-		else
-			simulation_service->AddObjectToScene(object, scene_name);
-#else
-		simulation_service->AddObjectToScene(object, scene_name);
-#endif
 	}
 }
 
@@ -517,19 +485,10 @@ void StaticService::_loadShuttles(SimulationServiceInterface* simulation_service
 		uint64_t parent_id = result->getUInt64(2);
 		auto parent = simulation_service->GetObjectById(parent_id);
 
-#ifdef SI_METHOD_ONE
 		if(parent_id != 0 && parent != nullptr)
 			parent->AddObject(nullptr, object);
 
 		simulation_service->AddObjectToScene(object, scene_name);
-#elif SI_METHOD_TWO
-		if(parent_id != 0 && parent != nullptr)
-			parent->AddObject(nullptr, object);
-		else
-			simulation_service->AddObjectToScene(object, scene_name);
-#else
-		simulation_service->AddObjectToScene(object, scene_name);
-#endif
 
 		simulation_service->TransferObjectToScene(object, scene_name);
 

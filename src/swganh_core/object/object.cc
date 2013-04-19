@@ -988,7 +988,7 @@ std::pair<bool, boost::optional<std::shared_ptr<Object>>> Object::AddSlotObject(
             added = true;
         }
 
-        SetArrangementId(arrangement_id);
+        //SetArrangementId(arrangement_id);
     }
     
     object->SetContainer(shared_from_this());

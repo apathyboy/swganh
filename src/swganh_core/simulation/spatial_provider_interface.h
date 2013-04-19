@@ -22,7 +22,7 @@ class SpatialProviderInterface
 {
 public:
 	virtual void SvgToFile()=0;
-	virtual void AddObject(std::shared_ptr<swganh::object::Object> newObject, int32_t arrangement_id=-2)=0;
+	virtual void AddObject(std::shared_ptr<swganh::object::Object> newObject)=0;
 	virtual void RemoveObject(std::shared_ptr<swganh::object::Object> oldObject)=0;
 	virtual void UpdateObject(std::shared_ptr<swganh::object::Object> obj, const swganh::object::AABB& old_bounding_volume, const swganh::object::AABB& new_bounding_volume, std::shared_ptr<swganh::object::Object> view_box, const swganh::object::AABB view_box_old_bounding_volume, const swganh::object::AABB view_box_new_bounding_volume) = 0;
 	virtual void InsertObject(std::shared_ptr<swganh::object::Object> object)=0;

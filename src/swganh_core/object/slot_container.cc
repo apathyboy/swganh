@@ -19,5 +19,8 @@ void SlotContainer::remove_object(const std::shared_ptr<Object>& removeObject)
 
 void SlotContainer::view_objects(ViewWalkerFunction walkerFunction)
 {
-	for_each(held_objects_.begin(), held_objects_.end(), walkerFunction);
+    for(auto& object : held_objects_)
+    {
+        walkerFunction(object);
+    }
 }

@@ -31,7 +31,7 @@ public:
 	std::shared_ptr<WorldContainer>& GetWorldContainer() { return world_container_; }
 
 	//Object Management
-	virtual void AddObject(std::shared_ptr<swganh::object::Object> newObject, int32_t arrangement_id=-2);
+	virtual void AddObject(std::shared_ptr<swganh::object::Object> newObject);
 	virtual void RemoveObject(std::shared_ptr<swganh::object::Object> oldObject);
 	virtual void UpdateObject(std::shared_ptr<swganh::object::Object> obj, const swganh::object::AABB& old_bounding_volume, const swganh::object::AABB& new_bounding_volume, std::shared_ptr<swganh::object::Object> view_box = nullptr, const swganh::object::AABB view_box_old_bounding_volume = swganh::object::AABB(), const swganh::object::AABB view_box_new_bounding_volume = swganh::object::AABB());
 	virtual void DeleteObject(std::shared_ptr<swganh::object::Object> object);
