@@ -67,6 +67,9 @@ StaticService::StaticService(SwganhKernel* kernel)
             auto simulation_service = kernel_->GetServiceManager()->GetService<SimulationServiceInterface>("SimulationService");
             auto spawn_service = kernel_->GetServiceManager()->GetService<SpawnServiceInterface>("SpawnService");
             
+            
+            LOG(warning) << "Loading static data for: " << real_event->scene_label;
+
             try {
             	std::stringstream ss;
             	ss << "CALL sp_GetStaticObjects(0," << real_event->scene_id-1 << ");";
@@ -75,8 +78,7 @@ StaticService::StaticService(SwganhKernel* kernel)
             	statement->execute(ss.str());
             
             	std::unique_ptr<sql::ResultSet> result;
-            
-            	LOG(warning) << "Loading static data for: " << real_event->scene_label;
+
             	_loadBuildings(simulation_service, std::unique_ptr<sql::ResultSet>(statement->getResultSet()), 
             		real_event->scene_id, real_event->scene_label);
             
@@ -111,11 +113,12 @@ StaticService::StaticService(SwganhKernel* kernel)
                 statement->getMoreResults();
                 _loadShuttles(simulation_service, spawn_service, std::unique_ptr<sql::ResultSet>(statement->getResultSet()),
             	real_event->scene_id, real_event->scene_label);
-            	LOG(warning) << "Loading static data COMPLETE for: " << real_event->scene_label;
             
             } catch(std::exception& e) {
             	LOG(warning) << e.what();
             }
+            	
+            LOG(warning) << "Loading static data COMPLETE for: " << real_event->scene_label;
 
 			//@todo: remove this hardcoded spawn
             if (real_event->scene_id-1 == 0)
