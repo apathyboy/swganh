@@ -214,7 +214,7 @@ QueryBox QuadtreeSpatialProvider::GetQueryBoxViewRange(std::shared_ptr<Object> o
 {
 	glm::vec3 position;
 	glm::quat orientation;
-	object->__InternalGetAbsolutes(position, orientation);
+	object->GetAbsolutes(position, orientation);
 	return QueryBox(quadtree::Point(position.x - VIEWING_RANGE, position.z - VIEWING_RANGE), 
 					quadtree::Point(position.x + VIEWING_RANGE, position.z + VIEWING_RANGE));	
 }

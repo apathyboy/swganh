@@ -50,7 +50,7 @@ void PlayerViewBox::OnCollisionEnter(std::shared_ptr<Object> collider)
 	// ordering.
 	if(collider->GetContainer() != nullptr)
 	{
-		if(collider->GetContainer()->GetObjectId() != 0)
+        if(collider->GetContainer()->GetContainmentId() != 0)
 		{
 			// We are already aware of the parent, this is a new object spawned
 			// after the parent.
@@ -66,7 +66,7 @@ void PlayerViewBox::OnCollisionEnter(std::shared_ptr<Object> collider)
 					{
 						std::cout << "Creating2 [ " << collider->GetTemplate() << ":" << collider->GetObjectId(); 
 						if(collider->GetContainer() != nullptr)
-							std::cout << ":" << collider->GetContainer()->GetObjectId();
+                            std::cout << ":" << collider->GetContainer()->GetContainmentId();
 						std::cout << "] for ";
 						std::wcout << player_->GetCustomName() << std::endl;
 						collider->Subscribe(controller);
@@ -79,7 +79,7 @@ void PlayerViewBox::OnCollisionEnter(std::shared_ptr<Object> collider)
 							{
 								std::cout << "Creating2 [ " << child->GetTemplate() << ":" << child->GetObjectId(); 
 								if(child->GetContainer() != nullptr)
-									std::cout << ":" << child->GetContainer()->GetObjectId();
+									std::cout << ":" << child->GetContainer()->GetContainmentId();
 								std::cout << "] for ";
 								std::wcout << player_->GetCustomName() << std::endl;
 								child->Subscribe(controller);
@@ -102,7 +102,7 @@ void PlayerViewBox::OnCollisionEnter(std::shared_ptr<Object> collider)
 		{
 			std::cout << "Creating [ " << collider->GetTemplate() << ":" << collider->GetObjectId(); 
 			if(collider->GetContainer() != nullptr)
-				std::cout << ":" << collider->GetContainer()->GetObjectId();
+				std::cout << ":" << collider->GetContainer()->GetContainmentId();
 			std::cout << "] for ";
 			std::wcout << player_->GetCustomName() << std::endl;
 			collider->Subscribe(controller);
@@ -115,7 +115,7 @@ void PlayerViewBox::OnCollisionEnter(std::shared_ptr<Object> collider)
 				{
 					std::cout << "Creating [ " << child->GetTemplate() << ":" << child->GetObjectId(); 
 					if(child->GetContainer() != nullptr)
-						std::cout << ":" << child->GetContainer()->GetObjectId();
+						std::cout << ":" << child->GetContainer()->GetContainmentId();
 					std::cout << "] for ";
 					std::wcout << player_->GetCustomName() << std::endl;
 					child->Subscribe(controller);
@@ -138,7 +138,7 @@ void PlayerViewBox::OnCollisionLeave(std::shared_ptr<Object> collider)
 	// be spawned along with top level objects to ensure correct
 	// ordering.
 	if(collider->GetContainer() != nullptr)
-		if(collider->GetContainer()->GetObjectId() != 0)
+		if(collider->GetContainer()->GetContainmentId() != 0)
 			return;
 
 	// Remove collided object from view.
@@ -149,7 +149,7 @@ void PlayerViewBox::OnCollisionLeave(std::shared_ptr<Object> collider)
 		{
 			std::cout << "Destroying [ " << collider->GetTemplate() << ":" << collider->GetObjectId(); 
 			if(collider->GetContainer() != nullptr)
-				std::cout << ":" << collider->GetContainer()->GetObjectId();
+				std::cout << ":" << collider->GetContainer()->GetContainmentId();
 			std::cout << "] for ";
 			std::wcout << player_->GetCustomName() << std::endl;
 			collider->SendDestroy(controller);
@@ -161,7 +161,7 @@ void PlayerViewBox::OnCollisionLeave(std::shared_ptr<Object> collider)
 		{	
 			std::cout << "Destroying [ " << child->GetTemplate() << ":" << child->GetObjectId(); 
 			if(child->GetContainer() != nullptr)
-				std::cout << ":" << child->GetContainer()->GetObjectId();
+				std::cout << ":" << child->GetContainer()->GetContainmentId();
 			std::cout << "] for ";
 			std::wcout << player_->GetCustomName() << std::endl;
 			child->SendDestroy(controller);

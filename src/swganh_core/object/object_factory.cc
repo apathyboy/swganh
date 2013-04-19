@@ -308,16 +308,7 @@ void ObjectFactory::LoadContainedObjects(
     
         auto contained_object = object_manager_->CreateObjectFromStorage(contained_id, contained_type);
         
-        if(contained_object->GetArrangementId() == -2)
-        {
-            //This object has never been loaded before and needs to be put into the default slot.
-            object->AddObject(nullptr, contained_object);            
-        }
-        else 
-        {
-            //Put it back where it was persisted
-            object->AddObject(nullptr, contained_object, contained_object->GetArrangementId());
-        }
+        object->AddObject(nullptr, contained_object);
     }
 }
 

@@ -20,12 +20,6 @@ namespace object {
     
     class ContainerPermissionsInterface;
     class Object;
-    class SlotInterface;
-
-    typedef std::map<
-	    int32_t,
-	    std::shared_ptr<SlotInterface>
-    > ObjectSlots;
 
     typedef std::vector<std::vector<int32_t>> ObjectArrangements;
     
@@ -50,10 +44,6 @@ namespace object {
             const std::shared_ptr<Object>& object,
             const std::shared_ptr<ContainerInterface>& newContainer) = 0;
 		
-        virtual void SwapSlots(
-            const std::shared_ptr<Object>& requester,
-            const std::shared_ptr<Object>& object) = 0;
-
 		virtual bool HasContainedObjects() = 0;
 
 		virtual std::list<std::shared_ptr<Object>> GetObjects(
@@ -92,19 +82,6 @@ namespace object {
         }
 
 		virtual void GetAbsolutes(glm::vec3& pos, glm::quat& rot) = 0;
-        
-        virtual void SetSlotInformation(ObjectSlots slots, ObjectArrangements arrangements) = 0;
-        
-        virtual ObjectSlots GetSlotDescriptor() = 0;
-
-        virtual ObjectArrangements GetSlotArrangements() = 0;
-
-        virtual boost::optional<std::shared_ptr<Object>> ClearSlot(int32_t slot_id) = 0;
-        virtual bool ClearSlot(std::shared_ptr<Object> object) = 0;
-        
-        virtual std::pair<bool, boost::optional<std::shared_ptr<Object>>> AddSlotObject(std::shared_ptr<Object> object) = 0;
-
-        virtual std::shared_ptr<Object> GetSlotObject(int32_t slot_id) = 0;
 	};
 
 }}

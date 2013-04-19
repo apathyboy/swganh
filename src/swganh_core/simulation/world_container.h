@@ -18,26 +18,67 @@ class WorldContainer : public swganh::object::ContainerInterface
 public:
 	WorldContainer(SpatialProviderInterface* spatial_provider)
 		: spatial_provider_(spatial_provider)
+        , null_container_(nullptr)
 	{ SetPermissions(std::shared_ptr<swganh::object::ContainerPermissionsInterface>(new swganh::object::WorldPermission())); }
 	~WorldContainer() { };
 
-	uint64_t GetObjectId() { return 0; }
+    uint64_t GetContainmentId() const { return 0; }
 
-	void AddObject(std::shared_ptr<swganh::object::Object> requester, std::shared_ptr<swganh::object::Object> newObject, int32_t arrangement_id=-2);
-	void RemoveObject(std::shared_ptr<swganh::object::Object> requester, std::shared_ptr<swganh::object::Object> oldObject);
-	void TransferObject(std::shared_ptr<swganh::object::Object> requester, std::shared_ptr<swganh::object::Object> object, std::shared_ptr<ContainerInterface> newContainer, glm::vec3 position, int32_t arrangement_id=-2);
-	
-	// 
-	void __InternalGetObjects(std::shared_ptr<swganh::object::Object> requester, uint32_t max_depth, bool topDown, std::list<std::shared_ptr<swganh::object::Object>>& out) { std::cout << "WorldContainer::__InternalGetObjects" << std::endl; }
-	void __InternalViewObjects(std::shared_ptr<swganh::object::Object> requester, uint32_t max_depth, bool topDown, std::function<void(std::shared_ptr<swganh::object::Object>)> func) { std::cout << "WorldContainer::__InternalViewObjects" << std::endl; }
-	int32_t __InternalInsert(std::shared_ptr<swganh::object::Object> object, glm::vec3 new_position, int32_t arrangement_id=-2);
-	void __InternalViewAwareObjects(std::function<void(std::shared_ptr<swganh::object::Object>)> func, std::shared_ptr<swganh::object::Object> hint=nullptr) { std::cout << "WorldContainer::__internalViewAwareObjects" << std::endl; }
-	std::shared_ptr<ContainerInterface> GetContainer() { return nullptr; }
-	void SetContainer(const std::shared_ptr<ContainerInterface>& container) { std::cout << "WorldContainer::SetContainer" << std::endl; }
-	void __InternalGetAbsolutes(glm::vec3& pos, glm::quat& rot) { pos = glm::vec3(); rot = glm::quat(); }
+    virtual void AddObject(
+        const std::shared_ptr<swganh::object::Object>& requester,
+        std::shared_ptr<swganh::object::Object> object);
+    
+    virtual void RemoveObject(
+        const std::shared_ptr<swganh::object::Object>& requester, 
+        const std::shared_ptr<swganh::object::Object>& oldObject);
+    
+    virtual void TransferObject(
+        const std::shared_ptr<swganh::object::Object>& requester,
+        const std::shared_ptr<swganh::object::Object>& object,
+        const std::shared_ptr<swganh::object::ContainerInterface>& newContainer);
+    
+    virtual bool HasContainedObjects() { return true; }
+    
+    virtual std::list<std::shared_ptr<swganh::object::Object>> GetObjects(
+        const std::shared_ptr<swganh::object::Object>& requester, 
+        uint32_t max_depth,
+        bool topDown)
+    { 
+        std::cout << "WorldContainer::GetObjects" << std::endl; 
+        return std::list<std::shared_ptr<swganh::object::Object>>();
+    }
+    
+    virtual void GetObjects(
+        const std::shared_ptr<swganh::object::Object>& requester, 
+        uint32_t max_depth, 
+        bool topDown, 
+        std::list<std::shared_ptr<swganh::object::Object>>& out)
+    { 
+        std::cout << "WorldContainer::GetObjects" << std::endl;
+    }
+    
+    virtual void ViewObjects(
+        const std::shared_ptr<swganh::object::Object>& requester, 
+        uint32_t max_depth,
+        bool topDown, 
+        std::function<void (const std::shared_ptr<swganh::object::Object>&)> func)
+    { 
+        std::cout << "WorldContainer::ViewObjects" << std::endl;
+    }
+    
+    virtual std::shared_ptr<swganh::object::ContainerPermissionsInterface> GetPermissions() { return nullptr; }
+    
+    virtual void SetPermissions(std::shared_ptr<swganh::object::ContainerPermissionsInterface> obj) {}
+
+    const std::shared_ptr<swganh::object::ContainerInterface>& GetContainer() { return null_container_; }
+	void SetContainer(const std::shared_ptr<swganh::object::ContainerInterface>& container) { std::cout << "WorldContainer::SetContainer" << std::endl; }
+
+	virtual void GetAbsolutes(glm::vec3& pos, glm::quat& rot) { pos = glm::vec3(); rot = glm::quat(); }
 
 private:
 	SpatialProviderInterface* spatial_provider_;
+    std::shared_ptr<swganh::object::ContainerInterface> null_container_;
+
 };
 
 }} // namespace swganh::simulation

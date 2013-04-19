@@ -57,7 +57,8 @@ void MovementManager::HandleDataTransformServer(
 		std::shared_ptr<Object> old_container = std::static_pointer_cast<Object>(object->GetContainer());
 		if(old_container->GetTemplate().compare("object/cell/shared_cell.iff") == 0) 
 		{
-			old_container->TransferObject(nullptr, object, spatial_provider_->GetWorldContainer(), new_position);
+            object->SetPosition(new_position);
+			old_container->TransferObject(nullptr, object, spatial_provider_->GetWorldContainer());
 		} 
 		else
 		{
@@ -157,7 +158,8 @@ void MovementManager::HandleDataTransform(
 		std::shared_ptr<Object> old_container = std::static_pointer_cast<Object>(object->GetContainer());
 		if(old_container->GetTemplate().compare("object/cell/shared_cell.iff") == 0) 
 		{
-			old_container->TransferObject(nullptr, object, spatial_provider_->GetWorldContainer(), message.position);
+            object->SetPosition(message.position);
+			old_container->TransferObject(nullptr, object, spatial_provider_->GetWorldContainer());
 		} 
 		else 
 		{
@@ -215,7 +217,8 @@ void MovementManager::HandleDataTransformWithParent(
 		//Perform the transfer
 		if(object->GetContainer() != container)
 		{
-			object->GetContainer()->TransferObject(object, object, container, message.position);
+            object->SetPosition(message.position);
+			object->GetContainer()->TransferObject(object, object, container);
 		}
 		else
 		{

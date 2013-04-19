@@ -57,6 +57,11 @@ typedef std::map<
 	boost::variant<float, int64_t, std::wstring>
 > AttributesMap;
 
+typedef std::map<
+    int32_t,
+    std::shared_ptr<SlotInterface>
+> ObjectSlots;
+
 typedef boost::variant<float, int64_t, std::wstring, boost::blank> AttributeVariant;
 
 typedef swganh::ValueEvent<std::shared_ptr<Object>> ObjectEvent;
@@ -127,9 +132,9 @@ public:
 			auto b_obj_id = b->GetObjectId();
 
 			if(a->GetContainer() != nullptr)
-				a_obj_id += a->GetContainer()->GetObjectId();
+                a_obj_id += a->GetContainer()->GetContainmentId();
 			if(b->GetContainer() != nullptr)
-				b_obj_id += b->GetContainer()->GetObjectId();
+				b_obj_id += b->GetContainer()->GetContainmentId();
 
 			return a_obj_id < b_obj_id; 
 		}
