@@ -74,7 +74,7 @@ void PlayerViewBox::OnCollisionEnter(std::shared_ptr<Object> collider)
 						collider->CreateBaselines(controller);
 					}
 
-					collider->ViewObjects(nullptr, 0, true, [=](const std::shared_ptr<Object>& child) {
+					collider->ViewObjects(player_, 0, true, [=](const std::shared_ptr<Object>& child) {
 							if(child->IsInSnapshot() == false)
 							{
 								std::cout << "Creating2 [ " << child->GetTemplate() << ":" << child->GetObjectId(); 
@@ -110,7 +110,7 @@ void PlayerViewBox::OnCollisionEnter(std::shared_ptr<Object> collider)
 			collider->CreateBaselines(controller);
 		}
 
-		collider->ViewObjects(nullptr, 0, true, [=](const std::shared_ptr<Object>& child) {
+		collider->ViewObjects(player_, 0, true, [=](const std::shared_ptr<Object>& child) {
 				if(child->IsInSnapshot() == false)
 				{
 					std::cout << "Creating [ " << child->GetTemplate() << ":" << child->GetObjectId(); 
