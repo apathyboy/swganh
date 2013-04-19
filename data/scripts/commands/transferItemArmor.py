@@ -3,8 +3,7 @@ from swgpy.command import BaseSwgCommand
 from swgpy.utility import *
 
 
-
-class TransferItemArmor(BaseSwgCommand):
+class TransferItemArmorCommand(BaseSwgCommand):
     def getCommandName(self):
         return 'transferitemarmor'
 
@@ -18,8 +17,8 @@ class TransferItemArmor(BaseSwgCommand):
             container.remove(self.getActor(), self.getTarget())
             self.getActor().addToSlot(self.getTarget())
         else:
-            print('Unequipped item start armor')
+            print('Unequipped item start item')
             self.getActor().clearFromSlot(self.getTarget())
-            #print('Unequipped item end')
-            #container.add(self.getActor(), self.getTarget())
-
+            container.add(self.getActor(), self.getTarget())
+            print('Unequipped item end')
+            
