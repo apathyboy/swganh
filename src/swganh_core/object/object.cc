@@ -850,6 +850,25 @@ void Object::ViewObjects(
             if (!topDown)
                 func(contained_object);
         }
+
+        for(auto& slot : slot_descriptor_)
+        {
+            slot.second->view_objects([&] (const std::shared_ptr<Object>& object) 
+            {
+                uint32_t object_instance = object->GetInstanceId();
+                if (object_instance == 0 || object_instance == requester_instance)
+                {
+                    if(topDown)
+                        func(object);
+
+                    if(max_depth != 1 && (!requester || requester->GetObjectId() == GetObjectId()))
+                        object->ViewObjects(requester, (max_depth == 0) ? 0 : max_depth-1, topDown, func);
+
+                    if(!topDown)
+                        func(object);
+                }
+            });
+        }
 	}
 }
 
@@ -978,6 +997,8 @@ std::pair<bool, boost::optional<std::shared_ptr<Object>>> Object::AddSlotObject(
         boost::lock_guard<boost::mutex> lock_container(containment_mutex_, boost::adopt_lock);
     
         auto arrangement_id = GetAppropriateArrangementId_(object);
+        
+        object->SetArrangementId(arrangement_id);
 
         auto& arrangement = object->slot_arrangements_[arrangement_id - 4];
         for (auto& i : arrangement)
