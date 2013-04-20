@@ -465,7 +465,11 @@ public:
 	void SetDatabasePersisted(bool value);
 	void SetInSnapshot(bool value);
 
-	/**
+    void AddAware(const std::shared_ptr<Object>& object);
+    void RemoveAware(const std::shared_ptr<Object>& object);
+    bool IsAware(const std::shared_ptr<Object>& object);
+
+    /**
 	 * @brief Gets the Attribute Map
 	 */ 
 	AttributesMap GetAttributeMap();
@@ -731,6 +735,7 @@ private:
 	AttributesMap attributes_map_;
     
     ObserverContainer observers_;
+    AwareObjectContainer aware_objects_;
 
     BaselinesCacheContainer baselines_;
 

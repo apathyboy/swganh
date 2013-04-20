@@ -524,6 +524,51 @@ void Object::SetInSnapshot(bool value)
 	in_snapshot_ = value;
 }
 
+void Object::AddAware(const std::shared_ptr<Object>& object)
+{
+    auto& controller = GetController();
+
+    if (!IsAware(object) && controller)
+    {
+        if(!object->IsInSnapshot())
+        {
+            object->Subscribe(controller);
+            object->SendCreateByCrc(controller);
+            object->CreateBaselines(controller);
+        }
+
+        aware_objects_.insert(object);
+        
+        object->ViewObjects(shared_from_this(), 1, true, [&] (const std::shared_ptr<Object>& child)
+        {
+            AddAware(child);
+        });
+    }
+}
+
+void Object::RemoveAware(const std::shared_ptr<Object>& object)
+{
+    auto& controller = GetController();
+
+    if (IsAware(object) && controller)
+    {
+        object->SendDestroy(controller);
+        object->Unsubscribe(controller);
+        
+        aware_objects_.erase(object);
+
+        object->ViewObjects(shared_from_this(), 1, true, [&] (const std::shared_ptr<Object>& child)
+        {
+            RemoveAware(child);
+        });
+    }
+}
+
+bool Object::IsAware(const std::shared_ptr<Object>& object)
+{
+    return aware_objects_.find(object) != aware_objects_.end();
+}
+
 AttributesMap Object::GetAttributeMap()
 {
 	boost::lock_guard<boost::mutex> lock(object_mutex_);
@@ -751,6 +796,8 @@ void Object::AddObject(
 
 	        object->SetContainer(shared_from_this());
     	    object->SetSceneId(GetSceneId());
+
+            AddAware(object);
         }
 	}
 }
@@ -770,6 +817,8 @@ void Object::RemoveObject(
         { return oldObject == contained_object; }), std::end(contained_objects_));
 
         oldObject->SetContainer(nullptr);
+        
+        RemoveAware(oldObject);
     }
 }
 
