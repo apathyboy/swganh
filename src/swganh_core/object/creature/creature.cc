@@ -972,6 +972,35 @@ int32_t Creature::GetStatMax(StatIndex stat_index)
     return stat_max_list_.At(stat_index).value;
 }
 
+void Creature::AddObject(
+    const std::shared_ptr<Object>& requester,
+    std::shared_ptr<Object> object)
+{
+    GetSlotObject(4)->AddObject(requester, object);
+    AddAware(object);
+}
+
+void Creature::RemoveObject(
+    const std::shared_ptr<Object>& requester, 
+    const std::shared_ptr<Object>& oldObject)
+{    
+    GetSlotObject(4)->RemoveObject(requester, oldObject);
+    RemoveAware(oldObject);
+}
+
+void Creature::TransferObject(
+    const std::shared_ptr<Object>& requester,
+    const std::shared_ptr<Object>& object,
+    const std::shared_ptr<ContainerInterface>& newContainer)
+{    
+    GetSlotObject(4)->TransferObject(requester, object, newContainer);
+}
+
+bool Creature::HasContainedObjects()
+{
+    return GetSlotObject(4)->HasContainedObjects();
+}
+
 boost::optional<std::shared_ptr<Object>> Creature::ClearSlot(int32_t slot_id)
 {
     auto item = Object::ClearSlot(slot_id);
@@ -1001,17 +1030,11 @@ boost::optional<std::shared_ptr<Object>> Creature::ClearSlot(int32_t slot_id)
 
 std::pair<bool, boost::optional<std::shared_ptr<Object>>> Creature::AddSlotObject(std::shared_ptr<Object> object)
 {
-    auto& tangible = std::dynamic_pointer_cast<Tangible>(object);
-
-    if (!tangible)
-    {
-        return std::make_pair(false, boost::optional<std::shared_ptr<Object>>());
-    }
-
-    auto result = Object::AddSlotObject(tangible);
+    auto result = Object::AddSlotObject(object);
 
     if (result.first)
     {
+        if(auto& tangible = std::dynamic_pointer_cast<Tangible>(object))
         {
             boost::lock_guard<boost::mutex> lock(object_mutex_);
             equipment_list_.Add(EquipmentItem(tangible));

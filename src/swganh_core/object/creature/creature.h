@@ -566,7 +566,22 @@ public:
 	std::vector<Stat> GetMaxStats(void);
 	int32_t GetStatMax(StatIndex stat_index);
 	void SerializeMaxStats(swganh::messages::BaseSwgMessage* message);
-
+    
+    virtual void AddObject(
+        const std::shared_ptr<Object>& requester,
+        std::shared_ptr<Object> object);
+    
+    virtual void RemoveObject(
+        const std::shared_ptr<Object>& requester, 
+        const std::shared_ptr<Object>& oldObject);
+    
+    virtual void TransferObject(
+        const std::shared_ptr<Object>& requester,
+        const std::shared_ptr<Object>& object,
+        const std::shared_ptr<ContainerInterface>& newContainer);
+    
+    virtual bool HasContainedObjects();
+    
     // Equipment List
     
     virtual boost::optional<std::shared_ptr<Object>> ClearSlot(int32_t slot_id);

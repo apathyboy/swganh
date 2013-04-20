@@ -49,6 +49,7 @@ def CreateStartingCharacter(kernel, scale, base_model, customization, full_name,
     # Create Starting Items
     startingItems = GetStartingItems(species, profession, gender)
     # Add all sub objects to creature (parent)
+    creature.addToSlot(player)
     creature.addToSlot(datapad)
     creature.addToSlot(inventory)
     creature.addToSlot(bank)
@@ -56,7 +57,6 @@ def CreateStartingCharacter(kernel, scale, base_model, customization, full_name,
     if (hair):
         hair.setCustomizationFromInts(hair_customization)
         creature.addToSlot(hair)
-    creature.add(creature, player)
     # Now add the objects to the inventory
     # Wearables get equipped
     for item in startingItems:
@@ -64,7 +64,7 @@ def CreateStartingCharacter(kernel, scale, base_model, customization, full_name,
         if 'wearables' in item:
             creature.addToSlot(item_obj)
         else:
-            inventory.add(creature, item_obj)
+            creature.add(creature, item_obj)
 
     creature.scene_id = simulation.getSceneId(startLoc.name)
 

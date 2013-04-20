@@ -81,12 +81,11 @@ class PyRadialMenu(RadialMenu):
 	
 	def giveItems(self, owner, list, postProcess):
 		sim = self.getKernel().serviceManager().simulationService()
-		inv = self.getKernel().serviceManager().equipmentService().getEquippedObject(owner, "inventory")
 		for name in list:
 			item = sim.createObject(name, swgpy.ContainerPermission.DEFAULT)
 			if item is not None:
 				postProcess(item)
-				inv.add(owner, item)
+				owner.add(owner, item)
 	
 	def displaySUIList(self, owner, list, callbackName):
 		sui = self.getKernel().serviceManager().suiService()
