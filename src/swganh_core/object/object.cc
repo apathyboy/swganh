@@ -537,7 +537,10 @@ void Object::AddAware(const std::shared_ptr<Object>& object)
             object->CreateBaselines(controller);
         }
 
-        aware_objects_.insert(object);
+        {
+            boost::lock_guard<boost::mutex> lock(object_mutex_);
+            aware_objects_.insert(object);
+        }
         
         object->ViewObjects(shared_from_this(), 1, true, [&] (const std::shared_ptr<Object>& child)
         {
@@ -555,7 +558,10 @@ void Object::RemoveAware(const std::shared_ptr<Object>& object)
         object->SendDestroy(controller);
         object->Unsubscribe(controller);
         
-        aware_objects_.erase(object);
+        {
+            boost::lock_guard<boost::mutex> lock(object_mutex_);
+            aware_objects_.erase(object);
+        }
 
         object->ViewObjects(shared_from_this(), 1, true, [&] (const std::shared_ptr<Object>& child)
         {
@@ -565,7 +571,8 @@ void Object::RemoveAware(const std::shared_ptr<Object>& object)
 }
 
 bool Object::IsAware(const std::shared_ptr<Object>& object)
-{
+{    
+    boost::lock_guard<boost::mutex> lock(object_mutex_);
     return aware_objects_.find(object) != aware_objects_.end();
 }
 
