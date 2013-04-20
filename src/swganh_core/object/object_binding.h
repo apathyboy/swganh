@@ -50,7 +50,13 @@ bool ClearFromSlotWrapper(Object* this_obj, std::shared_ptr<Object> object)
 
 std::shared_ptr<Object> AddSlotObjectWrapper(Object* this_obj, std::shared_ptr<Object> object)
 {
-    return *(this_obj->AddSlotObject(object).second);
+    std::shared_ptr<Object> old_object = nullptr;
+    
+    auto result = this_obj->AddSlotObject(object);
+    if (result.second)
+        old_object = *(result.second);
+
+    return old_object;
 }
 
 
