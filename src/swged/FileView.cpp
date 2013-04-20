@@ -96,10 +96,12 @@ void CFileView::FillFileView()
     std::vector<std::pair<std::string, HTREEITEM>> directory_cache;
     auto total = file_listing_.size();
     int count = 0;
+
     // Loop through all the files in the listing
     for (auto& file : file_listing_)
     {
         std::vector<std::string> path_data;
+        std::string current_depth;
         boost::split(path_data, file, boost::is_any_of("/"));
 
         HTREEITEM previous = NULL;
@@ -108,6 +110,7 @@ void CFileView::FillFileView()
         for (uint32_t i = 0; i < path_data.size(); ++i)
         {
             auto& current_item = path_data[i];
+            current_depth += current_item;
             
             // Is this the file element (the last iteration of the loop)
             if (i + 1 == path_data.size())
@@ -117,7 +120,7 @@ void CFileView::FillFileView()
             }
 
             // If a tree item has already been created for this directory pull it from the cache and continue
-            if (directory_cache.size() > i && directory_cache[i].first.compare(current_item) == 0)
+            if (directory_cache.size() > i && directory_cache[i].first.compare(current_depth) == 0)
             {
                 previous = directory_cache[i].second;
                 continue;
@@ -129,9 +132,9 @@ void CFileView::FillFileView()
             // If the directory cache is not big enough push the item back, otherwise
             // overwrite the cache entry for this nested level.
             if (directory_cache.size() <= i)
-                directory_cache.push_back(std::make_pair(current_item, previous));
+                directory_cache.push_back(std::make_pair(current_depth, previous));
             else
-                directory_cache[i] = std::make_pair(current_item, previous);
+                directory_cache[i] = std::make_pair(current_depth, previous);
         }
         
         if (count % 100)

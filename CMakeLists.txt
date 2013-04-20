@@ -49,7 +49,7 @@ option(BUILD_DOCS
 
 option(BUILD_EXAMPLES
     "Explicitly force building of examples" OFF)
-    
+
 option(TREAT_WARNINGS_AS_ERRORS
     "Treat all warnings as errors" ON)
 
@@ -94,7 +94,7 @@ if(MSVC)
     message(STATUS " - MSVC: Version ${MSVC_VERSION}")
 
     if(MSVC_VERSION LESS 1700)
-    	message(FATAL_ERROR "Visual Studio 11 or newer is required ")
+        message(FATAL_ERROR "Visual Studio 11 or newer is required ")
     endif()
 
     SET(_WIN32_WINNT 0x0601 CACHE INTERNAL "Setting _WIN32_WINNT to 0x0601 for Windows Vista minimum APIs")
@@ -110,16 +110,24 @@ if(MSVC)
     MESSAGE(STATUS "- MSVC: Set variadic max to 10 for compatibility with dependencies")
 
     if(TREAT_WARNINGS_AS_ERRORS)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /WX")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
         message(STATUS "- MSVC: Treating all warnings as errors")
-	endif()
+    endif()
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251")
 
     ADD_DEFINITIONS (/D BOOST_ALL_DYN_LINK)
     MESSAGE(STATUS "- BOOST: Enable dynamic linking")
-    
+
     add_definitions(/D BOOST_ALL_NO_LIB)
     message(status "- BOOST: Disable automatic linking")
+
+    ADD_DEFINITIONS (/D _HAS_ITERATOR_DEBUGGING=0)
+    MESSAGE(STATUS "- MSVC: set iterator debugging to 0")
+
+    ADD_DEFINITIONS (/D _SECURE_SCL=0)
+    MESSAGE(STATUS "- MSVC: set iterator debugging to 0")
 endif()
 
 # Use the static/multithreaded libraries.
@@ -137,20 +145,20 @@ if(NOT DEFINED VENDOR_PREFIX)
 endif()
 
 if(DEFINED VENDOR_PREFIX)
-    set(BOOST_ROOT ${VENDOR_PREFIX}/boost)
-    set(GLM_ROOT ${VENDOR_PREFIX}/glm)
-	set(ENV{MYSQL_DIR} ${VENDOR_PREFIX}/mysql-connector-c)
-    set(MysqlConnectorCpp_ROOT ${VENDOR_PREFIX}/mysql-connector-cpp)
-    set(PYTHON_ROOT ${VENDOR_PREFIX}/python)
-    set(TURTLE_ROOT ${VENDOR_PREFIX}/turtle)
-    set(ZLIB_ROOT ${VENDOR_PREFIX}/zlib)
+    set(BOOST_ROOT ${VENDOR_PREFIX})
+    set(GLM_ROOT ${VENDOR_PREFIX})
+    set(ENV{MYSQL_DIR} ${VENDOR_PREFIX})
+    set(MysqlConnectorCpp_ROOT ${VENDOR_PREFIX})
+    set(PYTHON_ROOT ${VENDOR_PREFIX})
+    set(TURTLE_ROOT ${VENDOR_PREFIX})
+    set(ZLIB_ROOT ${VENDOR_PREFIX})
 endif()
 
 if (NOT WIN32)
     find_package(TBB REQUIRED)
 endif()
 
-find_package(Boost 1.49.0 COMPONENTS date_time filesystem iostreams log log_setup program_options python3 serialization system thread unit_test_framework ${AdditionalBoostLibs} REQUIRED)
+find_package(Boost 1.49.0 COMPONENTS iostreams serialization date_time filesystem log log_setup program_options python3 system thread unit_test_framework ${AdditionalBoostLibs} REQUIRED)
 find_package(Glm REQUIRED)
 find_package(MysqlConnectorC REQUIRED)
 find_package(MysqlConnectorCpp REQUIRED)
