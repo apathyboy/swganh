@@ -976,16 +976,26 @@ void Creature::AddObject(
     const std::shared_ptr<Object>& requester,
     std::shared_ptr<Object> object)
 {
-    GetSlotObject(4)->AddObject(requester, object);
-    AddAware(object);
+    auto inventory_slot = GetSlotObject(4);
+
+    if (inventory_slot)
+    {
+        GetSlotObject(4)->AddObject(requester, object);
+        AddAware(object);
+    }
 }
 
 void Creature::RemoveObject(
     const std::shared_ptr<Object>& requester, 
     const std::shared_ptr<Object>& oldObject)
 {    
-    GetSlotObject(4)->RemoveObject(requester, oldObject);
-    RemoveAware(oldObject);
+    auto inventory_slot = GetSlotObject(4);
+
+    if (inventory_slot)
+    {
+        inventory_slot->RemoveObject(requester, oldObject);
+        RemoveAware(oldObject);
+    }
 }
 
 void Creature::TransferObject(
@@ -993,12 +1003,24 @@ void Creature::TransferObject(
     const std::shared_ptr<Object>& object,
     const std::shared_ptr<ContainerInterface>& newContainer)
 {    
-    GetSlotObject(4)->TransferObject(requester, object, newContainer);
+    auto inventory_slot = GetSlotObject(4);
+
+    if (inventory_slot)
+    {
+        inventory_slot->TransferObject(requester, object, newContainer);
+    }
 }
 
 bool Creature::HasContainedObjects()
 {
-    return GetSlotObject(4)->HasContainedObjects();
+    auto inventory_slot = GetSlotObject(4);
+
+    if (inventory_slot)
+    {
+        return inventory_slot->HasContainedObjects();
+    }
+
+    return false;
 }
 
 boost::optional<std::shared_ptr<Object>> Creature::ClearSlot(int32_t slot_id)
