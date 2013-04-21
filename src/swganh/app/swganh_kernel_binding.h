@@ -9,8 +9,6 @@
 
 #include "swganh_kernel.h"
 
-#include "swganh/scripting/python_shared_ptr.h"
-
 #include "swganh/event_dispatcher.h"
 #include "swganh/app/kernel_interface.h"
 #include "swganh/service/service_manager.h"

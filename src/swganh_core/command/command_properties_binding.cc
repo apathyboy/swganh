@@ -6,7 +6,6 @@
 #endif
 #include "command_properties_binding.h"
 
-#include "swganh/scripting/python_shared_ptr.h"
 #include <boost/python.hpp>
 
 #include "command_properties.h"

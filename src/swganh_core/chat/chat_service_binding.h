@@ -7,7 +7,6 @@
 #include <Python.h>
 #endif
 
-#include "swganh/scripting/python_shared_ptr.h"
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include "chat_service_interface.h"
 #include <boost/python.hpp>

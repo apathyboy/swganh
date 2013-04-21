@@ -6,7 +6,6 @@
 #include <Python.h>
 #endif
 
-#include "swganh/scripting/python_shared_ptr.h"
 #include "simulation_service_interface.h"
 
 #include <boost/python.hpp>
@@ -58,6 +57,7 @@ void exportSimulationService()
         .def("startScene", &SimulationServiceInterface::StartScene, "starts a scene by its label")
         .def("stopScene", &SimulationServiceInterface::StopScene, "stops a scene by the given label")
         .def("getSceneId", &SimulationServiceInterface::SceneIdByName, "gets a scene id from a given name")
+        .def("getSceneName", &SimulationServiceInterface::SceneNameById, "gets a scene id from a given name")
 		.def("createObject", &SimulationServiceInterface::CreateObjectFromTemplate, CreateOverload(args("template_name", "permission_type", "is_persisted", "object_id"), "Creates an object of the given template"))
 		.def("removeObject", &SimulationServiceInterface::RemoveObject, "Removes an object from the simulation (delete).")
 		.def("removeObjectById", &SimulationServiceInterface::RemoveObjectById, "Removes an object from the simulation by id (delete).")

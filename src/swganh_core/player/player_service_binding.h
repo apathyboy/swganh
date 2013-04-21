@@ -6,7 +6,6 @@
 #include <Python.h>
 #endif
 
-#include "swganh/scripting/python_shared_ptr.h"
 #include "player_service_interface.h"
 #include "swganh_core/object/creature/creature.h"
 

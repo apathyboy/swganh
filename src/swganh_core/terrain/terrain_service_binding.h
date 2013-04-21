@@ -7,7 +7,6 @@
 #endif
 
 #include "swganh/logger.h"
-#include "swganh/scripting/python_shared_ptr.h"
 
 #include <memory>
 #include <boost/python.hpp>

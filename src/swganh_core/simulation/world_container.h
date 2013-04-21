@@ -70,7 +70,7 @@ public:
     
     virtual void SetPermissions(std::shared_ptr<swganh::object::ContainerPermissionsInterface> obj) {}
 
-    const std::shared_ptr<swganh::object::ContainerInterface>& GetContainer() { return null_container_; }
+    std::shared_ptr<swganh::object::ContainerInterface> GetContainer() { return null_container_; }
 	void SetContainer(const std::shared_ptr<swganh::object::ContainerInterface>& container) { std::cout << "WorldContainer::SetContainer" << std::endl; }
 
 	virtual void GetAbsolutes(glm::vec3& pos, glm::quat& rot) { pos = glm::vec3(); rot = glm::quat(); }
