@@ -658,12 +658,10 @@ public:
     virtual std::shared_ptr<ContainerPermissionsInterface> GetPermissions();
 
     virtual void SetPermissions(std::shared_ptr<ContainerPermissionsInterface> obj);
-
-    using ContainerInterface::GetContainer;
-
+    
     virtual void SetContainer(const std::shared_ptr<ContainerInterface>& container);
 
-    virtual const std::shared_ptr<ContainerInterface>& GetContainer();
+    virtual std::shared_ptr<ContainerInterface> GetContainer();
 
     virtual void GetAbsolutes(glm::vec3& pos, glm::quat& rot);
 

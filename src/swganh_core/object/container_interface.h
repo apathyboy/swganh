@@ -69,10 +69,10 @@ namespace object {
         
         virtual void SetContainer(const std::shared_ptr<ContainerInterface>& container) = 0;
         
-        virtual const std::shared_ptr<ContainerInterface>& GetContainer() = 0;
+        virtual std::shared_ptr<ContainerInterface> GetContainer() = 0;
         
         template<typename T>
-        std::shared_ptr<T> GetContainer()
+        std::shared_ptr<T> GetContainerAs()
         {
 #ifdef _DEBUG
             return std::dynamic_pointer_cast<T>(GetContainer());

@@ -437,7 +437,7 @@ void Player::ClearAllQuests()
 
 std::vector<Ability> Player::GetAbilityList() 
 {
-    auto creature = GetContainer<Creature>();
+    auto creature = GetContainerAs<Creature>();
 	auto skill_commands = creature->GetSkillCommands();
 	
 	boost::lock_guard<boost::mutex> lock(object_mutex_);
@@ -450,7 +450,7 @@ std::vector<Ability> Player::GetAbilityList()
 
 bool Player::HasAbility(string ability)
 {
-    auto creature = GetContainer<Creature>();
+    auto creature = GetContainerAs<Creature>();
     auto abilities = creature->GetSkillCommands();
     
     boost::lock_guard<boost::mutex> lock(object_mutex_);

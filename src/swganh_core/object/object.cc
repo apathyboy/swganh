@@ -836,6 +836,7 @@ void Object::TransferObject(
 {
 	if(	requester == nullptr || this->GetPermissions()->canRemove(shared_from_this(), requester, object))
 	{
+        object->GetContainer()->RemoveObject(requester, object);
         newContainer->AddObject(nullptr, object);
 	}
 }
@@ -946,7 +947,7 @@ void Object::SetContainer(const std::shared_ptr<ContainerInterface>& container)
     container_ = container;
 }
 
-const std::shared_ptr<ContainerInterface>& Object::GetContainer()
+std::shared_ptr<ContainerInterface> Object::GetContainer()
 {
     boost::lock_guard<boost::mutex> lock(object_mutex_);
 	return container_;
