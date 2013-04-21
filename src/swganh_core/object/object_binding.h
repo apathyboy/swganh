@@ -5,7 +5,6 @@
 #ifndef WIN32
 #include <Python.h>
 #endif
-#include "swganh/scripting/python_shared_ptr.h"
 
 #include "swganh_core/object/object.h"
 #include "swganh_core/object/cell/cell.h"
@@ -28,25 +27,10 @@ using namespace boost::python;
 using namespace std;
 using namespace swganh::object;
 
-boost::python::tuple AddObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> newObject, int32_t arrangement_id=-2)
-{
-	return boost::python::make_tuple(requester, newObject,  arrangement_id);
-}
-
-boost::python::tuple TransferObject(std::shared_ptr<Object> requester, std::shared_ptr<Object> object, std::shared_ptr<Object> newContainer, int32_t arrangement_id=-2)
-{
-	return boost::python::make_tuple(requester, object, newContainer, arrangement_id);
-}
-
-bool ClearSlotWrapper(Object* this_obj, uint32_t slot_id)
-{
-    return this_obj->ClearSlot(slot_id);
-} 
-
-bool ClearFromSlotWrapper(Object* this_obj, std::shared_ptr<Object> object)
-{
-    return this_obj->ClearSlot(object);
-} 
+void (Object::*SwapSlots)(const std::shared_ptr<Object>&, const std::shared_ptr<Object>&) = &Object::SwapSlots;    
+boost::optional<std::shared_ptr<Object>> (Object::*ClearSlot)(int32_t slot_id) = &Object::ClearSlot;
+std::shared_ptr<Object> (Object::*GetSlotObject)(int32_t slot_id) = &Object::GetSlotObject;
+bool (Object::*ClearFromSlot)(std::shared_ptr<Object> object) = &Object::ClearSlot;
 
 std::shared_ptr<Object> AddSlotObjectWrapper(Object* this_obj, std::shared_ptr<Object> object)
 {
@@ -58,7 +42,6 @@ std::shared_ptr<Object> AddSlotObjectWrapper(Object* this_obj, std::shared_ptr<O
 
     return old_object;
 }
-
 
 void SendSystemMessage1(std::shared_ptr<Object> requester, std::string filename, std::string label)
 {
@@ -155,10 +138,7 @@ void PlayMusic3(std::shared_ptr<swganh::object::Object> object, std::string musi
 	SystemMessage::PlayMusic(object, music_name, channel, send_in_range);
 }
 BOOST_PYTHON_FUNCTION_OVERLOADS(PlayMusic3Overload, PlayMusic3, 3, 4)
-
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addObjectOverload, AddObject, 2, 2)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(transferObjectOverload, TransferObject, 3, 3)
-
+    
 void UpdatePosition(std::shared_ptr<Object> self, glm::vec3 position, glm::quat orientation, std::shared_ptr<Object> parent=nullptr)
 {
 	self->UpdatePosition(position, orientation, parent);
@@ -171,11 +151,6 @@ std::shared_ptr<swganh::object::Creature> ToCreature(std::shared_ptr<swganh::obj
 {
 	return static_pointer_cast<swganh::object::Creature>(obj);
 }
-
-struct ProsePackageWrapper : ProsePackage, wrapper<ProsePackage>
-{
-    ProsePackageWrapper() : ProsePackage(){}
-};
 
 void exportOutOfBand()
 {
@@ -202,41 +177,15 @@ void exportObject()
     .value("WHITE", controllers::WHITE)
     .value("MIX", controllers::MIX)
     ;
-    
-	void (Object::*RemoveObject)(const shared_ptr<Object>&, const shared_ptr<Object>&) = &Object::RemoveObject;
-    
-    ;
-	void (Object::*AddObject)(const shared_ptr<Object>&, shared_ptr<Object>) = &Object::AddObject;
-    
-    void (Object::*TransferObject)(
-        const std::shared_ptr<Object>&,
-        const std::shared_ptr<Object>&,
-        const std::shared_ptr<ContainerInterface>&) = &Object::TransferObject;
-
-    void (Object::*SwapSlots)(
-        const std::shared_ptr<Object>&,
-        const std::shared_ptr<Object>&) = &Object::SwapSlots;
-    
-    bool (Object::*HasContainedObjects)() = &Object::HasContainedObjects;
-
-    const std::shared_ptr<ContainerInterface>& (Object::*GetContainer)() = &Object::GetContainer;
-    
-    boost::optional<std::shared_ptr<Object>> (Object::*ClearSlot)(int32_t slot_id) = &Object::ClearSlot;
-    
-    std::pair<bool, boost::optional<std::shared_ptr<Object>>> (Object::*AddSlotObject)(std::shared_ptr<Object> object) = &Object::AddSlotObject;
-
-    std::shared_ptr<Object> (Object::*GetSlotObject)(int32_t slot_id) = &Object::GetSlotObject;
-    bool (Object::*ClearFromSlot)(std::shared_ptr<Object> object) = &Object::ClearSlot;
-
-	//class_<ContainerInterface, std::shared_ptr<ContainerInterface>, boost::noncopyable>("ContainerInterface", "Container interface", no_init)
-	//	.def("add", &ContainerInterface::AddObject, addObjectOverload(args("requester", "newObject", "arrangement_id"), "Adds an object to the current object"))
-	//	.def("remove", RemoveObject, "Removes an object fomr the current object")
-	//	.def("transfer", &ContainerInterface::TransferObject, transferObjectOverload(args("object", "newContainer", "arrangement_id"), "Transfer an object to a different object"))
-	//	.def("swapSlots", &Object::SwapSlots, "Change an objects current arrangement")	
-	//	.def("container", &Object::GetContainer, "Gets the :class:`ContainerInterface` object of the current object")
-	//	.def("hasContainedObjects", &Object::HasContainedObjects, "Checks to see if container has any objects in it")
-	//	.def_readonly("id", &ContainerInterface::GetObjectId, "Gets the object id of the container")
-	//	;
+        	
+	class_<ContainerInterface, std::shared_ptr<ContainerInterface>, boost::noncopyable>("ContainerInterface", "Container interface", no_init)
+		.def("add", &ContainerInterface::AddObject, "Adds an object to the current object")
+		.def("remove", &ContainerInterface::RemoveObject, "Removes an object fomr the current object")
+		.def("transfer", &ContainerInterface::TransferObject, "Transfer an object to a different object")
+		.def("container", &ContainerInterface::GetContainer, "Gets the :class:`ContainerInterface` object of the current object")
+		.def("hasContainedObjects", &ContainerInterface::HasContainedObjects, "Checks to see if container has any objects in it")
+        .def("id", &ContainerInterface::GetContainmentId, "Gets the object id of the container")
+		;
 	
 	class_<SystemMessage, boost::noncopyable>("SystemMessage", "Static class that deals with system messages.", no_init)
 		.def("sendSystemMessage", SendSystemMessage1, "Send a system message to the requester, see :class:`")
@@ -261,7 +210,7 @@ void exportObject()
 		.staticmethod("playMusic")
 		;
 
-    class_<Object, std::shared_ptr<Object>, boost::noncopyable>("Object", "The Base SWG Object that all Objects inherit from")
+    class_<Object, bp::bases<ContainerInterface>, std::shared_ptr<Object>, boost::noncopyable>("Object", "The Base SWG Object that all Objects inherit from")
 		.add_property("id", &Object::GetObjectId, &Object::SetObjectId, "Gets or sets The id of the object")
 		.add_property("scene_id", &Object::GetSceneId, &Object::SetSceneId, "Gets and Sets the scene id the object is in")
 		.add_property("type", &Object::GetType, "Gets the type of the object")
@@ -294,15 +243,10 @@ void exportObject()
 		.def("toCreature", ToCreature)
 		.def("rangeTo", &Object::RangeTo, "Gets the range from the object to the given target")
 		.def("updatePosition", UpdatePosition, UpdatePosOverload(args("self", "position", "orientation", "parent"),"Updates the position and sends an update to the player"))
-		.def("add", AddObject, addObjectOverload(args("requester", "newObject", "arrangement_id"), "Adds an object to the current object"))
-		.def("remove", RemoveObject, "Removes an object fomr the current object")
-		.def("transfer", TransferObject, transferObjectOverload(args("object", "newContainer", "arrangement_id"), "Transfer an object to a different object"))
 		.def("swapSlots", SwapSlots, "Change an objects current arrangement")	
-		.def("container", GetContainer, return_internal_reference<>(), "Gets the :class:`ContainerInterface` object of the current object")
-		.def("hasContainedObjects", HasContainedObjects, "Checks to see if container has any objects in it")		
 		.def("addToSlot", AddSlotObjectWrapper, "Equips an object to its most appropriate slot")		
 		.def("getFromSlot", GetSlotObject, "Gets the object in the specified slot")		
-		.def("clearSlot", ClearSlotWrapper, "Clears any object in the specified slot")	
+        .def("clearSlot", ClearSlot, "Clears any object in the specified slot")	
         .def("clearFromSlot", ClearFromSlot, "Clears specified object from any slot")		
         ;
 
@@ -311,9 +255,12 @@ void exportObject()
 
 	class_<Cell, bases<Object>, std::shared_ptr<Cell>, boost::noncopyable>("Cell");
 	class_<Intangible, bases<Object>, std::shared_ptr<Intangible>, boost::noncopyable>("Intangible");
-
-	implicitly_convertible<std::shared_ptr<Intangible>, std::shared_ptr<Object>>();
-	
-	implicitly_convertible<std::shared_ptr<Cell>, std::shared_ptr<Object>>();
-	implicitly_convertible<std::shared_ptr<Cell>, std::shared_ptr<Intangible>>();
+    
+    implicitly_convertible<std::shared_ptr<Intangible>, std::shared_ptr<Object>>();
+    implicitly_convertible<std::shared_ptr<Intangible>, std::shared_ptr<ContainerInterface>>();
+    
+    implicitly_convertible<std::shared_ptr<Cell>, std::shared_ptr<Object>>();
+    implicitly_convertible<std::shared_ptr<Cell>, std::shared_ptr<Intangible>>();
+    implicitly_convertible<std::shared_ptr<Cell>, std::shared_ptr<ContainerInterface>>();
+    implicitly_convertible<std::shared_ptr<Object>, std::shared_ptr<ContainerInterface>>();
 }
