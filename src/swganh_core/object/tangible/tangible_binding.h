@@ -50,6 +50,7 @@ void exportTangible()
 	implicitly_convertible<std::shared_ptr<FactoryCrate>, std::shared_ptr<Tangible>>();
 	implicitly_convertible<std::shared_ptr<Building>, std::shared_ptr<Tangible>>();
 	implicitly_convertible<std::shared_ptr<Tangible>, std::shared_ptr<Object>>();
+    implicitly_convertible<std::shared_ptr<Tangible>, std::shared_ptr<ContainerInterface>>();
 }
 void exportWeapon()
 {
