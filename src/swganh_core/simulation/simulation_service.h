@@ -38,8 +38,10 @@ namespace simulation {
 		*/
 		void PersistRelatedObjects(const std::shared_ptr<swganh::object::Object>& object, bool persist_inherited = false);
         void PersistRelatedObjects(uint64_t parent_object_id, bool persist_inherited = false);
-		void AddObjectToScene(std::shared_ptr<swganh::object::Object> object, const std::string& scene_label);
-        
+		
+        void AddObjectToScene(std::shared_ptr<swganh::object::Object> object, const std::string& scene_label);
+        void AddObject(std::shared_ptr<swganh::object::Object> object);
+
         std::shared_ptr<swganh::object::Object> LoadObjectById(uint64_t object_id);
         std::shared_ptr<swganh::object::Object> LoadObjectById(uint64_t object_id, uint32_t type);
         

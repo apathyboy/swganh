@@ -672,6 +672,11 @@ void SimulationService::AddObjectToScene(std::shared_ptr<swganh::object::Object>
 	impl_->AddObjectToScene(object, scene_label);
 }
 
+void SimulationService::AddObject(std::shared_ptr<swganh::object::Object> object)
+{
+    impl_->AddObjectToScene(object, SceneNameById(object->GetSceneId()));
+}
+
 std::set<std::pair<float, std::shared_ptr<swganh::object::Object>>> SimulationService::FindObjectsInRangeByTag(const std::shared_ptr<swganh::object::Object> requester, const std::string& tag, float range)
 {
 	return impl_->FindObjectsInRangeByTag(requester, tag, range);

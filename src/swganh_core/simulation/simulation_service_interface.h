@@ -65,6 +65,7 @@ namespace simulation {
 		virtual bool SceneExists(uint32_t scene_id) = 0;
 
 		virtual void AddObjectToScene(std::shared_ptr<swganh::object::Object> object, const std::string& scene_label) = 0;
+		virtual void AddObject(std::shared_ptr<swganh::object::Object> object) = 0;
 
         virtual void RegisterObjectFactories() = 0;
 
