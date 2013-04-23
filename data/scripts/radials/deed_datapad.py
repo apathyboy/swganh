@@ -15,7 +15,7 @@ class PyRadialMenu(RadialMenu):
 	def handleRadial(self, owner, target, action):
 		if action == RadialIdentifier.serverMenu1:
 			sim = self.getKernel().serviceManager().simulationService()
-			datapad = self.getKernel().serviceManager().equipmentService().getEquippedObject(owner, "datapad")
+			datapad = owner.getSlotObject("datapad")
 			pcd = sim.createObject(target.getStringAttribute("deed_pcd"), ContainerPermission.NO_VIEW)
 			mobile = sim.createObject(target.getStringAttribute("deed_mobile"), ContainerPermission.RIDEABLE)
 

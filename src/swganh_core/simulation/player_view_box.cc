@@ -43,14 +43,17 @@ PlayerViewBox::~PlayerViewBox()
 void PlayerViewBox::OnCollisionEnter(std::shared_ptr<Object> collider)
 {
     player_->AddAware(collider);
+    //collider->AddAware(player_);
 }
 
 void PlayerViewBox::OnCollisionStay(std::shared_ptr<Object> collider)
 {
+    player_->AddAware(collider);
     //OnCollisionEnter(collider);
 }
 
 void PlayerViewBox::OnCollisionLeave(std::shared_ptr<Object> collider)
 {
     player_->RemoveAware(collider);
+    //collider->RemoveAware(player_);
 }

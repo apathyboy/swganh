@@ -54,5 +54,5 @@ void EquipmentService::ClearSlot(std::shared_ptr<Object> object, std::string slo
 		
 std::shared_ptr<Object> EquipmentService::GetEquippedObject(std::shared_ptr<Object> object, std::string slot_name)
 {
-	return object->GetSlotObject(slot_definitions_->findSlotByName(slot_name));
+	return object->GetSlotObject(slot_name);
 }

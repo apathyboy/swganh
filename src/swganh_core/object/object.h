@@ -71,6 +71,7 @@ typedef boost::geometry::model::polygon<Point> CollisionBox;
 typedef boost::geometry::model::box<Point> AABB;
 
 class ObjectFactory;
+class ObjectManager;
 class ObjectMessageBuilder;
 class ContainerPermissionsInterface;
 
@@ -465,8 +466,8 @@ public:
 	void SetDatabasePersisted(bool value);
 	void SetInSnapshot(bool value);
 
-    void AddAware(const std::shared_ptr<Object>& object);
-    void RemoveAware(const std::shared_ptr<Object>& object);
+    void AddAware(const std::shared_ptr<Object>& object, bool recurse = true);
+    void RemoveAware(const std::shared_ptr<Object>& object, bool recurse = true);
     bool IsAware(const std::shared_ptr<Object>& object);
 
     /**
@@ -616,6 +617,8 @@ public:
 	bool IsCollidable(void) const { return collidable_; }
 
 
+    void SetObjectManager(ObjectManager* manager);
+
     // Containment
     uint64_t GetContainmentId() const;
 
@@ -677,7 +680,7 @@ public:
 
     virtual std::pair<bool, boost::optional<std::shared_ptr<Object>>> AddSlotObject(std::shared_ptr<Object> object);
 
-    virtual std::shared_ptr<Object> GetSlotObject(int32_t slot_id);
+    virtual std::shared_ptr<Object> GetSlotObject(const std::string& slot_name);
 
 protected:
 	std::atomic<uint64_t> object_id_;                // create
@@ -736,7 +739,7 @@ private:
     AwareObjectContainer aware_objects_;
 
     BaselinesCacheContainer baselines_;
-
+    ObjectManager* object_manager_;
     bool is_dirty_;
 
 	bool database_persisted_;

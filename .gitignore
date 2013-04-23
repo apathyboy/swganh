@@ -18,6 +18,8 @@ data/sql/setup.cfg
 .cproject
 .project
 .settings
+*.sublime-project
+*.sublime-workspace
 
 data/docs/generated
 /nbproject/private/

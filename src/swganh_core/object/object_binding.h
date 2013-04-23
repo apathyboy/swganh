@@ -29,7 +29,7 @@ using namespace swganh::object;
 
 void (Object::*SwapSlots)(const std::shared_ptr<Object>&, const std::shared_ptr<Object>&) = &Object::SwapSlots;    
 boost::optional<std::shared_ptr<Object>> (Object::*ClearSlot)(int32_t slot_id) = &Object::ClearSlot;
-std::shared_ptr<Object> (Object::*GetSlotObject)(int32_t slot_id) = &Object::GetSlotObject;
+std::shared_ptr<Object> (Object::*GetSlotObject)(const std::string&) = &Object::GetSlotObject;
 bool (Object::*ClearFromSlot)(std::shared_ptr<Object> object) = &Object::ClearSlot;
 
 std::shared_ptr<Object> AddSlotObjectWrapper(Object* this_obj, std::shared_ptr<Object> object)
@@ -245,7 +245,7 @@ void exportObject()
 		.def("updatePosition", UpdatePosition, UpdatePosOverload(args("self", "position", "orientation", "parent"),"Updates the position and sends an update to the player"))
 		.def("swapSlots", SwapSlots, "Change an objects current arrangement")	
 		.def("addToSlot", AddSlotObjectWrapper, "Equips an object to its most appropriate slot")		
-		.def("getFromSlot", GetSlotObject, "Gets the object in the specified slot")		
+		.def("getSlotObject", GetSlotObject, "Gets the object in the specified slot")		
         .def("clearSlot", ClearSlot, "Clears any object in the specified slot")	
         .def("clearFromSlot", ClearFromSlot, "Clears specified object from any slot")		
         ;

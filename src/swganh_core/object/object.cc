@@ -24,6 +24,8 @@
 #include "swganh_core/simulation/player_view_box.h"
 #include "swganh_core/simulation/world_container.h"
 
+#include "object_manager.h"
+
 using namespace swganh::observer;
 using namespace std;
 using namespace swganh::object;
@@ -524,58 +526,6 @@ void Object::SetInSnapshot(bool value)
 	in_snapshot_ = value;
 }
 
-void Object::AddAware(const std::shared_ptr<Object>& object)
-{
-    auto& controller = GetController();
-
-    if (!IsAware(object) && controller)
-    {
-        if(!object->IsInSnapshot())
-        {
-            object->Subscribe(controller);
-            object->SendCreateByCrc(controller);
-            object->CreateBaselines(controller);
-        }
-
-        {
-            boost::lock_guard<boost::mutex> lock(object_mutex_);
-            aware_objects_.insert(object);
-        }
-        
-        object->ViewObjects(shared_from_this(), 1, true, [&] (const std::shared_ptr<Object>& child)
-        {
-            AddAware(child);
-        });
-    }
-}
-
-void Object::RemoveAware(const std::shared_ptr<Object>& object)
-{
-    auto& controller = GetController();
-
-    if (IsAware(object) && controller)
-    {
-        object->SendDestroy(controller);
-        object->Unsubscribe(controller);
-        
-        {
-            boost::lock_guard<boost::mutex> lock(object_mutex_);
-            aware_objects_.erase(object);
-        }
-
-        object->ViewObjects(shared_from_this(), 1, true, [&] (const std::shared_ptr<Object>& child)
-        {
-            RemoveAware(child);
-        });
-    }
-}
-
-bool Object::IsAware(const std::shared_ptr<Object>& object)
-{    
-    boost::lock_guard<boost::mutex> lock(object_mutex_);
-    return aware_objects_.find(object) != aware_objects_.end();
-}
-
 AttributesMap Object::GetAttributeMap()
 {
 	boost::lock_guard<boost::mutex> lock(object_mutex_);
@@ -778,6 +728,11 @@ void Object::UpdateAABB()
 
 //Object Management
 
+void Object::SetObjectManager(ObjectManager* manager)
+{
+    object_manager_ = manager;
+}
+
 uint64_t Object::GetContainmentId() const
 {
     return GetObjectId();
@@ -824,7 +779,7 @@ void Object::RemoveObject(
         { return oldObject == contained_object; }), std::end(contained_objects_));
 
         oldObject->SetContainer(nullptr);
-        
+
         RemoveAware(oldObject);
     }
 }
@@ -837,7 +792,7 @@ void Object::TransferObject(
 	if(	requester == nullptr || this->GetPermissions()->canRemove(shared_from_this(), requester, object))
 	{
         object->GetContainer()->RemoveObject(requester, object);
-        newContainer->AddObject(nullptr, object);
+        newContainer->AddObject(requester, object);
 	}
 }
 
@@ -996,7 +951,6 @@ boost::optional<std::shared_ptr<Object>> Object::ClearSlot(int32_t slot_id)
 {
     boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
         
-	bool cleared = false;
     boost::optional<std::shared_ptr<Object>> cleared_object;
 
 	auto slot_iter = slot_descriptor_.find(slot_id);
@@ -1009,11 +963,16 @@ boost::optional<std::shared_ptr<Object>> Object::ClearSlot(int32_t slot_id)
 				slot->remove_object(object);
                 object->SetArrangementId(0);
                 cleared_object = object;
-				cleared = true;
 			});
 			
 		}
 	}
+
+    if(cleared_object)
+    {
+        RemoveAware(*cleared_object);
+    }
+
 	return cleared_object;
 }
 
@@ -1023,22 +982,27 @@ bool Object::ClearSlot(std::shared_ptr<Object> object)
         
 	bool cleared = false;
 
-    //for (auto& descriptor : slot_descriptor_)
-    //{
-    //    auto slot = descriptor.second;
-    //    if (slot->is_filled())
-    //    {
-    //        slot->view_objects([&object, &cleared, &slot] (std::shared_ptr<Object> slot_object)
-    //        {
-    //            if (slot_object == object)
-    //            {
-    //                slot_object->SetArrangementId(0);
-    //                slot->remove_object(slot_object);
-    //                cleared = true;
-    //            }
-    //        });
-    //    }
-    //}
+    for (auto& descriptor : slot_descriptor_)
+    {
+        auto slot = descriptor.second;
+        if (slot->is_filled())
+        {
+            slot->view_objects([&object, &cleared, &slot] (std::shared_ptr<Object> slot_object)
+            {
+                if (slot_object == object)
+                {
+                    slot_object->SetArrangementId(0);
+                    slot->remove_object(slot_object);
+                    cleared = true;
+                }
+            });
+        }
+    }
+
+    if(cleared)
+    {
+        RemoveAware(object);
+    }
 
 	return cleared;
 }
@@ -1065,20 +1029,22 @@ std::pair<bool, boost::optional<std::shared_ptr<Object>>> Object::AddSlotObject(
                 (*removed_object)->SetArrangementId(-2);
             added = true;
         }
-
-        //SetArrangementId(arrangement_id);
     }
-    
+
     object->SetContainer(shared_from_this());
     object->SetSceneId(GetSceneId());
+    
+    AddAware(object);
 
     return std::make_pair(added, removed_object);
 }
 
-std::shared_ptr<Object> Object::GetSlotObject(int32_t slot_id)
+std::shared_ptr<Object> Object::GetSlotObject(const std::string& slot_name)
 {
     boost::lock_guard<boost::mutex> lock_container(containment_mutex_);
         
+    auto slot_id = object_manager_->GetSlotDefinition()->findSlotByName(slot_name);
+
 	std::shared_ptr<Object> found = nullptr;
 	auto slot_iter = slot_descriptor_.find(slot_id);
 	if (slot_iter != slot_descriptor_.end())
@@ -1157,4 +1123,74 @@ Object::ObserverContainer Object::GetControllersInView()
 	}
 	*/
 	return observers_;
+}
+
+void Object::AddAware(const std::shared_ptr<Object>& object, bool recurse)
+{
+    //If we are a slotted item then we should notify our parent of the containment change.
+    auto container = GetContainer();
+    if(container && container->GetContainmentId() != 0)
+    {
+        GetContainerAs<Object>()->AddAware(object);
+    }
+
+    auto& controller = GetController();    
+    if (!IsAware(object) && controller)
+    {
+        if(!object->IsInSnapshot())
+        {
+            object->Subscribe(controller);
+            object->SendCreateByCrc(controller);
+            object->CreateBaselines(controller);
+        }
+
+        {
+            boost::lock_guard<boost::mutex> lock(object_mutex_);
+            aware_objects_.insert(object);
+        }        
+    }
+    
+    if(controller)
+    {
+        object->ViewObjects(shared_from_this(), 1, true, [&] (const std::shared_ptr<Object>& child)
+        {
+            AddAware(child);
+        });
+    }
+}
+
+void Object::RemoveAware(const std::shared_ptr<Object>& object, bool recurse)
+{
+    //If we are a slotted item then we should notify our parent of the containment change.
+    auto container = GetContainer();
+    if(container && container->GetContainmentId() != 0)
+    {
+        GetContainerAs<Object>()->RemoveAware(object);
+    }
+
+    auto& controller = GetController();
+    if (IsAware(object) && controller)
+    {
+        object->SendDestroy(controller);
+        object->Unsubscribe(controller);
+        
+        {
+            boost::lock_guard<boost::mutex> lock(object_mutex_);
+            aware_objects_.erase(object);
+        }
+    }
+    
+    if(recurse && controller)
+    {
+        object->ViewObjects(shared_from_this(), 1, true, [&] (const std::shared_ptr<Object>& child)
+        {
+            RemoveAware(child);
+        });
+    }
+}
+
+bool Object::IsAware(const std::shared_ptr<Object>& object)
+{    
+    boost::lock_guard<boost::mutex> lock(object_mutex_);
+    return aware_objects_.find(object) != aware_objects_.end();
 }

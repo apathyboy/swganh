@@ -20,7 +20,7 @@ Use git to checkout the latest version of the source:
 
     git clone https://github.com/anhstudios/swganh.git
 
-Next, download the latest dependencies package for Visual Studio 11 here: 
+Next, download the latest dependencies package for Visual Studio 11 here:
 
 https://github.com/anhstudios/swganh/downloads
 
@@ -42,7 +42,7 @@ This will kick off a full build of the project. The final output can be found at
 * **NOTE** Since the project files are located outside the source directory adding new files from within visual studio requires changing the default save location.*
 
 To add a new file, manually create it in the src directory and then run the following from within the build directory.
-    
+
     cmake ..
 
 
@@ -56,12 +56,12 @@ On linux platforms a minimum of GCC 4.6 is required to build the project. After 
     cd build
     cmake ..
     make
-    
+
 A more complete set of instructions that covers building dependencies can be found in the official documentation.
 
 ### Clang and other compilers ###
 
-[Clang][3] does not yet support lambdas, a C++0x feature commonly used in this project. Once lambda support is available we will investigate officially adopting it as a supported compiler. 
+[Clang][3] does not yet support lambdas, a C++0x feature commonly used in this project. Once lambda support is available we will investigate officially adopting it as a supported compiler.
 
 ## Quick Links ##
 

@@ -976,11 +976,11 @@ void Creature::AddObject(
     const std::shared_ptr<Object>& requester,
     std::shared_ptr<Object> object)
 {
-    auto inventory_slot = GetSlotObject(4);
+    auto inventory_slot = GetSlotObject("inventory");
 
     if (inventory_slot)
     {
-        GetSlotObject(4)->AddObject(requester, object);
+        inventory_slot->AddObject(requester, object);
         AddAware(object);
     }
 }
@@ -989,7 +989,7 @@ void Creature::RemoveObject(
     const std::shared_ptr<Object>& requester, 
     const std::shared_ptr<Object>& oldObject)
 {    
-    auto inventory_slot = GetSlotObject(4);
+    auto inventory_slot = GetSlotObject("inventory");
 
     if (inventory_slot)
     {
@@ -1003,7 +1003,7 @@ void Creature::TransferObject(
     const std::shared_ptr<Object>& object,
     const std::shared_ptr<ContainerInterface>& newContainer)
 {    
-    auto inventory_slot = GetSlotObject(4);
+    auto inventory_slot = GetSlotObject("inventory");
 
     if (inventory_slot)
     {
@@ -1013,7 +1013,7 @@ void Creature::TransferObject(
 
 bool Creature::HasContainedObjects()
 {
-    auto inventory_slot = GetSlotObject(4);
+    auto inventory_slot = GetSlotObject("inventory");
 
     if (inventory_slot)
     {

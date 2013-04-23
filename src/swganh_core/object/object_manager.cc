@@ -496,6 +496,7 @@ void ObjectManager::LoadSlotsForObject(std::shared_ptr<Object> object)
 			}
 		}
 	
+        object->SetObjectManager(this);
 		object->SetSlotInformation(descriptors, arrangements);
 	}
 }

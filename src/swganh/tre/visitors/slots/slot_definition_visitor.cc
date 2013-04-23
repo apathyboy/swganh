@@ -37,10 +37,11 @@ void SlotDefinitionVisitor::visit_data(uint32_t depth, std::string name, uint32_
 
 size_t SlotDefinitionVisitor::findSlotByName(const std::string& name)
 {
-	for(size_t i = 0; i < slots_.size(); ++i)
-	{
-		if(slots_[i].name == name)
-			return i;
+    auto find_iter = std::find_if(slots_.begin(), slots_.end(), [&name] (const slot_entry& slot) { return slot.name.compare(name) == 0; });
+    if(find_iter != slots_.end())
+    {
+        return std::distance(slots_.begin(), find_iter);
 	}
+
 	return -1;
 }
