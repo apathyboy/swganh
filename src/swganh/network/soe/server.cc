@@ -43,12 +43,14 @@ void Server::SendTo(const udp::endpoint& endpoint, ByteBuffer buffer) {
         endpoint, 
         [this] (const boost::system::error_code& error, std::size_t bytes_transferred)
     {
-        if (bytes_transferred == 0)
+        if (!error)
         {
-            DLOG(warning) << "Sent 0 bytes";
+            bytes_sent_ += bytes_transferred;
         }
-		
-        bytes_sent_ += bytes_transferred;
+        else
+        {
+            DLOG(warning) << "Send error occurred: " << error.message();
+        }		
     });
 }
 
@@ -68,7 +70,7 @@ void Server::AsyncReceive() {
 			buffer(&recv_buffer_[0], recv_buffer_.size()), 
 			current_remote_endpoint_,
 			[this] (const boost::system::error_code& error, std::size_t bytes_transferred) {
-				if(!error)
+				if(bytes_transferred > 0)
 				{
 					bytes_recv_ += bytes_transferred;
 
@@ -77,11 +79,8 @@ void Server::AsyncReceive() {
 
 					GetSession(current_remote_endpoint_)->HandleProtocolMessage(move(message));                			
 				}
-				else if (error == boost::asio::error::connection_refused || error == boost::asio::error::connection_reset )
-				{
-					LOG(info) << "lost client with AsyncReceive error: " << error.message();				
-				}		
-				AsyncReceive();
+				
+                AsyncReceive();
 		});
 	}
 }

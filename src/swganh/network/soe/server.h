@@ -64,7 +64,7 @@ private:
     Server();
     
     void AsyncReceive();
-    
+
     boost::asio::ip::udp::socket socket_;
     boost::asio::ip::udp::endpoint current_remote_endpoint_;
     std::array<char, 496> recv_buffer_;
