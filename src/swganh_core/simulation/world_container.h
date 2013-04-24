@@ -35,7 +35,8 @@ public:
     virtual void TransferObject(
         const std::shared_ptr<swganh::object::Object>& requester,
         const std::shared_ptr<swganh::object::Object>& object,
-        const std::shared_ptr<swganh::object::ContainerInterface>& newContainer);
+        const std::shared_ptr<swganh::object::ContainerInterface>& newContainer,
+        glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f));
     
     virtual bool HasContainedObjects() { return true; }
     

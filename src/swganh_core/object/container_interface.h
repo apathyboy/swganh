@@ -42,7 +42,8 @@ namespace object {
         virtual void TransferObject(
             const std::shared_ptr<Object>& requester,
             const std::shared_ptr<Object>& object,
-            const std::shared_ptr<ContainerInterface>& newContainer) = 0;
+            const std::shared_ptr<ContainerInterface>& newContainer,
+            glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f)) = 0;
 		
 		virtual bool HasContainedObjects() = 0;
 

@@ -787,11 +787,13 @@ void Object::RemoveObject(
 void Object::TransferObject(
     const std::shared_ptr<Object>& requester,
     const std::shared_ptr<Object>& object,
-    const std::shared_ptr<ContainerInterface>& newContainer)
+    const std::shared_ptr<ContainerInterface>& newContainer,
+    glm::vec3 position)
 {
 	if(	requester == nullptr || this->GetPermissions()->canRemove(shared_from_this(), requester, object))
 	{
         object->GetContainer()->RemoveObject(requester, object);
+        object->SetPosition(position);
         newContainer->AddObject(requester, object);
 	}
 }

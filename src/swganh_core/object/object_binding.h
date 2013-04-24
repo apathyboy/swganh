@@ -15,7 +15,7 @@
 #include <boost/python.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-
+ 
 #include "swganh_core/sui/radial_binding.h"
 
 #include "swganh_core/messages/system_message.h"

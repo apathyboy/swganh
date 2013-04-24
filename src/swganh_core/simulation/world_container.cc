@@ -20,14 +20,17 @@ void WorldContainer::RemoveObject(const std::shared_ptr<swganh::object::Object>&
 	spatial_provider_->RemoveObject(oldObject);
 }
 	
-void WorldContainer::TransferObject(const std::shared_ptr<swganh::object::Object>& requester, const std::shared_ptr<swganh::object::Object>& object, const std::shared_ptr<ContainerInterface>& newContainer) 
+void WorldContainer::TransferObject(
+    const std::shared_ptr<swganh::object::Object>& requester, 
+    const std::shared_ptr<swganh::object::Object>& object, 
+    const std::shared_ptr<ContainerInterface>& newContainer,
+    glm::vec3 position)
 { 
 	std::cout << "WorldContainer::TransferObject" << std::endl; 
 	{
-#ifdef SI_METHOD_TWO
-		spatial_provider_->DeleteObject(object);
-#endif
-        newContainer->AddObject(nullptr, object);
+        object->GetContainer()->RemoveObject(requester, object);
+        object->SetPosition(position);
+        newContainer->AddObject(requester, object);
 	}
 
 	//Send updates to both

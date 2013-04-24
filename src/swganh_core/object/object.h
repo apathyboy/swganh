@@ -633,7 +633,8 @@ public:
     virtual void TransferObject(
             const std::shared_ptr<Object>& requester,
             const std::shared_ptr<Object>& object,
-            const std::shared_ptr<ContainerInterface>& newContainer);
+            const std::shared_ptr<ContainerInterface>& newContainer,
+            glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f));
 
     virtual void SwapSlots(
             const std::shared_ptr<Object>& requester,
