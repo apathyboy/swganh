@@ -105,8 +105,7 @@ namespace scripting {
                 auto instance = creator();
 
                 std::shared_ptr<boost::python::object> py_instance = std::shared_ptr<boost::python::object>(
-                    new boost::python::object(instance),
-                    [] (boost::python::object* obj) { ScopedGilLock lock; delete obj; });
+                    new boost::python::object(instance), PythonObjectDeleter());
 
                 if(!py_instance->is_none())
                 {
