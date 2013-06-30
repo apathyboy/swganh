@@ -3,6 +3,7 @@ include(GroupSourcesByFilesystem)
 
 file(GLOB_RECURSE SOURCES *.h *.hpp *.cpp *.cc)
 file(GLOB_RECURSE INTERFACES *.ui)
+file(GLOB_RECURSE RESOURCES *.qrc)
 
 GroupSourcesByFilesystem("${SOURCES}")
 GroupSourcesByFilesystem("${INTERFACES}")
@@ -11,8 +12,9 @@ GroupSourcesByFilesystem("${INTERFACES}")
 set(CMAKE_AUTOMOC ON)
 
 qt5_wrap_ui(UI_SOURCES ${INTERFACES})
+qt5_add_resources(RESOURCES_RCC ${RESOURCES})
 
-add_executable(swged ${GUI_TYPE} ${SOURCES} ${UI_SOURCES})
+add_executable(swged ${GUI_TYPE} ${SOURCES} ${UI_SOURCES} ${RESOURCES_RCC})
 
 target_link_libraries(swged
     swganh_lib
