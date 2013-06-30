@@ -12,6 +12,7 @@ endif()
 
 ## project executables
 add_subdirectory(swganh)
+add_subdirectory(swged)
 
 ## publish 14 core implementation
 add_subdirectory(swganh_core)

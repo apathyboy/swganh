@@ -169,6 +169,14 @@ endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${C_WARNINGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_WARNINGS}")
 
+# GUI Type
+if(WIN32)
+    set(GUI_TYPE WIN32)
+endif(WIN32)
+if(APPLE)
+    set(GUI_TYPE MACOSX_BUNDLE)
+endif(APPLE)
+
 # Use the static/multithreaded libraries.
 add_definitions(-DBOOST_ALL_NO_LIB)
 add_definitions(-DBOOST_ALL_DYN_LINK)
@@ -206,6 +214,8 @@ find_package(MysqlConnectorCpp REQUIRED)
 find_package(PythonLibs REQUIRED)
 find_package(Turtle REQUIRED)
 find_package(ZLib REQUIRED)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 
 # make sure the source directory and the binary directory (where any generated
 # files will be found) are automatically searched for includes

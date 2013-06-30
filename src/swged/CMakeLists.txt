@@ -1,0 +1,43 @@
+
+include(GroupSourcesByFilesystem)
+
+file(GLOB_RECURSE SOURCES *.h *.hpp *.cpp *.cc)
+file(GLOB_RECURSE INTERFACES *.ui)
+
+GroupSourcesByFilesystem("${SOURCES}")
+GroupSourcesByFilesystem("${INTERFACES}")
+
+# Instruct CMake to run moc automatically when needed
+set(CMAKE_AUTOMOC ON)
+
+qt5_wrap_ui(UI_SOURCES ${INTERFACES})
+
+add_executable(swged ${GUI_TYPE} ${SOURCES} ${UI_SOURCES})
+
+target_link_libraries(swged
+    swganh_lib
+    ${Boost_LIBRARIES}
+    ${Qt5Core_QTMAIN_LIBRARIES}
+)
+
+# Use the Widgets module from Qt 5
+qt5_use_modules(swged Widgets)
+
+if(ZLIB_LIBRARY_DEBUG)
+    target_link_libraries(swged debug ${ZLIB_LIBRARY_DEBUG})
+    get_filename_component(ZLIB_PATH ${ZLIB_LIBRARY_DEBUG} PATH)
+    get_filename_component(ZLIB_FILE ${ZLIB_LIBRARY_DEBUG} NAME_WE)
+endif()
+
+if(ZLIB_LIBRARY_RELEASE)
+    target_link_libraries(swged optimized ${ZLIB_LIBRARY_RELEASE})
+    get_filename_component(ZLIB_PATH ${ZLIB_LIBRARY_DEBUG} PATH)
+    get_filename_component(ZLIB_FILE ${ZLIB_LIBRARY_DEBUG} NAME_WE)
+endif()
+
+if(WIN32)
+    add_custom_command(TARGET swged POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${ZLIB_PATH}/${ZLIB_FILE}.dll
+            $<TARGET_FILE_DIR:swged>)
+endif()
