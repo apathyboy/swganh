@@ -3,12 +3,18 @@
 
 #include "qfiledialog.h"
 
-OptionsDialog::OptionsDialog(QWidget* parent)
+OptionsDialog::OptionsDialog(QWidget* parent, QString project_directory)
     : QDialog(parent)
 {
     setupUi(this);
+    
+    projectDirectory->setText(project_directory);
+
 
     connect(chooseProjectDirectory, SIGNAL(clicked()), this, SLOT(slotChooseProjectDirectory()));
+    connect((QObject *)buttonBox->button(QDialogButtonBox::RestoreDefaults), SIGNAL(clicked()), this, SLOT(slotDefaults()));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
 void OptionsDialog::slotChooseProjectDirectory()
@@ -24,4 +30,9 @@ void OptionsDialog::slotChooseProjectDirectory()
     }
 
     projectDirectory->setText(s);
+}
+
+void OptionsDialog::slotDefaults()
+{
+	projectDirectory->setText("");
 }

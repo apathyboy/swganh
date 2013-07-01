@@ -8,8 +8,9 @@ class OptionsDialog : public QDialog, public Ui::Options
     Q_OBJECT
 
 public:
-    explicit OptionsDialog(QWidget* parent);
+    OptionsDialog(QWidget* parent, QString project_directory);
 
 private slots:
     void slotChooseProjectDirectory();
+    void slotDefaults();
 };
