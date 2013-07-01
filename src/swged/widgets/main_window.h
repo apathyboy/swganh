@@ -1,38 +1,20 @@
 
 #pragma once
 
-#include <QMainWindow>
+#include "ui_main_window.h"
 
-QT_BEGIN_NAMESPACE
-class QAction;
-class QTreeWidget;
-class QMenu;
-class QMdiArea;
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow();
-
-private slots:
-    void about();
+    MainWindow(QWidget* parent = 0);
 
 private:
-    void createActions();
-    void createMenus();
-    void createStatusBar();
-    void createDockWindows();
+	QString project_directory_;
 
-    QMdiArea* mdi_area_;
-    QTreeWidget* resource_tree_;
+    void setProjectDirectory(QString dir);
 
-    QMenu* file_menu_;
-    QMenu* edit_menu_;
-    QMenu* view_menu_;
-    QMenu* help_menu_;
-    QAction* about_action_;
-    QAction* quit_action_;
+private slots:
+	void slotOptions();
 };

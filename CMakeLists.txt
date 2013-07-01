@@ -24,8 +24,8 @@ endif()
 
 cmake_minimum_required(VERSION 2.8.11)
 
-#cmake_policy(VERSION 2.8.11)
-#cmake_policy(SET CMP0022 NEW)
+cmake_policy(VERSION 2.8.11.20130628-g46c95)
+cmake_policy(SET CMP0022 NEW)
 
 project(swganh CXX)
 
@@ -158,9 +158,6 @@ if(MSVC)
     endif()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251")
-
-    ADD_DEFINITIONS (/D _HAS_ITERATOR_DEBUGGING=0)
-    MESSAGE(STATUS "- MSVC: set iterator debugging to 0")
 
     ADD_DEFINITIONS (/D _SECURE_SCL=0)
     MESSAGE(STATUS "- MSVC: set iterator debugging to 0")

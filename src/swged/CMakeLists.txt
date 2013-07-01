@@ -1,6 +1,8 @@
 
 include(GroupSourcesByFilesystem)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+
 file(GLOB_RECURSE SOURCES *.h *.hpp *.cpp *.cc)
 file(GLOB_RECURSE INTERFACES *.ui)
 file(GLOB_RECURSE RESOURCES *.qrc)

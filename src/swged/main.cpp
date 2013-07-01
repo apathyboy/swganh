@@ -8,7 +8,10 @@ QSplashScreen* splash = 0;
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
+
+    app.setOrganizationName("ANH Studios");
+    app.setApplicationName("SWGEd");
 
     QSplashScreen splash(QPixmap(":/images/splash_logo.jpg"));
     splash.setFont( QFont("Helvetica", 10) );
@@ -24,5 +27,5 @@ int main(int argc, char *argv[])
 	qApp->processEvents();
     splash.finish(&mw);
 
-    return a.exec();
+    return app.exec();
 }

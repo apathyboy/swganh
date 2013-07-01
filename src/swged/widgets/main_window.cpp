@@ -2,69 +2,33 @@
 #include <QtWidgets>
 
 #include "main_window.h"
+#include "options_dialog.h"
 
-MainWindow::MainWindow()
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent)
 {
-    mdi_area_ = new QMdiArea;
-    setCentralWidget(mdi_area_);
+    setupUi(this);
 
-    createActions();
-    createMenus();
-    createStatusBar();
-    createDockWindows();
+    project_directory_ = QDir::homePath();
 
-    setWindowTitle(tr("SWGEd"));
-
-    setUnifiedTitleAndToolBarOnMac(true);
+    connect(actionOptions, SIGNAL(triggered()), this, SLOT(slotOptions()));    
 }
 
-void MainWindow::about()
+void MainWindow::slotOptions()
 {
-   QMessageBox::about(this, tr("About Dock Widgets"),
-            tr("The <b>SWGEd</b> application is a tool for creating "
-               "and managing Star Wars Galaxies game content."));
+    OptionsDialog* options = new OptionsDialog(this);
+
+    if (options->exec() == QDialog::Accepted)
+    {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        
+        auto project_dir = options->projectDirectory->text();
+
+        setProjectDirectory(project_dir);
+    }
 }
 
-void MainWindow::createActions()
+void MainWindow::setProjectDirectory(QString dir)
 {
-    quit_action_ = new QAction(tr("&Quit"), this);
-    quit_action_->setShortcuts(QKeySequence::Quit);
-    quit_action_->setStatusTip(tr("Quit the application"));
-    connect(quit_action_, SIGNAL(triggered()), this, SLOT(close()));
-
-    about_action_ = new QAction(tr("&About"), this);
-    about_action_->setStatusTip(tr("Show information about SWGEd"));
-    connect(about_action_, SIGNAL(triggered()), this, SLOT(about()));
-}
-
-void MainWindow::createMenus()
-{
-    file_menu_ = menuBar()->addMenu(tr("&File"));
-    file_menu_->addSeparator();
-    file_menu_->addAction(quit_action_);
-
-    edit_menu_ = menuBar()->addMenu(tr("&Edit"));
-
-    view_menu_ = menuBar()->addMenu(tr("&View"));
-
-    menuBar()->addSeparator();
-
-    help_menu_ = menuBar()->addMenu(tr("&Help"));
-    help_menu_->addAction(about_action_);
-}
-
-void MainWindow::createStatusBar()
-{
-    statusBar()->showMessage(tr("Ready"));
-}
-
-void MainWindow::createDockWindows()
-{
-    QDockWidget* dock = new QDockWidget(tr("Resources"), this);
-    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    resource_tree_ = new QTreeWidget(dock);
-
-    dock->setWidget(resource_tree_);
-    addDockWidget(Qt::RightDockWidgetArea, dock);
-    view_menu_->addAction(dock->toggleViewAction());
+    project_directory_ = dir;
 }
