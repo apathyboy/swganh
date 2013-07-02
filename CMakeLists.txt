@@ -161,6 +161,8 @@ if(MSVC)
 
     ADD_DEFINITIONS (/D _SECURE_SCL=0)
     MESSAGE(STATUS "- MSVC: set iterator debugging to 0")
+
+    add_definitions(-DHAVE_ROUND)
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${C_WARNINGS}")
