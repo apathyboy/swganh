@@ -104,7 +104,10 @@ std::vector<std::string> TreArchive::GetAvailableResources(std::function<void (i
         resource_list.insert(begin(resource_list), begin(resources), end(resources));
 
         ++completed;
-        progress_callback(total, completed);
+
+        if (progress_callback) {
+            progress_callback(total, completed);
+        }
     }
 
     // sort and remove duplicates
