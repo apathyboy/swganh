@@ -22,6 +22,7 @@ namespace swganh {
     bool MainWindow::openProject(QString project_directory)
     {
         project_manager_ = new ProjectManager(this, treeFiles);
+        project_manager_->initialize(project_directory);
 
         return true;
     }
