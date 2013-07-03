@@ -118,14 +118,11 @@ std::vector<std::string> TreArchive::GetAvailableResources(std::function<void (i
     return resource_list;
 }
 
-void TreArchive::VisitAvailableResources(std::function<void (const char*)> visitor)
+void TreArchive::VisitAvailableResources(std::function<void (std::string) > visitor)
 {
-    std::set<std::string> found;
-
     for (const auto& item : lookup_)
     {
         visitor(item.first);
-        //auto resources = reader->get
     }
 }
 

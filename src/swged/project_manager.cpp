@@ -44,11 +44,10 @@ namespace swganh {
         
         std::map<std::string, QTreeWidgetItem*> item_cache;
 
-        archive_->VisitAvailableResources([project_root, &item_cache] (std::string file) {
-
+        archive_->VisitAvailableResources([project_root, &item_cache] (std::string resource_name) {
             std::vector<std::string> path_data;
             std::string current_depth;
-            boost::split(path_data, file, boost::is_any_of("/"));
+            boost::split(path_data, resource_name, boost::is_any_of("/"));
             
             QTreeWidgetItem* parent = nullptr;
             
@@ -73,7 +72,7 @@ namespace swganh {
                     QTreeWidgetItem* item = new QTreeWidgetItem(parent);
             
                     item->setText(0, QString().fromStdString(current_item));
-                    item->setData(0, Qt::UserRole, QString().fromStdString(current_depth));
+                    item->setData(0, Qt::UserRole, QString().fromStdString(resource_name));
             
                     parent = item;
                     item_cache.insert(std::make_pair(current_depth, item));

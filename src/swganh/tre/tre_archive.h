@@ -104,7 +104,7 @@ namespace tre {
         std::vector<std::string> GetAvailableResources(std::function<void (int total, int completed)> progress_callback) const;
 
 
-        void VisitAvailableResources(std::function<void (const char*)> visitor);
+        void VisitAvailableResources(std::function<void (std::string resource_name) > visitor);
 
     private:
 
