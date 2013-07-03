@@ -36,53 +36,53 @@ namespace swganh {
 
     void ProjectManager::loadProjectTree(QString project_directory)
     {
-        QTreeWidgetItem* project_root = new QTreeWidgetItem(tree_files_);
+        QTreeWidgetItem* project_root = new QTreeWidgetItem;
 
         QString projectName = project_directory.section("/", -1, -1);
         project_root->setText(0, projectName);
         project_root->setData(0, Qt::UserRole, project_directory);
-        tree_files_->setItemExpanded(project_root, true);
-
-        std::map<std::string, QTreeWidgetItem*> item_cache;
-        auto file_listing = archive_->GetAvailableResources();
         
-        int top_level_count = 0;
-        for (const auto& file : file_listing)
-        {
+        std::map<std::string, QTreeWidgetItem*> item_cache;
+
+        archive_->VisitAvailableResources([project_root, &item_cache] (std::string file) {
+
             std::vector<std::string> path_data;
             std::string current_depth;
             boost::split(path_data, file, boost::is_any_of("/"));
             
             QTreeWidgetItem* parent = nullptr;
-        
+            
             auto path_depth = path_data.size();
             for (uint32_t i = 0; i < path_depth; ++i)
             {
                 const auto& current_item = path_data[i];
                 current_depth += "/" + current_item;
-        
+            
                 if (i == 0)
                 {
                     parent = project_root;
                 }
-
+            
                 auto find_iter = item_cache.find(current_depth);
                 if (find_iter != item_cache.end())
                 {
                     parent = find_iter->second;
                 }
-                else 
+                else
                 {
                     QTreeWidgetItem* item = new QTreeWidgetItem(parent);
-
+            
                     item->setText(0, QString().fromStdString(current_item));
                     item->setData(0, Qt::UserRole, QString().fromStdString(current_depth));
-
+            
                     parent = item;
                     item_cache.insert(std::make_pair(current_depth, item));
                 }
             }
-        }
+        });
+
+        tree_files_->addTopLevelItem(project_root);
+        tree_files_->expandItem(project_root);
     }
 
 }
