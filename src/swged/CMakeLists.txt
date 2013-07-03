@@ -37,8 +37,8 @@ endif()
 
 if(ZLIB_LIBRARY_RELEASE)
     target_link_libraries(swged optimized ${ZLIB_LIBRARY_RELEASE})
-    get_filename_component(ZLIB_PATH ${ZLIB_LIBRARY_DEBUG} PATH)
-    get_filename_component(ZLIB_FILE ${ZLIB_LIBRARY_DEBUG} NAME_WE)
+    get_filename_component(ZLIB_PATH ${ZLIB_LIBRARY_RELEASE} PATH)
+    get_filename_component(ZLIB_FILE ${ZLIB_LIBRARY_RELEASE} NAME_WE)
 endif()
 
 if(WIN32)
