@@ -26,6 +26,8 @@ namespace swganh {
 
         void initialize(QString project_directory);
 
+        tre::TreArchive* getArchive();
+
     private:
         void loadProjectTree(QString project_directory);
 

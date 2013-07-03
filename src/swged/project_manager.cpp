@@ -39,6 +39,11 @@ namespace swganh {
         loadProjectTree(project_directory);
     }
 
+    tre::TreArchive* ProjectManager::getArchive()
+    {
+        return archive_.get();
+    }
+
     void ProjectManager::loadProjectTree(QString project_directory)
     {
         tree_files_->setRootIsDecorated(true);
