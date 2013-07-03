@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     splash.setFont( QFont("Helvetica", 10) );
     splash.show();
     
-    splash.showMessage("Loading project", Qt::AlignLeft, Qt::white);
+    splash.showMessage("Loading project", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
 	qApp->processEvents();
 
     MainWindow mw;
