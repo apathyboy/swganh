@@ -15,7 +15,7 @@ namespace swganh {
         ProjectTree(QWidget* parent = 0);
 
         void setProjectManager(ProjectManager* project_manager) { project_manager_ = project_manager; }
-
+        
     private:
         ProjectManager* project_manager_;
     };

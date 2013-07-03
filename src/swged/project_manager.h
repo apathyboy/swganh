@@ -32,6 +32,10 @@ namespace swganh {
         MainWindow* parent_;
         ProjectTree* tree_files_;
         std::unique_ptr<tre::TreArchive> archive_;
+
+    private slots:
+        void slotProjectTreeCollapsed(QTreeWidgetItem* expanded_item);
+        void slotProjectTreeExpanded(QTreeWidgetItem* expanded_item);
     };
 
 }

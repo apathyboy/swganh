@@ -29,7 +29,7 @@ namespace swganh {
         void loadSettings();
         void saveSettings();
 
-        private slots:
+    private slots:
         void slotOptions();
     };
 
