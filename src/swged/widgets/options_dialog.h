@@ -3,14 +3,18 @@
 
 #include "ui_options.h"
 
-class OptionsDialog : public QDialog, public Ui::Options
-{
-    Q_OBJECT
+namespace swganh {
 
-public:
-    OptionsDialog(QWidget* parent, QString project_directory);
+    class OptionsDialog : public QDialog, public Ui::Options
+    {
+        Q_OBJECT
 
-private slots:
-    void slotChooseProjectDirectory();
-    void slotDefaults();
-};
+    public:
+        OptionsDialog(QWidget* parent, QString project_directory);
+
+        private slots:
+        void slotChooseProjectDirectory();
+        void slotDefaults();
+    };
+
+}

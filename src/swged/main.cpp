@@ -4,6 +4,8 @@
 
 #include "widgets/main_window.h"
 
+using swganh::MainWindow;
+
 QSplashScreen* splash = 0;
 
 int main(int argc, char *argv[])
@@ -17,11 +19,20 @@ int main(int argc, char *argv[])
     splash.setFont( QFont("Helvetica", 10) );
     splash.show();
     
+    splash.showMessage("Loading project", Qt::AlignLeft, Qt::white);
 	qApp->processEvents();
-    splash.showMessage("Loading project");
-    
-	qApp->processEvents();
+
     MainWindow mw;
+
+    qApp->processEvents();
+
+    auto project_dir = mw.getProjectDirectory();
+    if (!project_dir.isEmpty())
+    {
+        mw.openProject(project_dir);
+    }
+
+    qApp->processEvents();
     mw.show();
     
 	qApp->processEvents();

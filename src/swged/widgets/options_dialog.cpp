@@ -1,38 +1,42 @@
 
 #include "options_dialog.h"
 
-#include "qfiledialog.h"
+#include <QFileDialog>
 
-OptionsDialog::OptionsDialog(QWidget* parent, QString project_directory)
-    : QDialog(parent)
-{
-    setupUi(this);
-    
-    projectDirectory->setText(project_directory);
+namespace swganh {
 
-
-    connect(chooseProjectDirectory, SIGNAL(clicked()), this, SLOT(slotChooseProjectDirectory()));
-    connect((QObject *)buttonBox->button(QDialogButtonBox::RestoreDefaults), SIGNAL(clicked()), this, SLOT(slotDefaults()));
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-}
-
-void OptionsDialog::slotChooseProjectDirectory()
-{
-    QString s = QFileDialog::getExistingDirectory(
-        this,
-        tr("Choose the project directory"),
-        QDir::homePath(),
-        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    if(s.isEmpty())
+    OptionsDialog::OptionsDialog(QWidget* parent, QString project_directory)
+        : QDialog(parent)
     {
-        return;
+        setupUi(this);
+
+        projectDirectory->setText(project_directory);
+
+
+        connect(chooseProjectDirectory, SIGNAL(clicked()), this, SLOT(slotChooseProjectDirectory()));
+        connect((QObject *) buttonBox->button(QDialogButtonBox::RestoreDefaults), SIGNAL(clicked()), this, SLOT(slotDefaults()));
+        connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+        connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
     }
 
-    projectDirectory->setText(s);
-}
+    void OptionsDialog::slotChooseProjectDirectory()
+    {
+        QString s = QFileDialog::getExistingDirectory(
+            this,
+            tr("Choose the project directory"),
+            QDir::homePath(),
+            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        if (s.isEmpty())
+        {
+            return;
+        }
 
-void OptionsDialog::slotDefaults()
-{
-	projectDirectory->setText("");
+        projectDirectory->setText(s);
+    }
+
+    void OptionsDialog::slotDefaults()
+    {
+        projectDirectory->setText("");
+    }
+
 }

@@ -3,26 +3,34 @@
 
 #include "ui_main_window.h"
 
-class MainWindow : public QMainWindow, private Ui::MainWindow
-{
-    Q_OBJECT
+namespace swganh {
 
-public:
-    MainWindow(QWidget* parent = 0);
+    class ProjectManager;
 
-    QString getProjectDirectory() { return project_directory_; }
-    
-protected:
-    void closeEvent(QCloseEvent *event);
+    class MainWindow : public QMainWindow, private Ui::MainWindow
+    {
+        Q_OBJECT
 
-private:
-	QString project_directory_;
+    public:
+        MainWindow(QWidget* parent = 0);
 
-    void setProjectDirectory(QString dir);
+        bool openProject(QString project_directory);
+        QString getProjectDirectory() const { return project_directory_; }
 
-    void loadSettings();
-    void saveSettings();
+    protected:
+        void closeEvent(QCloseEvent *event);
 
-private slots:
-	void slotOptions();
-};
+    private:
+        QString project_directory_;
+        ProjectManager* project_manager_;
+
+        void setProjectDirectory(QString dir);
+
+        void loadSettings();
+        void saveSettings();
+
+        private slots:
+        void slotOptions();
+    };
+
+}

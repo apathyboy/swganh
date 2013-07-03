@@ -3,60 +3,72 @@
 
 #include "main_window.h"
 #include "options_dialog.h"
+#include "project_manager.h"
 
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
-{
-    setupUi(this);
+namespace swganh {
 
-    project_directory_ = "";
-
-    loadSettings();
-
-    connect(actionOptions, SIGNAL(triggered()), this, SLOT(slotOptions()));    
-}
-
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-    saveSettings();
-    event->accept();
-}
-
-void MainWindow::slotOptions()
-{
-    OptionsDialog* options = new OptionsDialog(this, project_directory_);
-
-    if (options->exec() == QDialog::Accepted)
+    MainWindow::MainWindow(QWidget* parent)
+        : QMainWindow(parent)
     {
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-        
-        auto project_dir = options->projectDirectory->text();
+        setupUi(this);
 
-        setProjectDirectory(project_dir);
+        project_directory_ = "";
 
-        QApplication::restoreOverrideCursor();
+        loadSettings();
+
+        connect(actionOptions, SIGNAL(triggered()), this, SLOT(slotOptions()));
     }
-}
 
-void MainWindow::setProjectDirectory(QString dir)
-{
-    project_directory_ = dir;
-}
-    
-void MainWindow::loadSettings()
-{
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ANH Studios", "SWGEd");
+    bool MainWindow::openProject(QString project_directory)
+    {
+        project_manager_ = new ProjectManager(this, treeFiles);
 
-    settings.beginGroup("main");
-    setProjectDirectory(settings.value("project_directory", QString("")).toString());
-    settings.endGroup();
-}
+        return true;
+    }
 
-void MainWindow::saveSettings()
-{
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ANH Studios", "SWGEd");
-    
-    settings.beginGroup("main");
-    settings.setValue("project_directory", getProjectDirectory());
-    settings.endGroup();
+    void MainWindow::closeEvent(QCloseEvent *event)
+    {
+        saveSettings();
+        event->accept();
+    }
+
+    void MainWindow::slotOptions()
+    {
+        OptionsDialog* options = new OptionsDialog(this, project_directory_);
+
+        if (options->exec() == QDialog::Accepted)
+        {
+            QApplication::setOverrideCursor(Qt::WaitCursor);
+
+            auto project_dir = options->projectDirectory->text();
+
+            setProjectDirectory(project_dir);
+
+            QApplication::restoreOverrideCursor();
+        }
+    }
+
+    void MainWindow::setProjectDirectory(QString dir)
+    {
+        project_directory_ = dir;
+    }
+
+    void MainWindow::loadSettings()
+    {
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ANH Studios", "SWGEd");
+
+        settings.beginGroup("main");
+        setProjectDirectory(settings.value("project_directory", QString("")).toString());
+        settings.endGroup();
+    }
+
+    void MainWindow::saveSettings()
+    {
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ANH Studios", "SWGEd");
+
+        settings.beginGroup("main");
+        settings.setValue("project_directory", getProjectDirectory());
+        settings.endGroup();
+    }
+
 }
