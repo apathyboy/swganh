@@ -20,6 +20,7 @@ namespace swganh {
     private:
         ProjectManager* project_manager_;
 
+        void openProject(QString project_directory);
         void loadSettings();
         void saveSettings();
 

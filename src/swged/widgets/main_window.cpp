@@ -33,13 +33,22 @@ namespace swganh {
 
         if (options->exec() == QDialog::Accepted)
         {
-            QApplication::setOverrideCursor(Qt::WaitCursor);
-
             auto project_dir = options->projectDirectory->text();
-            project_manager_->openProject(project_dir);
-
-            QApplication::restoreOverrideCursor();
+            openProject(project_dir);
         }
+    }
+
+    void MainWindow::openProject(QString project_directory)
+    {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+
+        if (!project_manager_->openProject(project_directory))
+        {
+            QApplication::restoreOverrideCursor();
+            slotOptions();
+        }
+
+        QApplication::restoreOverrideCursor();
     }
 
     void MainWindow::loadSettings()
@@ -49,7 +58,7 @@ namespace swganh {
         settings.beginGroup("main");
         
         auto project_dir = settings.value("project_directory", QString("")).toString();
-        project_manager_->openProject(project_dir);
+        openProject(project_dir);
 
         settings.endGroup();
     }
