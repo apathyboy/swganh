@@ -3,6 +3,8 @@
 
 #include <QTreeWidget>
 
+class QPoint;
+
 namespace swganh {
 
     class ProjectManager;
@@ -21,10 +23,16 @@ namespace swganh {
     private:
         ProjectManager* project_manager_;
 
+        bool isFile(QTreeWidgetItem* item) const;
+        bool isDir(QTreeWidgetItem* item) const;
+
     private slots:
         void slotItemCollapsed(QTreeWidgetItem* expanded_item);
         void slotItemExpanded(QTreeWidgetItem* expanded_item);
         void slotItemDoubleClicked(QTreeWidgetItem* expanded_item, int column);
+        void slotExtractFile();
+        void slotExtractDir();
+        void slotContextMenuRequested(const QPoint& p);
     };
 
 }

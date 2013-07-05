@@ -7,7 +7,9 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <QMenu>
 #include <QMessageBox>
+#include <QMouseEvent>
 
 #include "swganh/tre/tre_archive.h"
 
@@ -24,6 +26,10 @@ namespace swganh {
         // launch editor with src file loaded
         connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
             this, SLOT(slotItemDoubleClicked(QTreeWidgetItem*, int)));
+
+        setContextMenuPolicy(Qt::CustomContextMenu);
+
+        connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotContextMenuRequested(const QPoint&)));
     }
 
     void ProjectTree::load(QString project_directory)
@@ -55,6 +61,16 @@ namespace swganh {
                 cache.insert(path_data[0]);
             }
         });
+    }
+
+    bool ProjectTree::isFile(QTreeWidgetItem* item) const
+    {
+        return item->text(0).contains(".");
+    }
+
+    bool ProjectTree::isDir(QTreeWidgetItem* item) const
+    {
+        return !isFile(item);
     }
 
     void ProjectTree::slotItemCollapsed(QTreeWidgetItem* expanded_item)
@@ -101,8 +117,45 @@ namespace swganh {
 
     void ProjectTree::slotItemDoubleClicked(QTreeWidgetItem* expanded_item, int column)
     {
+        auto text = expanded_item->text(0);
+        if (text.toStdString().find_first_of(".") != std::string::npos)
+        {
+            QMessageBox msgBox;
+            msgBox.setText("Open with default editor.");
+            msgBox.exec();
+        }
+    }
+
+    void ProjectTree::slotExtractFile()
+    {
         QMessageBox msgBox;
-        msgBox.setText("The document has been modified.");
+        msgBox.setText("Extract file.");
         msgBox.exec();
     }
+
+    void ProjectTree::slotExtractDir()
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Extract directory.");
+        msgBox.exec();
+    }
+
+    void ProjectTree::slotContextMenuRequested(const QPoint&)
+    {
+        auto current_item = currentItem();
+
+        QMenu* menu = new QMenu(this);
+
+        if (isFile(current_item))
+        {
+            connect(menu->addAction(tr("Extract file...")), SIGNAL(triggered()), this, SLOT(slotExtractFile()));
+        }
+        else
+        {
+            connect(menu->addAction(tr("Extract directory...")), SIGNAL(triggered()), this, SLOT(slotExtractDir()));
+        }
+
+        menu->exec(QCursor::pos());
+    }
+
 }
