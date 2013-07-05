@@ -20,6 +20,12 @@ namespace swganh {
 
         void load(QString project_directory);
 
+    public slots:
+        void slotAddTreeItem(QString text, QString data);
+
+    signals:
+        void newTreeItem(QString text, QString data);
+
     private:
         ProjectManager* project_manager_;
 

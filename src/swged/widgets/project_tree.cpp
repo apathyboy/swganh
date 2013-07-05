@@ -30,37 +30,42 @@ namespace swganh {
         setContextMenuPolicy(Qt::CustomContextMenu);
 
         connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotContextMenuRequested(const QPoint&)));
+
+
+        connect(this, &ProjectTree::newTreeItem, this, &ProjectTree::slotAddTreeItem);
     }
 
     void ProjectTree::load(QString project_directory)
     {
         setRootIsDecorated(true);
 
-        QTreeWidgetItem* project_root = new QTreeWidgetItem;
-        project_root->setText(0, "Game Data");
-        project_root->setData(0, Qt::UserRole, project_directory);
-
         std::set<std::string> cache;
 
         project_manager_->getArchive()->VisitAvailableResources(
-            [this, project_root, &cache](std::string resource_name)
+            [this, &cache](std::string resource_name)
         {
             std::vector<std::string> path_data;
             boost::split(path_data, resource_name, boost::is_any_of("/"));
 
             if (cache.find(path_data[0]) == cache.end())
             {
-                QTreeWidgetItem* item = new QTreeWidgetItem();
-
-                item->setText(0, QString().fromStdString(path_data[0]));
-                item->setData(0, Qt::UserRole, QString().fromStdString(path_data[0]));
-                item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
-
-                addTopLevelItem(item);
+                emit newTreeItem(QString().fromStdString(path_data[0]),
+                    QString().fromStdString(path_data[0]));
 
                 cache.insert(path_data[0]);
             }
         });
+    }
+
+    void ProjectTree::slotAddTreeItem(QString text, QString data)
+    {
+        QTreeWidgetItem* item = new QTreeWidgetItem();
+
+        item->setText(0, text);
+        item->setData(0, Qt::UserRole, data);
+        item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+
+        addTopLevelItem(item);
     }
 
     bool ProjectTree::isFile(QTreeWidgetItem* item) const
