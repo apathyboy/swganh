@@ -2,7 +2,7 @@
 #pragma once
 
 #include <QFutureWatcher>
-#include <QProgressDialog>
+#include <QProgressBar>
 
 #include "ui_main_window.h"
 
@@ -19,6 +19,8 @@ namespace swganh {
 
         QFuture<void> openProject();
 
+        void showStatusProgress(bool visible);
+
     signals:
         void options();
 
@@ -29,7 +31,7 @@ namespace swganh {
         ProjectManager* project_manager_;
 
         QFutureWatcher<void> future_watcher_;
-        QProgressDialog* proj_load_progress_;
+        QProgressBar* status_progress_bar_;
         QString project_directory_;
 
         void loadSettings();
@@ -37,6 +39,7 @@ namespace swganh {
 
     private slots:
         void slotOptions();
+        void slotProjectLoadFinished();
     };
 
 }

@@ -23,10 +23,14 @@ namespace swganh {
         connect(actionOptions, SIGNAL(triggered()), this, SLOT(slotOptions()));
         connect(this, SIGNAL(options()), this, SLOT(slotOptions()));
 
-        proj_load_progress_ = new QProgressDialog(this);
+        status_progress_bar_ = new QProgressBar(this);
+        status_progress_bar_->setVisible(false);
+        status_progress_bar_->setMinimum(0);
+        status_progress_bar_->setMaximum(0);
 
-        connect(&future_watcher_, SIGNAL(finished()), this, SLOT(slot_finished()));
-        connect(&future_watcher_, SIGNAL(finished()), proj_load_progress_, SLOT(cancel()));
+        statusbar->addPermanentWidget(status_progress_bar_);
+
+        connect(&future_watcher_, SIGNAL(finished()), this, SLOT(slotProjectLoadFinished()));
 
     }
 
@@ -47,10 +51,8 @@ namespace swganh {
             auto future = openProject();
             future_watcher_.setFuture(future);
 
-            proj_load_progress_->setMinimum(0);
-            proj_load_progress_->setMaximum(0);
-            proj_load_progress_->setWindowModality(Qt::WindowModal);
-            proj_load_progress_->exec();
+            statusbar->showMessage(tr("Opening project..."));
+            showStatusProgress(true);
         }
 
         options->deleteLater();
@@ -68,14 +70,17 @@ namespace swganh {
         });
     }
 
+    void MainWindow::showStatusProgress(bool visible)
+    {
+        status_progress_bar_->setVisible(visible);
+    }
+
     void MainWindow::loadSettings()
     {
         QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ANH Studios", "SWGEd");
 
-        settings.beginGroup("main");
-        
+        settings.beginGroup("main");        
         project_directory_ = settings.value("project_directory", QString("")).toString();
-
         settings.endGroup();
     }
 
@@ -88,4 +93,9 @@ namespace swganh {
         settings.endGroup();
     }
 
+    void MainWindow::slotProjectLoadFinished()
+    {
+        statusbar->clearMessage();
+        showStatusProgress(false);
+    }
 }
