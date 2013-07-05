@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
 
     MainWindow mw;
     
+    mw.openProject();
+
     qApp->processEvents();
     mw.show();
     
