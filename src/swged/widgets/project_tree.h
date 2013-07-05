@@ -24,6 +24,7 @@ namespace swganh {
     private slots:
         void slotItemCollapsed(QTreeWidgetItem* expanded_item);
         void slotItemExpanded(QTreeWidgetItem* expanded_item);
+        void slotItemDoubleClicked(QTreeWidgetItem* expanded_item, int column);
     };
 
 }

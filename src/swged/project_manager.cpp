@@ -28,11 +28,17 @@ namespace swganh {
     ProjectManager::~ProjectManager()
     {}
 
-    void ProjectManager::initialize(QString project_directory)
+    void ProjectManager::openProject(QString project_directory)
     {
         archive_ = std::make_unique<tre::TreArchive>(project_directory.toStdString() + "/live.cfg");
 
         tree_files_->load(project_directory);
+    }
+
+    void ProjectManager::closeProject()
+    {
+        archive_.reset();
+        tree_files_->clear();
     }
 
     tre::TreArchive* ProjectManager::getArchive()

@@ -7,6 +7,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <QMessageBox>
+
 #include "swganh/tre/tre_archive.h"
 
 #include "project_manager.h"
@@ -18,6 +20,10 @@ namespace swganh {
     {
         connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(slotItemCollapsed(QTreeWidgetItem*)));
         connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(slotItemExpanded(QTreeWidgetItem*)));
+
+        // launch editor with src file loaded
+        connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
+            this, SLOT(slotItemDoubleClicked(QTreeWidgetItem*, int)));
     }
 
     void ProjectTree::load(QString project_directory)
@@ -91,5 +97,12 @@ namespace swganh {
                 }
             }
         });
+    }
+
+    void ProjectTree::slotItemDoubleClicked(QTreeWidgetItem* expanded_item, int column)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("The document has been modified.");
+        msgBox.exec();
     }
 }

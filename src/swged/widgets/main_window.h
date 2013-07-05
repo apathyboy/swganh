@@ -15,6 +15,8 @@ namespace swganh {
         MainWindow(QWidget* parent = 0);
 
         bool openProject(QString project_directory);
+        void closeProject();
+
         QString getProjectDirectory() const { return project_directory_; }
 
     protected:

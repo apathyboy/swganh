@@ -1,6 +1,8 @@
 
 #include <QtWidgets>
 
+#include <boost/filesystem.hpp>
+
 #include "main_window.h"
 #include "options_dialog.h"
 #include "project_manager.h"
@@ -13,6 +15,7 @@ namespace swganh {
         setupUi(this);
 
         project_directory_ = "";
+        project_manager_ = new ProjectManager(this, treeFiles);
 
         loadSettings();
 
@@ -21,10 +24,14 @@ namespace swganh {
 
     bool MainWindow::openProject(QString project_directory)
     {
-        project_manager_ = new ProjectManager(this, treeFiles);
-        project_manager_->initialize(project_directory);
+        project_manager_->openProject(project_directory);
 
         return true;
+    }
+
+    void MainWindow::closeProject()
+    {
+        project_manager_->closeProject();
     }
 
     void MainWindow::closeEvent(QCloseEvent *event)
@@ -43,7 +50,16 @@ namespace swganh {
 
             auto project_dir = options->projectDirectory->text();
 
-            setProjectDirectory(project_dir);
+            if (project_dir.compare(getProjectDirectory()) != 0) {
+                closeProject();
+                
+                setProjectDirectory(project_dir);
+
+                if (boost::filesystem::is_directory(project_dir.toStdString()))
+                {
+                    openProject(project_dir);
+                }
+            }
 
             QApplication::restoreOverrideCursor();
         }
