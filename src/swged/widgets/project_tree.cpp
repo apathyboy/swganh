@@ -57,15 +57,22 @@ namespace swganh {
         });
     }
 
-    void ProjectTree::slotAddTreeItem(QString text, QString data)
+    void ProjectTree::slotAddTreeItem(QString text, QString data, QTreeWidgetItem* parent)
     {
-        QTreeWidgetItem* item = new QTreeWidgetItem();
+        QTreeWidgetItem* item = new QTreeWidgetItem(parent);
 
         item->setText(0, text);
         item->setData(0, Qt::UserRole, data);
-        item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
 
-        addTopLevelItem(item);
+        if (!text.contains("."))
+        {
+            item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+        }
+
+        if (!parent)
+        {
+            addTopLevelItem(item);
+        }
     }
 
     bool ProjectTree::isFile(QTreeWidgetItem* item) const
@@ -93,7 +100,7 @@ namespace swganh {
         std::set<std::string> cache;
 
         project_manager_->getArchive()->VisitAvailableResources(
-            [&item_data, expanded_item, &cache] (std::string resource_name) 
+            [this, &item_data, expanded_item, &cache] (std::string resource_name) 
         {
             if (resource_name.compare(0, item_data.size(), item_data) == 0)
             {
@@ -101,18 +108,10 @@ namespace swganh {
                 std::vector<std::string> path_data;
                 boost::split(path_data, substr, boost::is_any_of("/"));
 
-
                 if (cache.find(path_data[0]) == cache.end())
                 {
-                    QTreeWidgetItem* item = new QTreeWidgetItem(expanded_item);
-
-                    item->setText(0, QString().fromStdString(path_data[0]));
-                    item->setData(0, Qt::UserRole, QString().fromStdString(item_data + "/" + path_data[0]));
-
-                    if (path_data[0].find_first_of(".") == std::string::npos)
-                    {
-                        item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
-                    }
+                    emit newTreeItem(QString().fromStdString(path_data[0]),
+                        QString().fromStdString(item_data + "/" + path_data[0]), expanded_item);
 
                     cache.insert(path_data[0]);
                 }
