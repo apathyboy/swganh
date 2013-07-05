@@ -27,6 +27,7 @@ target_link_libraries(swged
 )
 
 # Use the Widgets module from Qt 5
+qt5_use_modules(swged Concurrent)
 qt5_use_modules(swged Widgets)
 
 if(ZLIB_LIBRARY_DEBUG)
