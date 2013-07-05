@@ -20,16 +20,18 @@ int main(int argc, char *argv[])
     splash.show();
     
     splash.showMessage("Loading project", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
-	qApp->processEvents();
+    app.processEvents();
 
     MainWindow mw;
     
-    mw.openProject();
+    auto future = mw.openProject();
 
-    qApp->processEvents();
+    while (!future.isFinished())
+    {
+        app.processEvents();
+    }
+
     mw.show();
-    
-	qApp->processEvents();
     splash.finish(&mw);
 
     return app.exec();

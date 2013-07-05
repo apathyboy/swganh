@@ -38,7 +38,7 @@ namespace swganh {
     void ProjectTree::load(QString project_directory)
     {
         setRootIsDecorated(true);
-
+        setUpdatesEnabled(false);
         std::set<std::string> cache;
 
         project_manager_->getArchive()->VisitAvailableResources(
@@ -55,6 +55,7 @@ namespace swganh {
                 cache.insert(path_data[0]);
             }
         });
+        setUpdatesEnabled(true);
     }
 
     void ProjectTree::slotAddTreeItem(QString text, QString data, QTreeWidgetItem* parent)

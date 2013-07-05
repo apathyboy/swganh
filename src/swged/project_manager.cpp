@@ -34,20 +34,17 @@ namespace swganh {
 
     bool ProjectManager::openProject(QString project_directory)
     {
-        if (project_directory.compare(getProjectDirectory()) != 0) {
-            closeProject();
-                        
-            if (bf::is_directory(project_directory.toStdString()))
-            {
-                project_directory_ = project_directory;
-                archive_ = std::make_unique<tre::TreArchive>(project_directory.toStdString() + "/live.cfg");
-                tree_files_->load(project_directory);
-
-                return true;
-            }
+        if (project_directory_.length() > 0) {
+            // A request was made to open a project while one is already open
+            return false;
         }
-        else if (project_directory.length() > 0) {
-            // A request was made to open an already open project
+
+        if (bf::is_directory(project_directory.toStdString())) 
+        {
+            project_directory_ = project_directory;
+            archive_ = std::make_unique<tre::TreArchive>(project_directory.toStdString() + "/live.cfg");
+            tree_files_->load(project_directory);
+
             return true;
         }
 

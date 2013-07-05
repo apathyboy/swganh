@@ -43,27 +43,29 @@ namespace swganh {
         if (options->exec() == QDialog::Accepted)
         {
             project_directory_ = options->projectDirectory->text();
-            openProject();
+
+            auto future = openProject();
+            future_watcher_.setFuture(future);
+
+            proj_load_progress_->setMinimum(0);
+            proj_load_progress_->setMaximum(0);
+            proj_load_progress_->setWindowModality(Qt::WindowModal);
+            proj_load_progress_->exec();
         }
 
         options->deleteLater();
     }
 
-    void MainWindow::openProject()
+    QFuture<void> MainWindow::openProject()
     {
-        auto future = QtConcurrent::run([this]() {
+        project_manager_->closeProject();
+
+        return QtConcurrent::run([this]() {
             if (!project_manager_->openProject(project_directory_))
             {
                 emit options();
             }
         });
-
-        future_watcher_.setFuture(future);
-
-        proj_load_progress_->setMinimum(0);
-        proj_load_progress_->setMaximum(0);
-        proj_load_progress_->setWindowModality(Qt::WindowModal);
-        proj_load_progress_->exec();
     }
 
     void MainWindow::loadSettings()

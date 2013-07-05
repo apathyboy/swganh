@@ -17,7 +17,7 @@ namespace swganh {
     public:
         MainWindow(QWidget* parent = 0);
 
-        void openProject();
+        QFuture<void> openProject();
 
     signals:
         void options();
