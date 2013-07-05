@@ -30,6 +30,8 @@ namespace swganh {
 
     void ProjectManager::openProject(QString project_directory)
     {
+        project_directory_ = project_directory;
+
         archive_ = std::make_unique<tre::TreArchive>(project_directory.toStdString() + "/live.cfg");
 
         tree_files_->load(project_directory);

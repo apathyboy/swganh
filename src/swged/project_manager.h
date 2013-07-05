@@ -24,6 +24,8 @@ namespace swganh {
         ProjectManager(MainWindow* parent, ProjectTree* tree_files);
         ~ProjectManager();
 
+        QString getProjectDirectory() { return project_directory_; }
+
         void openProject(QString project_directory);
         void closeProject();
 
@@ -33,6 +35,7 @@ namespace swganh {
         MainWindow* parent_;
         ProjectTree* tree_files_;
         std::unique_ptr<tre::TreArchive> archive_;
+        QString project_directory_;
     };
 
 }
