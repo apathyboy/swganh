@@ -14,24 +14,11 @@ namespace swganh {
     {
         setupUi(this);
 
-        project_directory_ = "";
         project_manager_ = new ProjectManager(this, treeFiles);
 
         loadSettings();
 
         connect(actionOptions, SIGNAL(triggered()), this, SLOT(slotOptions()));
-    }
-
-    bool MainWindow::openProject(QString project_directory)
-    {
-        project_manager_->openProject(project_directory);
-
-        return true;
-    }
-
-    void MainWindow::closeProject()
-    {
-        project_manager_->closeProject();
     }
 
     void MainWindow::closeEvent(QCloseEvent *event)
@@ -42,32 +29,17 @@ namespace swganh {
 
     void MainWindow::slotOptions()
     {
-        OptionsDialog* options = new OptionsDialog(this, project_directory_);
+        OptionsDialog* options = new OptionsDialog(this, project_manager_->getProjectDirectory());
 
         if (options->exec() == QDialog::Accepted)
         {
             QApplication::setOverrideCursor(Qt::WaitCursor);
 
             auto project_dir = options->projectDirectory->text();
-
-            if (project_dir.compare(getProjectDirectory()) != 0) {
-                closeProject();
-                
-                setProjectDirectory(project_dir);
-
-                if (boost::filesystem::is_directory(project_dir.toStdString()))
-                {
-                    openProject(project_dir);
-                }
-            }
+            project_manager_->openProject(project_dir);
 
             QApplication::restoreOverrideCursor();
         }
-    }
-
-    void MainWindow::setProjectDirectory(QString dir)
-    {
-        project_directory_ = dir;
     }
 
     void MainWindow::loadSettings()
@@ -75,7 +47,10 @@ namespace swganh {
         QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ANH Studios", "SWGEd");
 
         settings.beginGroup("main");
-        setProjectDirectory(settings.value("project_directory", QString("")).toString());
+        
+        auto project_dir = settings.value("project_directory", QString("")).toString();
+        project_manager_->openProject(project_dir);
+
         settings.endGroup();
     }
 
@@ -84,7 +59,7 @@ namespace swganh {
         QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ANH Studios", "SWGEd");
 
         settings.beginGroup("main");
-        settings.setValue("project_directory", getProjectDirectory());
+        settings.setValue("project_directory", project_manager_->getProjectDirectory());
         settings.endGroup();
     }
 

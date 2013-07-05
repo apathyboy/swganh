@@ -13,20 +13,12 @@ namespace swganh {
 
     public:
         MainWindow(QWidget* parent = 0);
-
-        bool openProject(QString project_directory);
-        void closeProject();
-
-        QString getProjectDirectory() const { return project_directory_; }
-
+                
     protected:
         void closeEvent(QCloseEvent *event);
 
     private:
-        QString project_directory_;
         ProjectManager* project_manager_;
-
-        void setProjectDirectory(QString dir);
 
         void loadSettings();
         void saveSettings();

@@ -23,15 +23,7 @@ int main(int argc, char *argv[])
 	qApp->processEvents();
 
     MainWindow mw;
-
-    qApp->processEvents();
-
-    auto project_dir = mw.getProjectDirectory();
-    if (!project_dir.isEmpty())
-    {
-        mw.openProject(project_dir);
-    }
-
+    
     qApp->processEvents();
     mw.show();
     

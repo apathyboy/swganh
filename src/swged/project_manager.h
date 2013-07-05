@@ -26,7 +26,7 @@ namespace swganh {
 
         QString getProjectDirectory() { return project_directory_; }
 
-        void openProject(QString project_directory);
+        bool openProject(QString project_directory);
         void closeProject();
 
         tre::TreArchive* getArchive();
