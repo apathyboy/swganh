@@ -38,6 +38,7 @@ namespace swganh {
         void saveSettings();
 
     private slots:
+        void slotAbout();
         void slotOptions();
         void slotProjectLoadFinished();
     };

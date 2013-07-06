@@ -1,6 +1,8 @@
 
 #include "main_window.h"
 
+#include "ui_about_dialog.h"
+
 #include <QtConcurrent>
 #include <QtWidgets>
 
@@ -8,6 +10,8 @@
 
 #include "options_dialog.h"
 #include "project_manager.h"
+
+#include "version.h"
 
 namespace swganh {
 
@@ -20,7 +24,9 @@ namespace swganh {
 
         loadSettings();
 
+        connect(actionAbout, SIGNAL(triggered()), this, SLOT(slotAbout()));
         connect(actionOptions, SIGNAL(triggered()), this, SLOT(slotOptions()));
+        connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
         connect(this, SIGNAL(options()), this, SLOT(slotOptions()));
 
         status_progress_bar_ = new QProgressBar(this);
@@ -38,6 +44,15 @@ namespace swganh {
     {
         saveSettings();
         event->accept();
+    }
+
+    void MainWindow::slotAbout()
+    {
+        QDialog about;
+        Ui::AboutDialog ui;
+        ui.setupUi(&about);
+        ui.version->setText(tr("Version %1").arg(SWGANH_VERSION));
+        about.exec();
     }
 
     void MainWindow::slotOptions()
