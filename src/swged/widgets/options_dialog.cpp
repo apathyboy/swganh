@@ -21,10 +21,16 @@ namespace swganh {
 
     void OptionsDialog::slotChooseProjectDirectory()
     {
+        QString starting_dir = projectDirectory->text();
+        if (starting_dir.isEmpty())
+        {
+            starting_dir = QDir::homePath();
+        }
+
         QString s = QFileDialog::getExistingDirectory(
             this,
             tr("Choose the project directory"),
-            QDir::homePath(),
+            starting_dir,
             QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
         if (s.isEmpty())
         {

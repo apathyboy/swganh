@@ -1,19 +1,26 @@
 
 #include "project_tree.h"
 
+#include <fstream>
 #include <set>
 #include <string>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 
 #include <QMenu>
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QtConcurrent>
+#include <QProgressDialog>
 
 #include "swganh/tre/tre_archive.h"
 
+#include "widgets/extract_dialog.h"
 #include "project_manager.h"
+
+namespace bfs = boost::filesystem;
 
 namespace swganh {
 
@@ -133,16 +140,121 @@ namespace swganh {
 
     void ProjectTree::slotExtractFile()
     {
-        QMessageBox msgBox;
-        msgBox.setText("Extract file.");
-        msgBox.exec();
+        auto current_item = currentItem();
+        auto project_dir = project_manager_->getProjectDirectory();
+
+        ExtractDialog* extract = new ExtractDialog(this, project_manager_->getProjectDirectory());
+
+        if (extract->exec() == QDialog::Accepted)
+        {
+            auto resource_name = current_item->data(0, Qt::UserRole).toString();
+            auto resource = project_manager_->getArchive()->GetResource(resource_name.toStdString());
+            auto target_filename = project_dir.append("/").append(resource_name);
+
+            // Create a progress dialog.
+            QProgressDialog dialog;
+            dialog.setLabelText(QString("Extracting %1").arg(resource_name));
+
+            // Create a QFutureWatcher and connect signals and slots.
+            QFutureWatcher<void> futureWatcher;
+            QObject::connect(&futureWatcher, SIGNAL(finished()), &dialog, SLOT(reset()));
+            QObject::connect(&dialog, SIGNAL(canceled()), &futureWatcher, SLOT(cancel()));
+            QObject::connect(&futureWatcher, SIGNAL(progressRangeChanged(int, int)), &dialog, SLOT(setRange(int, int)));
+            QObject::connect(&futureWatcher, SIGNAL(progressValueChanged(int)), &dialog, SLOT(setValue(int)));
+
+
+            futureWatcher.setFuture(QtConcurrent::run([target_filename, resource] () 
+            {
+                auto path = bfs::path(target_filename.toStdString());
+
+                if (bfs::is_regular_file(path))
+                {
+                    bfs::remove(path);
+                }
+
+                if (!bfs::is_directory(path.parent_path()))
+                {
+                    bfs::create_directories(path.parent_path());
+                }
+
+                std::basic_ofstream<unsigned char> ofs(path.string(), std::ios::out | std::ios::binary);
+
+                if (resource.size() > 0)
+                {
+                    ofs.write(resource.data(), resource.size());
+                }
+
+                ofs.close();
+            }));
+
+            dialog.exec();
+            futureWatcher.waitForFinished();
+        }
     }
 
     void ProjectTree::slotExtractDir()
     {
-        QMessageBox msgBox;
-        msgBox.setText("Extract directory.");
-        msgBox.exec();
+        auto current_item = currentItem();
+        auto project_dir = project_manager_->getProjectDirectory();
+
+        ExtractDialog* extract = new ExtractDialog(this, project_manager_->getProjectDirectory());
+
+        if (extract->exec() == QDialog::Accepted)
+        {
+            auto resource_name = current_item->data(0, Qt::UserRole).toString();
+
+            // Create a progress dialog.
+            QProgressDialog dialog;
+            dialog.setLabelText(QString("Extracting %1").arg(resource_name));
+
+            // Create a QFutureWatcher and connect signals and slots.
+            QFutureWatcher<void> futureWatcher;
+            QObject::connect(&futureWatcher, SIGNAL(finished()), &dialog, SLOT(reset()));
+            QObject::connect(&dialog, SIGNAL(canceled()), &futureWatcher, SLOT(cancel()));
+            QObject::connect(&futureWatcher, SIGNAL(progressRangeChanged(int, int)), &dialog, SLOT(setRange(int, int)));
+            QObject::connect(&futureWatcher, SIGNAL(progressValueChanged(int)), &dialog, SLOT(setValue(int)));
+
+            QVector<QString> files;
+
+            project_manager_->getArchive()->VisitAvailableResources(
+                [&files, &resource_name](std::string stored_name)
+            {
+                if (stored_name.compare(0, resource_name.length(), resource_name.toStdString()) == 0)
+                {
+                    files.push_back(QString().fromStdString(stored_name));
+                }
+            });
+
+            futureWatcher.setFuture(QtConcurrent::map(files, [this, project_dir](QString resource_name)
+            {
+                auto target_filename = project_dir;
+                target_filename.append("/").append(resource_name);
+                auto path = bfs::path(target_filename.toStdString());
+                auto resource = project_manager_->getArchive()->GetResource(resource_name.toStdString());
+
+                if (bfs::is_regular_file(path))
+                {
+                    bfs::remove(path);
+                }
+
+                if (!bfs::is_directory(path.parent_path()))
+                {
+                    bfs::create_directories(path.parent_path());
+                }
+
+                std::basic_ofstream<unsigned char> ofs(path.string(), std::ios::out | std::ios::binary);
+
+                if (resource.size() > 0)
+                {
+                    ofs.write(resource.data(), resource.size());
+                }
+
+                ofs.close();
+            }));
+
+            dialog.exec();
+            futureWatcher.waitForFinished();
+        }
     }
 
     void ProjectTree::slotContextMenuRequested(const QPoint&)

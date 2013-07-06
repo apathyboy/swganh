@@ -31,6 +31,9 @@ namespace swganh {
 
         tre::TreArchive* getArchive();
 
+    signals:
+        void closingProject();
+
     private:
         MainWindow* parent_;
         ProjectTree* tree_files_;

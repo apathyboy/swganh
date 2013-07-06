@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 #include "tre_reader.h"
+#include "swganh/byte_buffer.h"
 
 namespace swganh {
 namespace tre {

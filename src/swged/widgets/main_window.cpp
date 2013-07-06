@@ -8,6 +8,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include "extract_dialog.h"
 #include "options_dialog.h"
 #include "project_manager.h"
 
@@ -75,8 +76,6 @@ namespace swganh {
 
     QFuture<void> MainWindow::openProject()
     {
-        project_manager_->closeProject();
-
         return QtConcurrent::run([this]() {
             if (!project_manager_->openProject(project_directory_))
             {
