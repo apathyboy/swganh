@@ -198,7 +198,7 @@ if (NOT WIN32)
     find_package(TBB REQUIRED)
 endif()
 
-find_package(Boost 1.53.0 COMPONENTS date_time filesystem log_setup log program_options python3 system thread unit_test_framework ${AdditionalBoostLibs} REQUIRED)
+find_package(Boost 1.54.0 COMPONENTS date_time filesystem log_setup log program_options python3 system thread unit_test_framework ${AdditionalBoostLibs} REQUIRED)
 find_package(Glm REQUIRED)
 find_package(MysqlConnectorC REQUIRED)
 find_package(MysqlConnectorCpp REQUIRED)
