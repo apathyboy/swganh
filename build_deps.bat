@@ -36,9 +36,8 @@ set "PROJECT_BASE=%~dp0"
 set "PROJECT_DRIVE=%~d0"
 set "BUILD_DIR=%PROJECT_BASE%build\deps\"
 set "VENDOR_DIR=%PROJECT_BASE%vendor\"
-set MSVC_VERSION=12
+set MSVC_VERSION=11
 set BOOST_VERSION=1.54.0
-set BOOST_LOG_REVISION=737
 set TURTLE_VERSION=1.2.0
 set GLM_VERSION=0.9.4.1
 set ZLIB_VERSION=1.2.7
@@ -312,10 +311,10 @@ if not exist "%MYSQL_C_DIR%" (
 cd "%MYSQL_C_DIR%"
 
 cmake -G"Visual Studio %MSVC_VERSION%" .
-cmake --build . --target libmysql/mysqlclient --config Debug
-cmake --build . --target libmysql/libmysql --config Debug
-cmake --build . --target libmysql/mysqlclient --config Release
-cmake --build . --target libmysql/libmysql --config Release
+cmake --build . --target mysqlclient --config Debug
+cmake --build . --target libmysql --config Debug
+cmake --build . --target mysqlclient --config Release
+cmake --build . --target libmysql --config Release
 
 if not exist "%VENDOR_DIR%include\mysql.h" (
     xcopy "include" "%VENDOR_DIR%include" /s /i /y
@@ -343,8 +342,8 @@ if not exist mysql-connector-cpp (
 cd mysql-connector-cpp
 
 cmake -G"Visual Studio %MSVC_VERSION%" -DBOOST_ROOT=%VENDOR_DIR% -DMYSQL_INCLUDE_DIR=%VENDOR_DIR%include -DMYSQL_LIB_DIR=%VENDOR_DIR%lib/Release .
-cmake --build . --target driver/mysqlcppconn --config Debug
-cmake --build . --target driver/mysqlcppconn --config Release
+cmake --build . --target mysqlcppconn --config Debug
+cmake --build . --target mysqlcppconn --config Release
 
 if not exist "%VENDOR_DIR%include\cppconn" (
     xcopy "cppconn" "%VENDOR_DIR%include\cppconn" /s /i /y
