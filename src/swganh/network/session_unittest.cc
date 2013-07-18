@@ -46,17 +46,17 @@ BOOST_AUTO_TEST_CASE(NewSessionHasZeroSendSequence) {
 }
 
 /// This test verifies that data packets sent out on the data channel are sequenced.
-BOOST_AUTO_TEST_CASE(SendingDataChannelMessageIncreasesServerSequence) {
-    auto service = buildMockServer();
-    boost::asio::io_service io_service;
-    shared_ptr<Session> session = make_shared<Session>(service.get(), io_service, buildTestEndpoint());
-
-    // Send 3 data channel messages and ensure the sequence is increased appropriately.
-    for (int i = 1; i <= 3; ++i ) {
-        session->SendTo(buildSimpleMessage());
-        BOOST_CHECK_EQUAL(i, session->server_sequence());
-    }
-}
+//BOOST_AUTO_TEST_CASE(SendingDataChannelMessageIncreasesServerSequence) {
+//    auto service = buildMockServer();
+//    boost::asio::io_service io_service;
+//    shared_ptr<Session> session = make_shared<Session>(service.get(), io_service, buildTestEndpoint());
+//
+//    // Send 3 data channel messages and ensure the sequence is increased appropriately.
+//    for (int i = 1; i <= 3; ++i ) {
+//        session->SendTo(buildSimpleMessage());
+//        BOOST_CHECK_EQUAL(i, session->server_sequence());
+//    }
+//}
 
 /// This test verifies that data channel messages are stored in case they need to be re-sent.
 //BOOST_AUTO_TEST_CASE(DataChannelMessagesAreStoredForResending) {
