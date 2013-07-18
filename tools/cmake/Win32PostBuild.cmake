@@ -77,3 +77,10 @@ add_custom_command(
     POST_BUILD
     COMMAND for /R \"${WIN_PROJECT_SOURCE_DIR}\\src\\\" %%a IN \(*.cfg\) do \(xcopy \"%%a\" \"${WIN_PROJECT_BINARY_DIR}\\bin\\$\(Configuration\)\\config\\plugins\\\" /D /I /Y\)
 )
+
+add_custom_command(
+    TARGET DEPS
+    POST_BUILD
+    COMMAND xcopy "${WIN_PROJECT_SOURCE_DIR}\\data\\testdata" "${WIN_PROJECT_BINARY_DIR}\\bin\\$\(Configuration\)\\testdata" /D /I /Y /s
+    VERBATIM
+)

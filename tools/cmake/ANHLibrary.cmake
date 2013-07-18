@@ -190,12 +190,12 @@ FUNCTION(AddANHLibrary name)
     	    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/tools/windows/user_project.vcxproj.in
     	        ${CMAKE_CURRENT_BINARY_DIR}/${name}_tests.vcxproj.user @ONLY)
         ENDIF()
-
+        
         add_custom_target(
             ${name}_test_runner ALL
-            COMMAND $<TARGET_FILE:${name}_test>
+            COMMAND $<TARGET_FILE:${name}_test> --catch_system_error=yes
             DEPENDS ${name}_test
-            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
         )
 
         set_target_properties(${name}_test_runner
@@ -205,9 +205,8 @@ FUNCTION(AddANHLibrary name)
 
         add_test(
             NAME all_${name}_tests
-            CONFIGURATIONS ${configuration}
             COMMAND ${name}_test --catch_system_error=yes --log_level=test_suite --output_format=XML --log_sink=${PROJECT_BINARY_DIR}/all_${name}_tests_$<CONFIGURATION>.xml
-            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${configuration})
+            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>)
     ENDIF()
 ENDFUNCTION()
 
