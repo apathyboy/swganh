@@ -191,12 +191,17 @@ FUNCTION(AddANHLibrary name)
     	        ${CMAKE_CURRENT_BINARY_DIR}/${name}_tests.vcxproj.user @ONLY)
         ENDIF()
 
-        # add_custom_command(
-            # TARGET ${name}_test
-            # POST_BUILD
-            # COMMAND $<TARGET_FILE:${name}_test>
-            # WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${configuration}
-        # )
+        add_custom_target(
+            ${name}_test_runner ALL
+            COMMAND $<TARGET_FILE:${name}_test>
+            DEPENDS ${name}_test
+            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        )
+
+        set_target_properties(${name}_test_runner
+            PROPERTIES
+            FOLDER "test_runners"
+        )
 
         add_test(
             NAME all_${name}_tests
