@@ -38,7 +38,12 @@ TerrainVisitor::~TerrainVisitor()
 
 void TerrainVisitor::visit_data(uint32_t depth, std::string name, uint32_t size, swganh::ByteBuffer& data)
 {
-	if(name == "MFAMDATA")
+	if (name == "0015DATA")
+	{
+		//Loading header data
+		header->Deserialize(data);
+	}
+	else if(name == "MFAMDATA")
 	{
 		//Reading a new fractal
 		working_fractal_ = new Fractal(data);
@@ -60,11 +65,6 @@ void TerrainVisitor::visit_data(uint32_t depth, std::string name, uint32_t size,
 		//Loading in layer specific layer data
 		working_layer_->Deserialize(data);
 		working_layer_ = nullptr;
-	}
-	else if(name == "0014DATA")
-	{
-		//Loading header data
-		header->Deserialize(data);
 	}
 }
 
