@@ -29,8 +29,8 @@ BOOST_AUTO_TEST_CASE(getWaterHeight) {
 
 	auto header = terrain_visitor->GetHeader();
 
-	//BOOST_REQUIRE_MESSAGE((0 == header->use_global_water_height), "Expected use_global_water_height of 0, got " << header->use_global_water_height);
-	//BOOST_REQUIRE_MESSAGE((0 == header->global_water_height), "Expected global_water_height of 0, got " << header->global_water_height);
+	BOOST_REQUIRE_MESSAGE((0 == header->use_global_water_height), "Expected use_global_water_height of 0, got " << header->use_global_water_height);
+	BOOST_REQUIRE_MESSAGE((0 == header->global_water_height), "Expected global_water_height of 0, got " << header->global_water_height);
 
 	in.close();
 }
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(getHeight) {
     for (unsigned int i = 0; i < coords.size(); i++)
     {
         pos = coords.at(i);
-
+	
 		float height_test = terrain_visitor->GetHeight(pos.x, pos.z);
         BOOST_REQUIRE_MESSAGE((fabs(height_test - pos.y) < 1), "Expected height of " << pos.y << " and got " << height_test);
     }
