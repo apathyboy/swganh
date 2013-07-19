@@ -20,7 +20,7 @@ namespace tre
 		
 		virtual void Deserialize(swganh::ByteBuffer& buffer);
 
-		virtual float Process(float x, float z, float transform_value, float& base_value, std::map<uint32_t,Fractal*>& fractals);
+		virtual float Process(float x, float z, float transform_value, float& base_value, FractalMap& fractals);
 
 	private:
 		float minHeight, maxHeight;

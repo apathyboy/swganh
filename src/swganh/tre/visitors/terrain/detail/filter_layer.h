@@ -4,6 +4,8 @@
 
 #include <map>
 #include "swganh/byte_buffer.h"
+
+#include "fractal.h"
 #include "layer.h"
 
 namespace swganh
@@ -18,7 +20,7 @@ namespace tre
 
 		virtual LayerType GetType() { return LAYER_TYPE_FILTER; }
 
-		virtual float Process(float x, float z, float transform_value, float& base_value, std::map<uint32_t,Fractal*>& fractals) = 0;
+		virtual float Process(float x, float z, float transform_value, float& base_value, FractalMap& fractals) = 0;
 		
 		int   feather_type;
         float feather_amount;

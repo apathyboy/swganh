@@ -4,9 +4,10 @@
 
 #include "swganh/tre/visitors/visitor_interface.h"
 
-#include <vector>
 #include <map>
+#include <memory>
 #include <stack>
+#include <vector>
 
 #include "detail/header.h"
 #include "detail/fractal.h"
@@ -20,9 +21,7 @@ namespace tre
 	class Fractal;
 	class Layer;
 	class ContainerLayer;
-
-	typedef std::map<uint32_t,Fractal*> FractalMap;
-
+	
 	class TerrainVisitor : public VisitorInterface
 	{
 	public:
@@ -52,7 +51,7 @@ namespace tre
 		bool IsWater(float x, float z);
 
 	private:
-		float processLayerHeight(ContainerLayer* layer, float x, float z, float& base_value, float affector_transform, std::map<uint32_t, Fractal*>& fractals);
+		float processLayerHeight(ContainerLayer* layer, float x, float z, float& base_value, float affector_transform, FractalMap& fractals);
 		float calculateFeathering(float value, int featheringType);
 		bool waterHeightHelper(ContainerLayer* layer, float x, float z, float& result);
 
@@ -63,7 +62,7 @@ namespace tre
 
 		//This is actual persistance data
 		TrnHeader* header;
-		FractalMap fractals_;
+		std::map<uint32_t, std::unique_ptr<Fractal>> fractals_;
 		std::vector<ContainerLayer*> layers_;
 	};
 }

@@ -18,7 +18,7 @@ namespace tre
 
 		virtual void Deserialize(swganh::ByteBuffer& buffer);
 		
-		virtual void GetBaseHeight(float x, float z, float transform_value, float& base_value, std::map<uint32_t,Fractal*>& fractals);
+		virtual void GetBaseHeight(float x, float z, float transform_value, float& base_value, FractalMap& fractals);
 
 	private:
 		int   transform_type;

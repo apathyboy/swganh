@@ -14,7 +14,7 @@ void HeightFilter::Deserialize(swganh::ByteBuffer& buffer)
 	feather_amount = buffer.read<float>();
 }
 
-float HeightFilter::Process(float x, float z, float transform_value, float& base_value, std::map<uint32_t,Fractal*>& fractals)
+float HeightFilter::Process(float x, float z, float transform_value, float& base_value, FractalMap& fractals)
 {
 	//std::cout << "FHGT::PROCESS("<< x << "," << z <<")" << std::endl;
 	float result;

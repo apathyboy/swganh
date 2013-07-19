@@ -12,11 +12,11 @@ void HeightFractal::Deserialize(swganh::ByteBuffer& buffer)
 	this->height_val = buffer.read<float>();
 }
 		
-void HeightFractal::GetBaseHeight(float x, float z, float transform_value, float& base_value, std::map<uint32_t,Fractal*>& fractals)
+void HeightFractal::GetBaseHeight(float x, float z, float transform_value, float& base_value, FractalMap& fractals)
 {
 	//std::cout << "AHFR::PROCESS("<< x << "," << z <<")" << std::endl;
 	
-	Fractal* fractal = fractals.find(fractal_id)->second;
+	const auto& fractal = fractals.find(fractal_id)->second;
 	
 	float noise_result = fractal->getNoise(x, z) * height_val;
 

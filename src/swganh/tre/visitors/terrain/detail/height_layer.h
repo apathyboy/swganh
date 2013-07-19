@@ -4,6 +4,7 @@
 
 #include <map>
 #include "swganh/byte_buffer.h"
+#include "fractal.h"
 #include "layer.h"
 
 namespace swganh
@@ -18,7 +19,7 @@ namespace tre
 
 		virtual LayerType GetType() { return LAYER_TYPE_HEIGHT; }
 		
-		virtual void GetBaseHeight(float x, float z, float transform_value, float& base_value, std::map<uint32_t, Fractal*>& fractals) = 0;
+		virtual void GetBaseHeight(float x, float z, float transform_value, float& base_value, FractalMap& fractals) = 0;
 	};
 	
 }

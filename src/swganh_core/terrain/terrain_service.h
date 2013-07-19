@@ -60,12 +60,6 @@ namespace terrain
 		virtual bool IsWater(uint32_t scene_id, float x, float z, bool raw=false);        
 
 	private:
-
-		bool waterHeightHelper(swganh::tre::ContainerLayer* layer, float x, float z, float& result);
-
-		float processLayerHeight(swganh::tre::ContainerLayer* layer, float x, float z, float& base_value, float affector_transform, std::map<uint32_t, swganh::tre::Fractal*>& fractals);
-		float calculateFeathering(float value, int featheringType);
-
 		boost::mutex terrain_mutex_;
 		SceneMap scenes_;
 		swganh::app::SwganhKernel* kernel_;

@@ -24,11 +24,6 @@ TerrainVisitor::TerrainVisitor()
 TerrainVisitor::~TerrainVisitor()
 {
 	delete header;
-	
-	for(auto& fractal : fractals_)
-	{
-		delete fractal.second;
-	}
 
 	for(auto& layer : layers_)
 	{
@@ -46,8 +41,10 @@ void TerrainVisitor::visit_data(uint32_t depth, std::string name, uint32_t size,
 	else if(name == "MFAMDATA")
 	{
 		//Reading a new fractal
-		working_fractal_ = new Fractal(data);
-		this->fractals_.insert(FractalMap::value_type(working_fractal_->fractal_id, working_fractal_));
+		//working_fractal_ = new Fractal(data);
+		auto tmp = std::make_unique<Fractal>(data);
+		working_fractal_ = tmp.get();
+		fractals_.insert(std::make_pair(tmp->fractal_id, std::move(tmp)));
 	} 
 	else if(name == "0001DATA" && working_fractal_ != nullptr) 
 	{
@@ -55,17 +52,17 @@ void TerrainVisitor::visit_data(uint32_t depth, std::string name, uint32_t size,
 		working_fractal_->Deserialize(data);
 		working_fractal_ = nullptr;
 	}
-	else if(working_layer_ != nullptr && name == "0001DATA")
-	{
-		//Loading basic layer data for the layer
-		working_layer_->SetData(data);
-	}
-	else if(working_layer_ != nullptr && (name == "DATAPARM" || name == "DATA" || name == "ADTA"))
-	{
-		//Loading in layer specific layer data
-		working_layer_->Deserialize(data);
-		working_layer_ = nullptr;
-	}
+	//else if(working_layer_ != nullptr && name == "0001DATA")
+	//{
+	//	//Loading basic layer data for the layer
+	//	working_layer_->SetData(data);
+	//}
+	//else if(working_layer_ != nullptr && (name == "DATAPARM" || name == "DATA" || name == "ADTA"))
+	//{
+	//	//Loading in layer specific layer data
+	//	working_layer_->Deserialize(data);
+	//	working_layer_ = nullptr;
+	//}
 }
 
 void TerrainVisitor::visit_folder(uint32_t depth, std::string name, uint32_t size)
@@ -75,14 +72,14 @@ void TerrainVisitor::visit_folder(uint32_t depth, std::string name, uint32_t siz
 	{
 		layer_stack_.pop();
 	}
-
+	
 	//If we can create the layer, we have an implementation for it
 	Layer* test_layer_ = LayerLoader(name);
 	if(test_layer_ != nullptr)
 	{
 		//We created a layer, so set it as the working layer
 		working_layer_ = test_layer_;
-
+	
 		//Hook the layer into either the top level layer list, or it's parent
 		if(layer_stack_.size() == 0 && working_layer_->GetType() == LAYER_TYPE_CONTAINER)
 		{
@@ -92,10 +89,9 @@ void TerrainVisitor::visit_folder(uint32_t depth, std::string name, uint32_t siz
 		{
 			((ContainerLayer*)layer_stack_.top().first)->InsertLayer(working_layer_);
 		}
-
+	
 		//Add the layer to the stack
-		auto entry = std::make_pair<Layer*, uint32_t>(std::forward<Layer*>(working_layer_), std::forward<uint32_t>(depth));
-		layer_stack_.push(std::move(entry));
+		layer_stack_.push(std::make_pair(working_layer_, depth));
 	}
 }
 
@@ -154,7 +150,7 @@ bool TerrainVisitor::IsWater(float x, float z)
 	return false;
 }
 
-float TerrainVisitor::processLayerHeight(ContainerLayer* layer, float x, float z, float& base_value, float affector_transform, std::map<uint32_t, Fractal*>& fractals)
+float TerrainVisitor::processLayerHeight(ContainerLayer* layer, float x, float z, float& base_value, float affector_transform, FractalMap& fractals)
 {
 	std::vector<BoundaryLayer*> boundaries = layer->boundaries;
 	std::vector<HeightLayer*> heights = layer->heights;

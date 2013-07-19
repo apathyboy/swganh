@@ -63,7 +63,7 @@ void SlopeFilter::SetMaxAngle(float new_angle)
 	}
 }
 
-float SlopeFilter::Process(float x, float z, float transform_value, float& base_value, std::map<uint32_t,Fractal*>& fractals)
+float SlopeFilter::Process(float x, float z, float transform_value, float& base_value, FractalMap& fractals)
 {
 	//std::cout << "FSLP::PROCESS("<< x << "," << z <<")" << std::endl;
 	float result;

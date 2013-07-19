@@ -20,11 +20,11 @@ void FractalFilter::Deserialize(swganh::ByteBuffer& buffer)
 	step = buffer.read<float>();
 }
 
-float FractalFilter::Process(float x, float z, float transform_value, float& base_value, std::map<uint32_t,Fractal*>& fractals)
+float FractalFilter::Process(float x, float z, float transform_value, float& base_value, FractalMap& fractals)
 {
 	//std::cout << "FFRA::PROCESS("<< x << "," << z <<")" << std::endl;
 	
-	Fractal* fractal = fractals.find(fractal_id)->second;
+	Fractal* fractal = fractals.find(fractal_id)->second.get();
 
 	float noise_result = fractal->getNoise(x, z) * step;
 	float result = 0;

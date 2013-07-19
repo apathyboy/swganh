@@ -2,8 +2,11 @@
 // See file LICENSE or go to http://swganh.com/LICENSE
 #pragma once
 
-#include <string>
+#include <cstdint>
 #include <iostream>
+#include <map>
+#include <memory>
+#include <string>
 
 #include "swganh/byte_buffer.h"
 #include "random.h"
@@ -13,6 +16,9 @@ namespace swganh
 {
 namespace tre
 {
+	class Fractal;
+	typedef std::map<uint32_t, std::unique_ptr<Fractal>> FractalMap;
+
 	class Fractal
 	{
 	public:
