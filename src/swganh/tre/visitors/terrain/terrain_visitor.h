@@ -42,9 +42,9 @@ namespace tre
 		*/
 		virtual void visit_folder(uint32_t depth, std::string name, uint32_t size);
 
-		TrnHeader* GetHeader() { return header; }
+		const TrnHeader& GetHeader() { return header; }
 		FractalMap& GetFractals() { return fractals_; }
-		std::vector<ContainerLayer*>& GetLayers() { return layers_; }
+		std::vector<std::shared_ptr<ContainerLayer>>& GetLayers() { return layers_; }
 
 		float GetWaterHeight(float x, float z);
 		float GetHeight(float x, float z);
@@ -57,13 +57,13 @@ namespace tre
 
 		//This is working data.
 		Fractal* working_fractal_;
-		std::stack<std::pair<Layer*, uint32_t>> layer_stack_;
+		std::stack<std::pair<std::shared_ptr<Layer>, uint32_t>> layer_stack_;
 		Layer* working_layer_;
 
 		//This is actual persistance data
-		TrnHeader* header;
+		TrnHeader header;
 		std::map<uint32_t, std::unique_ptr<Fractal>> fractals_;
-		std::vector<ContainerLayer*> layers_;
+		std::vector<std::shared_ptr<ContainerLayer>> layers_;
 	};
 }
 }

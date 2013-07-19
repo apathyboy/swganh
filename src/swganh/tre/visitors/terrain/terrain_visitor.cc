@@ -17,26 +17,17 @@
 using namespace swganh::tre;
 
 TerrainVisitor::TerrainVisitor()
-{
-	header = new TrnHeader();
-}
+{}
 
 TerrainVisitor::~TerrainVisitor()
-{
-	delete header;
-
-	for(auto& layer : layers_)
-	{
-		delete layer;
-	}
-}
+{}
 
 void TerrainVisitor::visit_data(uint32_t depth, std::string name, uint32_t size, swganh::ByteBuffer& data)
 {
 	if (name == "0015DATA")
 	{
 		//Loading header data
-		header->Deserialize(data);
+		header.Deserialize(data);
 	}
 	else if(name == "MFAMDATA")
 	{
@@ -52,17 +43,17 @@ void TerrainVisitor::visit_data(uint32_t depth, std::string name, uint32_t size,
 		working_fractal_->Deserialize(data);
 		working_fractal_ = nullptr;
 	}
-	//else if(working_layer_ != nullptr && name == "0001DATA")
-	//{
-	//	//Loading basic layer data for the layer
-	//	working_layer_->SetData(data);
-	//}
-	//else if(working_layer_ != nullptr && (name == "DATAPARM" || name == "DATA" || name == "ADTA"))
-	//{
-	//	//Loading in layer specific layer data
-	//	working_layer_->Deserialize(data);
-	//	working_layer_ = nullptr;
-	//}
+	else if(working_layer_ != nullptr && name == "0001DATA")
+	{
+		//Loading basic layer data for the layer
+		working_layer_->SetData(data);
+	}
+	else if(working_layer_ != nullptr && (name == "DATAPARM" || name == "DATA" || name == "ADTA"))
+	{
+		//Loading in layer specific layer data
+		working_layer_->Deserialize(data);
+		working_layer_ = nullptr;
+	}
 }
 
 void TerrainVisitor::visit_folder(uint32_t depth, std::string name, uint32_t size)
@@ -74,24 +65,25 @@ void TerrainVisitor::visit_folder(uint32_t depth, std::string name, uint32_t siz
 	}
 	
 	//If we can create the layer, we have an implementation for it
-	Layer* test_layer_ = LayerLoader(name);
+	auto test_layer_ = LayerLoader(name);
 	if(test_layer_ != nullptr)
 	{
 		//We created a layer, so set it as the working layer
-		working_layer_ = test_layer_;
+		working_layer_ = test_layer_.get();
 	
 		//Hook the layer into either the top level layer list, or it's parent
 		if(layer_stack_.size() == 0 && working_layer_->GetType() == LAYER_TYPE_CONTAINER)
 		{
-			layers_.push_back((ContainerLayer*)working_layer_);
+			layers_.push_back(std::static_pointer_cast<ContainerLayer>(test_layer_));
 		} 
 		else if(layer_stack_.top().first->GetType() == LAYER_TYPE_CONTAINER)
 		{
-			((ContainerLayer*)layer_stack_.top().first)->InsertLayer(working_layer_);
+			std::static_pointer_cast<ContainerLayer>(layer_stack_.top().first)
+				->InsertLayer(test_layer_);
 		}
 	
 		//Add the layer to the stack
-		layer_stack_.push(std::make_pair(working_layer_, depth));
+		layer_stack_.push(std::make_pair(test_layer_, depth));
 	}
 }
 
@@ -100,7 +92,7 @@ float TerrainVisitor::GetWaterHeight(float x, float z)
 	for (auto& child : GetLayers())
 	{
 		float result;
-		if (waterHeightHelper(child, x, z, result))
+		if (waterHeightHelper(child.get(), x, z, result))
 		{
 			return result;
 		}
@@ -108,10 +100,9 @@ float TerrainVisitor::GetWaterHeight(float x, float z)
 
 	//Todo:Apply any necessary layer modifications
 
-	auto header = GetHeader();
-	if (header->use_global_water_height)
+	if (header.use_global_water_height)
 	{
-		return header->global_water_height;
+		return header.global_water_height;
 	}
 
 	return FLT_MIN;
@@ -129,7 +120,7 @@ float TerrainVisitor::GetHeight(float x, float z)
 	{
 		if (layer->enabled)
 		{
-			processLayerHeight(layer, x, z, height_result, affector_transform, fractals);
+			processLayerHeight(layer.get(), x, z, height_result, affector_transform, fractals);
 		}
 	}
 
@@ -152,16 +143,16 @@ bool TerrainVisitor::IsWater(float x, float z)
 
 float TerrainVisitor::processLayerHeight(ContainerLayer* layer, float x, float z, float& base_value, float affector_transform, FractalMap& fractals)
 {
-	std::vector<BoundaryLayer*> boundaries = layer->boundaries;
-	std::vector<HeightLayer*> heights = layer->heights;
-	std::vector<FilterLayer*> filters = layer->filters;
+	auto boundaries = layer->boundaries;
+	auto heights = layer->heights;
+	auto filters = layer->filters;
 
 	float transform_value = 0.0f;
 	bool has_boundaries = false;
 
 	for (unsigned int i = 0; i < boundaries.size(); i++)
 	{
-		BoundaryLayer* boundary = (BoundaryLayer*) boundaries.at(i);
+		BoundaryLayer* boundary = (BoundaryLayer*) boundaries.at(i).get();
 
 		if (!boundary->enabled)
 			continue;
@@ -189,7 +180,7 @@ float TerrainVisitor::processLayerHeight(ContainerLayer* layer, float x, float z
 	{
 		for (unsigned int i = 0; i < filters.size(); ++i)
 		{
-			FilterLayer* filter = (FilterLayer*) filters.at(i);
+			FilterLayer* filter = (FilterLayer*) filters.at(i).get();
 
 			if (!filter->enabled)
 				continue;
@@ -212,7 +203,7 @@ float TerrainVisitor::processLayerHeight(ContainerLayer* layer, float x, float z
 		{
 			for (unsigned int i = 0; i < heights.size(); i++)
 			{
-				HeightLayer* affector = (HeightLayer*) heights.at(i);
+				HeightLayer* affector = (HeightLayer*) heights.at(i).get();
 
 				if (affector->enabled)
 				{
@@ -220,14 +211,10 @@ float TerrainVisitor::processLayerHeight(ContainerLayer* layer, float x, float z
 				}
 			}
 
-			std::vector<ContainerLayer*> children = layer->children;
-
-			for (unsigned int i = 0; i < children.size(); i++)
+			for (const auto& child : layer->children)
 			{
-				ContainerLayer* child = children.at(i);
-
 				if (child->enabled)
-					processLayerHeight(child, x, z, base_value, affector_transform * transform_value, fractals);
+					processLayerHeight(child.get(), x, z, base_value, affector_transform * transform_value, fractals);
 			}
 		}
 	}
@@ -266,7 +253,7 @@ bool TerrainVisitor::waterHeightHelper(ContainerLayer* layer, float x, float z, 
 	{
 		if (boundary->GetType() == LAYER_TYPE_BOUNDARY_POLYGON)
 		{
-			BoundaryPolygon* bpol = (BoundaryPolygon*) boundary;
+			BoundaryPolygon* bpol = (BoundaryPolygon*) boundary.get();
 			if (bpol->use_water_height && bpol->IsContained(x, z))
 			{
 				result = bpol->water_height;
@@ -278,7 +265,7 @@ bool TerrainVisitor::waterHeightHelper(ContainerLayer* layer, float x, float z, 
 	//Check our children recursively
 	for (auto& child : layer->children)
 	{
-		if (waterHeightHelper(child, x, z, result))
+		if (waterHeightHelper(child.get(), x, z, result))
 		{
 			return true;
 		}

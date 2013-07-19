@@ -2,14 +2,12 @@
 // See file LICENSE or go to http://swganh.com/LICENSE
 #pragma once
 
+#include <memory>
 #include <string>
 
-
-namespace swganh
-{
+namespace swganh {
 namespace tre {
 	class Layer;
-}
-}
+}}
 
-swganh::tre::Layer* LayerLoader(std::string node_name);
+std::shared_ptr<swganh::tre::Layer> LayerLoader(std::string node_name);

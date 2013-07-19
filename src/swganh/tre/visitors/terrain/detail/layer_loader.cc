@@ -21,28 +21,29 @@ using namespace swganh::tre;
 	This class is used to load a particular implementation based on it's node name.
 	We should consider using a map here instead as this is slightly inefficient.
 */
-Layer* LayerLoader(std::string node_name)
+std::shared_ptr<Layer> LayerLoader(std::string node_name)
 {
+	std::shared_ptr<Layer> layer = nullptr;
 	if(node_name == "LAYRFORM")
-		return new ContainerLayer();
+		layer = std::make_shared<ContainerLayer>();
 	else if(node_name == "BCIRFORM")
-		return new BoundaryCircle();
+		layer = std::make_shared<BoundaryCircle>();
 	else if(node_name == "BPOLFORM")
-		return new BoundaryPolygon();
+		layer = std::make_shared<BoundaryPolygon>();
 	else if(node_name == "BPLNFORM")
-		return new BoundaryPolyline();
+		layer = std::make_shared<BoundaryPolyline>();
 	else if(node_name == "BRECFORM")
-		return new BoundaryRectangle();
+		layer = std::make_shared<BoundaryRectangle>();
 	else if(node_name == "FFRAFORM")
-		return new FractalFilter();
+		layer = std::make_shared<FractalFilter>();
 	else if(node_name == "FHGTFORM")
-		return new HeightFilter();
+		layer = std::make_shared<HeightFilter>();
 	else if(node_name == "FSLPFORM")
-		return new SlopeFilter();
+		layer = std::make_shared<SlopeFilter>();
 	else if(node_name == "AHCNFORM")
-		return new HeightConstant();
+		layer = std::make_shared<HeightConstant>();
 	else if(node_name == "AHFRFORM")
-		return new HeightFractal();
-	else
-		return nullptr;
+		layer = std::make_shared<HeightFractal>();
+
+	return layer;
 }
