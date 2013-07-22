@@ -15,6 +15,7 @@ namespace swganh {
 
     class MainWindow;
     class ProjectTree;
+	class TerrainEditor;
 
     class ProjectManager : public QObject
     {
@@ -29,6 +30,8 @@ namespace swganh {
         bool openProject(QString project_directory);
         void closeProject();
 
+		void openFile(QString project_file);
+
         tre::TreArchive* getArchive();
 
     signals:
@@ -37,6 +40,7 @@ namespace swganh {
     private:
         MainWindow* parent_;
         ProjectTree* tree_files_;
+		std::unique_ptr<TerrainEditor> terrain_editor_;
         std::unique_ptr<tre::TreArchive> archive_;
         QString project_directory_;
     };

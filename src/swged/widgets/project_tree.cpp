@@ -132,9 +132,7 @@ namespace swganh {
         auto text = expanded_item->text(0);
         if (text.toStdString().find_first_of(".") != std::string::npos)
         {
-            QMessageBox msgBox;
-            msgBox.setText("Open with default editor.");
-            msgBox.exec();
+			project_manager_->openFile(text);
         }
     }
 

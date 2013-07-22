@@ -17,6 +17,7 @@
 
 #include "widgets/main_window.h"
 #include "widgets/project_tree.h"
+#include "widgets/terrain_editor.h"
 
 namespace bf = boost::filesystem;
 
@@ -61,6 +62,25 @@ namespace swganh {
 
         emit closingProject();
     }
+
+
+	void ProjectManager::openFile(QString project_file)
+	{
+		std::string extension = bf::extension(project_file.toStdString());
+		if (extension.compare(".trn") == 0)
+		{
+			// open terrain editor
+			terrain_editor_ = std::make_unique<TerrainEditor>();
+			terrain_editor_->show();
+		}
+		else
+		{
+			// open as hex view
+			QMessageBox msgBox;
+			msgBox.setText("open as hex view.");
+			msgBox.exec();
+		}
+	}
 
     tre::TreArchive* ProjectManager::getArchive()
     {
