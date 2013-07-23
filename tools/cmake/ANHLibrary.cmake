@@ -191,18 +191,6 @@ FUNCTION(AddANHLibrary name)
     	        ${CMAKE_CURRENT_BINARY_DIR}/${name}_tests.vcxproj.user @ONLY)
         ENDIF()
         
-        add_custom_target(
-            ${name}_test_runner ALL
-            COMMAND $<TARGET_FILE:${name}_test> --catch_system_error=yes
-            DEPENDS ${name}_test
-            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
-        )
-
-        set_target_properties(${name}_test_runner
-            PROPERTIES
-            FOLDER "test_runners"
-        )
-
         add_test(
             NAME all_${name}_tests
             COMMAND ${name}_test --catch_system_error=yes --log_level=test_suite --output_format=XML --log_sink=${PROJECT_BINARY_DIR}/all_${name}_tests_$<CONFIGURATION>.xml

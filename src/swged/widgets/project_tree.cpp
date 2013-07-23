@@ -57,7 +57,7 @@ namespace swganh {
             if (cache.find(path_data[0]) == cache.end())
             {
                 emit newTreeItem(QString().fromStdString(path_data[0]),
-                    QString().fromStdString(path_data[0]));
+					QString().fromStdString(resource_name));
 
                 cache.insert(path_data[0]);
             }
@@ -103,7 +103,7 @@ namespace swganh {
 
     void ProjectTree::slotItemExpanded(QTreeWidgetItem* expanded_item)
     {
-        auto item_data = expanded_item->data(0, Qt::UserRole).toString().toStdString();
+        auto item_data = expanded_item->text(0).toStdString();
 
         std::set<std::string> cache;
 
@@ -132,7 +132,7 @@ namespace swganh {
         auto text = expanded_item->text(0);
         if (text.toStdString().find_first_of(".") != std::string::npos)
         {
-			project_manager_->openFile(text);
+			project_manager_->openFile(expanded_item->data(0, Qt::UserRole).toString());
         }
     }
 

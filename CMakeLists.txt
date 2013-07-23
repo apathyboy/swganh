@@ -60,7 +60,7 @@ endif(WIN32)
 # tests. To prevent these unnecessary runnings during normal builds the
 # following option is set with a default of false.
 option(ENABLE_TEST_REPORT
-    "Enables the generation of a test report when running tests" OFF)
+    "Enables the generation of a test report when running tests" ON)
 
 option(USE_SYSTEM_LIBRARIES
     "Uses system libraries instead of downloading them" OFF)

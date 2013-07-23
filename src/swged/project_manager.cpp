@@ -17,7 +17,7 @@
 
 #include "widgets/main_window.h"
 #include "widgets/project_tree.h"
-#include "widgets/terrain_editor.h"
+#include "terrain/terrain_editor.h"
 
 namespace bf = boost::filesystem;
 
@@ -70,7 +70,7 @@ namespace swganh {
 		if (extension.compare(".trn") == 0)
 		{
 			// open terrain editor
-			terrain_editor_ = std::make_unique<TerrainEditor>();
+			terrain_editor_ = std::make_unique<TerrainEditor>(project_file, this);
 			terrain_editor_->show();
 		}
 		else
