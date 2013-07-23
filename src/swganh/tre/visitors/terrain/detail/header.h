@@ -23,6 +23,30 @@ struct TrnHeader
 		water_shader_size = buffer.read<float>();
 		water_shader_name = buffer.read<std::string>(false, true);
 		seconds_per_world_cycle = buffer.read<float>();
+
+		Collidable_MinDist = buffer.read<float>();
+		Collidable_MaxDist = buffer.read<float>();
+		Collidable_TileSize = buffer.read<float>();
+		Collidable_TileBorder = buffer.read<float>();
+		Collidable_Seed = buffer.read<float>();
+
+		NonCollidable_MinDist = buffer.read<float>();
+		NonCollidable_MaxDist = buffer.read<float>();
+		NonCollidable_TileSize = buffer.read<float>();
+		NonCollidable_TileBorder = buffer.read<float>();
+		NonCollidable_Seed = buffer.read<float>();
+
+		NearRadial_MinDist = buffer.read<float>();
+		NearRadial_MaxDist = buffer.read<float>();
+		NearRadial_TileSize = buffer.read<float>();
+		NearRadial_TileBorder = buffer.read<float>();
+		NearRadial_Seed = buffer.read<float>();
+
+		FarRadial_MinDist = buffer.read<float>();
+		FarRadial_MaxDist = buffer.read<float>();
+		FarRadial_TileSize = buffer.read<float>();
+		FarRadial_TileBorder = buffer.read<float>();
+		FarRadial_Seed = buffer.read<float>();
 	}
 
 	std::string filename;
@@ -35,9 +59,6 @@ struct TrnHeader
 	std::string water_shader_name;
 	float seconds_per_world_cycle;
 
-	/* 
-	Values not loaded because server doesn't need them
-	
 	float Collidable_MinDist;
 	float Collidable_MaxDist;
 	float Collidable_TileSize;
@@ -61,7 +82,6 @@ struct TrnHeader
 	float FarRadial_TileSize;
 	float FarRadial_TileBorder;
 	float FarRadial_Seed;
-	*/
 };
 
 }

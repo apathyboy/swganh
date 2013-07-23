@@ -2,6 +2,7 @@
 #include "terrain_editor.h"
 #include "project_manager.h"
 #include "ui_map_options.h"
+#include "ui_flora_options.h"
 #include "swganh/byte_buffer.h"
 #include "swganh/tre/visitors/terrain/terrain_visitor.h"
 #include "swganh/tre/iff/iff.h"
@@ -48,4 +49,39 @@ void TerrainEditor::on_actionMap_Options_triggered()
 	ui.cycleMins->setText(QString::number(mins));
 
 	map_options.exec();
+}
+
+void TerrainEditor::on_actionFlora_Options_triggered()
+{
+	QDialog flora_options;
+	Ui::FloraOptions ui;
+	ui.setupUi(&flora_options);
+
+	auto header = terrain_visitor_->GetHeader();
+
+	ui.collidableMaxDistance->setText(QString::number(header.Collidable_MaxDist));
+	ui.collidableMinDistance->setText(QString::number(header.Collidable_MinDist));
+	ui.collidableTileSize->setText(QString::number(header.Collidable_TileSize));
+	ui.collidableTileBorder->setText(QString::number(header.Collidable_TileBorder));
+	ui.collidableSeed->setText(QString::number(header.Collidable_Seed));
+
+	ui.nonCollidableMaxDistance->setText(QString::number(header.NonCollidable_MaxDist));
+	ui.nonCollidableMinDistance->setText(QString::number(header.NonCollidable_MinDist));
+	ui.nonCollidableTileSize->setText(QString::number(header.NonCollidable_TileSize));
+	ui.nonCollidableTileBorder->setText(QString::number(header.NonCollidable_TileBorder));
+	ui.nonCollidableSeed->setText(QString::number(header.NonCollidable_Seed));
+
+	ui.nearMaxDistance->setText(QString::number(header.NearRadial_MaxDist));
+	ui.nearMinDistance->setText(QString::number(header.NearRadial_MinDist));
+	ui.nearTileSize->setText(QString::number(header.NearRadial_TileSize));
+	ui.nearTileBorder->setText(QString::number(header.NearRadial_TileBorder));
+	ui.nearSeed->setText(QString::number(header.NearRadial_Seed));
+
+	ui.farMaxDistance->setText(QString::number(header.FarRadial_MaxDist));
+	ui.farMinDistance->setText(QString::number(header.FarRadial_MinDist));
+	ui.farTileSize->setText(QString::number(header.FarRadial_TileSize));
+	ui.farTileBorder->setText(QString::number(header.FarRadial_TileBorder));
+	ui.farSeed->setText(QString::number(header.FarRadial_Seed));
+
+	flora_options.exec();
 }

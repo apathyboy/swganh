@@ -24,7 +24,7 @@ TerrainVisitor::~TerrainVisitor()
 
 void TerrainVisitor::visit_data(uint32_t depth, std::string name, uint32_t size, swganh::ByteBuffer& data)
 {
-	if (name == "0015DATA")
+	if (name == "0014DATA")
 	{
 		//Loading header data
 		header.Deserialize(data);

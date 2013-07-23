@@ -23,6 +23,7 @@ namespace swganh {
 
 	private slots:
 		void on_actionMap_Options_triggered();
+		void on_actionFlora_Options_triggered();
 
 	private:
 		ProjectManager* project_manager_;
