@@ -3,7 +3,10 @@
 
 #include "swganh/tre/visitors/terrain/terrain_visitor.h"
 
+using swganh::tre::BoundaryLayer;
 using swganh::tre::ContainerLayer;
+using swganh::tre::FilterLayer;
+using swganh::tre::HeightLayer;
 using swganh::tre::Layer;
 using swganh::tre::LayerType;
 using swganh::ConstructionLayerTree;
@@ -41,20 +44,42 @@ void ConstructionLayerTree::addLayer(std::shared_ptr<Layer> layer, QTreeWidgetIt
 	switch (layer->GetType())
 	{
 	case LayerType::LAYER_TYPE_CONTAINER:
-		//auto container = std::static_pointer_cast<ContainerLayer>(layer);
-		item->setText(0, QString("Container"));
+		{
+			auto container = static_cast<ContainerLayer*>(layer.get());
+			item->setText(0, QString("Container"));
+			for (const auto& child : container->children)
+			{
+				addLayer(child, item);
+			}
+			for (const auto& child : container->boundaries)
+			{
+				addLayer(child, item);
+			}
+			for (const auto& child : container->filters)
+			{
+				addLayer(child, item);
+			}
+			for (const auto& child : container->heights)
+			{
+				addLayer(child, item);
+			}
+		}
 		break;
 	case LayerType::LAYER_TYPE_BOUNDARY:
-		item->setText(0, QString("Boundary"));
-		break;
 	case LayerType::LAYER_TYPE_BOUNDARY_POLYGON:
-		item->setText(0, QString("Boundary Polygon"));
+		{
+			item->setText(0, QString("Boundary"));
+		}
 		break;
 	case LayerType::LAYER_TYPE_HEIGHT:
-		item->setText(0, QString("Height"));
+		{
+			item->setText(0, QString("Height"));
+		}
 		break;
 	case LayerType::LAYER_TYPE_FILTER:
-		item->setText(0, QString("Filter"));
+		{
+			item->setText(0, QString("Filter"));
+		}
 		break;
 	}
 }
