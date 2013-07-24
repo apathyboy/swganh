@@ -1,0 +1,243 @@
+
+SGRP - Shader Group
+	SFAM - Shader Family
+		int - id
+		string family name
+		string surface properties file
+		bit - R
+		bit - G
+		bit - B
+		float - ? always seems to be 0x00000040 64
+		float - feather clamp
+		int - child count
+		shader child {
+			string family data - name
+			float shader data - weight
+		}
+FGRP - Flora Group
+	FFAM - Flora Family
+		int - id
+		string - name
+		family data {
+			bit - R
+			bit - G
+			bit - B
+			float - density
+		}
+		bool/int - floats on water
+		int - child count
+		flora child {
+			family data {
+				string name
+			}
+			child data {
+				float weight
+				bool/int align to terrain
+			}
+			swaying {
+				float displacement? 
+				float period?
+				bool/int sway flora?
+			}
+			scaling {
+				bool/int scale flora
+				float min scale
+				float max scale
+			}
+		}
+RGRP - Radial Group
+	RFAM - Radial Family
+		int - id
+		string name
+		family data {
+			bit - R
+			bit - G
+			bit - B
+			float - density
+		}
+		int - child count
+		radial child {
+			family data {
+				string name
+			}
+			child data {
+				float weight
+				float distance
+				float width
+				float height
+				int - maintain aspect ratio
+			}
+			swaying {
+				float displacement? 
+				float period?
+				bool/int sway flora?
+				int ? always seems to be 0
+			}
+		}
+EGRP - Environment Group
+	EFAM - Environment Family
+		int - id
+		string name
+		family data {
+		bit - R
+		bit - G
+		bit - B
+		float - feather clamp
+		}
+
+MGRP -
+	MFAM -
+		int - id
+		string name
+		MFRC
+			int seed
+			bool/int use_bias
+			float bias
+			bool/int use_gain
+			float gain
+			int - ? combination rule
+			float - octaves
+			float - amplitude
+			float - x scale
+			float - y scale
+			float - x offset
+			float - y offset
+			int - ? combination rule
+				{ rules enum:
+					add
+					multiply
+					crest
+					turbulence
+					crestClamp
+					turbulenceClamp
+					COUNT
+				}
+
+
+LYRS -
+	LAYR - construction layer
+		IHDR
+			bool/int enabled
+			string name
+		ADTA
+			bool/int invert boundaries
+			bool/int invert filters
+			int ?
+			string notes
+	AHFR - AffectorHeightFractal
+		IHDR
+			bool/int enabled
+			string name
+		PARM
+			int fractal family id
+			int operation
+				{ types: replace, add, subtract, multply, COUNT }
+			float y scale
+	ASCN - AffectorShaderConstant
+		IHDR
+			bool/int enabled
+			string name
+		DATA
+			int shader family id
+			bool/int feather clamp override
+			float clamp
+	ACRF - AffectorColorRampFractal
+		IHDR
+			bool/int enabled
+			string name
+		PARM
+			int fractal group id
+			int operation
+				{ types: replace, add, subtract, multply, COUNT }
+			string ramp (example terrain\tatt_colorramp_base_sand.tga)
+	AENV - AffectorEnvironment
+		IHDR
+			bool/int enabled
+			string name
+		DATA
+			int environment family id
+			bool/int feather clamp override
+			float clamp
+	FSLP - FilterSlope
+		IHDR
+			bool/int enabled
+			string name
+		DATA
+			float min_angle
+			float max_angle
+			int feather function
+				{ types: linear, easeIn, easeOut, easeInOut, COUNT }
+			float feather distance
+	AFDN - AffectorRadialNearConstant
+		IHDR
+			bool/int enabled
+			string name
+		DATA
+			int adjust?
+				{ types: adjustBorder, adjustOutside }
+			int operation { add/remove }?
+			bool/int remove all radial flora?
+			bool/int density override?
+			float density?
+	BCIR - BoundaryCircle
+		IHDR
+			bool/int enabled
+			string name
+		DATA
+			float center x
+			float center z
+			float radius
+			int feather function
+				{ types: linear, easeIn, easeOut, easeInOut, COUNT }
+			float feather distance
+	FFRA - Filter Fractal
+		IHDR
+			bool/int enabled
+			string name
+		PARM
+			int fractal family id
+			int feather function
+				{ types: linear, easeIn, easeOut, easeInOut, COUNT }
+			float feather distance
+			float low;
+			float high;
+			float step;
+	FHGT - Filter Height
+		IHDR
+			bool/int enabled
+			string name
+		DATA
+			float low height
+			float high height
+			int fractal family id
+			int feather function
+				{ types: linear, easeIn, easeOut, easeInOut, COUNT }
+	BPOL - BoundaryPolygon
+		IHDR
+			bool/int enabled
+			string name
+		DATA
+			int control point count
+			control point {
+				float x
+				float z
+			}
+			int feather function
+				{ types: linear, easeIn, easeOut, easeInOut, COUNT }
+			float feather distance
+			bool/int is local water table
+			float height
+			float shader size
+			string shader
+	AHTR - AffectorHeightTerrace
+		IHDR
+			bool/int enabled
+			string name
+		DATA
+			float terrace height
+			float flat ratio
+
+
+
+BakedTerrain water
+BakedTerrain slope

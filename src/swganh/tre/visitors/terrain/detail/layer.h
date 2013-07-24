@@ -28,6 +28,7 @@ namespace tre
 		virtual void SetData(swganh::ByteBuffer& buffer)
 		{
 			enabled = buffer.read<uint32_t>() == 1;
+			name = buffer.read<std::string>(false, true);
 		}
 
 		virtual LayerType GetType() = 0;
@@ -35,6 +36,7 @@ namespace tre
 		virtual void Deserialize(swganh::ByteBuffer& buffer) = 0;
 
 		bool enabled;
+		std::string name;
 
 	};
 

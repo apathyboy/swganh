@@ -24,6 +24,7 @@ namespace swganh {
 	private slots:
 		void on_actionMap_Options_triggered();
 		void on_actionFlora_Options_triggered();
+		void onLayerClicked(QTreeWidgetItem* expanded_item, int column);
 
 	private:
 		ProjectManager* project_manager_;

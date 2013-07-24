@@ -3,13 +3,17 @@
 #include "project_manager.h"
 #include "ui_map_options.h"
 #include "ui_flora_options.h"
+#include "layer_properties_widget.h"
 #include "swganh/byte_buffer.h"
 #include "swganh/tre/visitors/terrain/terrain_visitor.h"
 #include "swganh/tre/iff/iff.h"
 #include "swganh/tre/tre_archive.h"
-
+#include <QMessageBox>
 using swganh::TerrainEditor;
 using swganh::ProjectManager;
+using swganh::tre::Layer;
+using swganh::tre::ContainerLayer;
+using swganh::tre::LayerType;
 
 TerrainEditor::TerrainEditor(QString terrain_file, ProjectManager* project_manager, QWidget* parent)
 	: QMainWindow(parent)
@@ -25,6 +29,10 @@ TerrainEditor::TerrainEditor(QString terrain_file, ProjectManager* project_manag
 
 	setWindowTitle(windowTitle().append(" - ").append(terrain_file));
 	layerTree->initialize(&terrain_visitor_->GetLayers());
+
+	connect(layerTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+		this, SLOT(onLayerClicked(QTreeWidgetItem*, int)));
+
 }
 
 
@@ -84,4 +92,31 @@ void TerrainEditor::on_actionFlora_Options_triggered()
 	ui.farSeed->setText(QString::number(header.FarRadial_Seed));
 
 	flora_options.exec();
+}
+
+void TerrainEditor::onLayerClicked(QTreeWidgetItem* expanded_item, int column)
+{
+	auto layer = qvariant_cast<std::shared_ptr<Layer>>(expanded_item->data(0, Qt::UserRole));
+
+	switch (layer->GetType())
+	{
+	case LayerType::LAYER_TYPE_CONTAINER:
+		{
+			contextProperties->setWidget(new LayerPropertiesWidget(layer, this));
+		}
+		break;
+	case LayerType::LAYER_TYPE_BOUNDARY:
+	case LayerType::LAYER_TYPE_BOUNDARY_POLYGON:
+		{
+		}
+		break;
+	case LayerType::LAYER_TYPE_HEIGHT:
+		{
+		}
+		break;
+	case LayerType::LAYER_TYPE_FILTER:
+		{
+		}
+		break;
+	}
 }

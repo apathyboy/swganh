@@ -29,6 +29,7 @@ void ConstructionLayerTree::initialize(std::vector<std::shared_ptr<ContainerLaye
 void ConstructionLayerTree::addLayer(std::shared_ptr<Layer> layer, QTreeWidgetItem* parent)
 {
 	QTreeWidgetItem* item = new QTreeWidgetItem(parent);
+	item->setText(0, QString::fromStdString(layer->name));
 	item->setData(0, Qt::UserRole, QVariant::fromValue(layer));
 
 	item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
@@ -46,7 +47,6 @@ void ConstructionLayerTree::addLayer(std::shared_ptr<Layer> layer, QTreeWidgetIt
 	case LayerType::LAYER_TYPE_CONTAINER:
 		{
 			auto container = static_cast<ContainerLayer*>(layer.get());
-			item->setText(0, QString("Container"));
 			for (const auto& child : container->children)
 			{
 				addLayer(child, item);
@@ -68,17 +68,14 @@ void ConstructionLayerTree::addLayer(std::shared_ptr<Layer> layer, QTreeWidgetIt
 	case LayerType::LAYER_TYPE_BOUNDARY:
 	case LayerType::LAYER_TYPE_BOUNDARY_POLYGON:
 		{
-			item->setText(0, QString("Boundary"));
 		}
 		break;
 	case LayerType::LAYER_TYPE_HEIGHT:
 		{
-			item->setText(0, QString("Height"));
 		}
 		break;
 	case LayerType::LAYER_TYPE_FILTER:
 		{
-			item->setText(0, QString("Filter"));
 		}
 		break;
 	}

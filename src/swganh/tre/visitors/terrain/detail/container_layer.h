@@ -29,6 +29,8 @@ namespace tre
 			//Read ADTA
 			invert_boundaries = buffer.read<uint32_t>() == 1;
 			invert_filters = buffer.read<uint32_t>() == 1;
+			buffer.read<uint32_t>();
+			notes = buffer.read<std::string>(false, true);
 		}
 
 		virtual LayerType GetType() { return LAYER_TYPE_CONTAINER; }
@@ -58,7 +60,7 @@ namespace tre
 		std::vector<std::shared_ptr<HeightLayer>> heights;
 
 		bool invert_boundaries, invert_filters;
-
+		std::string notes;
 	private:
 	};
 
