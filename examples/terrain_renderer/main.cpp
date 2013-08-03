@@ -2,6 +2,15 @@
 #include <windows.h>
 #include <windowsx.h>
 
+#include <fstream>
+#include <vector>
+
+#include <glm/glm.hpp>
+
+#include "swganh/byte_buffer.h"
+#include "swganh/tre/visitors/terrain/terrain_visitor.h"
+#include "swganh/tre/iff/iff.h"
+
 typedef struct _RGNDATAHEADER {
 	DWORD dwSize;
 	DWORD iType;
@@ -18,8 +27,8 @@ typedef struct _RGNDATA {
 #include <d3d9.h>
 
 // define the screen resolution
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 256
+#define SCREEN_HEIGHT 2048
 
 // include the Direct3D Library file
 #pragma comment (lib, "d3d9.lib")
@@ -157,10 +166,49 @@ void render_frame(void)
 	d3ddev->SetFVF(CUSTOMFVF);
 
 	// select the vertex buffer to display
-	d3ddev->SetStreamSource(0, v_buffer, 0, sizeof(CUSTOMVERTEX));
+	//d3ddev->SetStreamSource(0, v_buffer, 0, sizeof(CUSTOMVERTEX));
 
 	// copy the vertex buffer to the back buffer
-	d3ddev->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
+	//d3ddev->DrawPrimitive(D3DPT_POINTLIST, 0, 1);
+	
+	std::ifstream in("testdata/terrain/tatooine.trn", std::ios::in | std::ios::binary);
+
+	if (!in.is_open())
+	{
+		return;
+	}
+
+	std::vector<char> tmp { std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>() };
+	swganh::ByteBuffer data(reinterpret_cast<unsigned char*>(tmp.data()), tmp.size());
+
+	auto terrain_visitor = std::make_shared<swganh::tre::TerrainVisitor>();
+
+	swganh::tre::iff_file::loadIFF(data, terrain_visitor);
+
+	const auto& wmap = terrain_visitor->GetWmap();
+	std::vector<CUSTOMVERTEX> vertices2;
+
+	uint32_t map_width = terrain_visitor->GetMapWidth();
+	uint32_t map_height = terrain_visitor->GetMapHeight();
+
+	for (unsigned int i = 0; i < map_height; ++i)
+	{
+		for (unsigned int j = 0; j < map_width; ++j)
+		{
+			unsigned char c = wmap.at((i * map_width) + j);
+			CUSTOMVERTEX v = { (float) j, (float) i, 1.0f, 1.0, D3DCOLOR_XRGB(c, c, c) };
+			vertices2.push_back(v);
+			//total += base::read(file, x);
+#if 0
+			std::cout << (unsigned int) x << " ";
+#endif
+		}
+	}
+
+	d3ddev->DrawPrimitiveUP(D3DPT_POINTLIST,        //PrimitiveType
+		vertices2.size(),                //PrimitiveCount
+		vertices2.data(),                   //pVertexStreamZeroData
+		sizeof(CUSTOMVERTEX));  //VertexStreamZeroStride
 
 	d3ddev->EndScene();
 
@@ -180,26 +228,99 @@ void cleanD3D(void)
 // this is the function that puts the 3D models into video RAM
 void init_graphics(void)
 {
-	// create the vertices using the CUSTOMVERTEX struct
-	CUSTOMVERTEX vertices [] =
+	std::ifstream in("testdata/terrain/tatooine.trn", std::ios::in | std::ios::binary);
+
+	if (!in.is_open())
 	{
-		{ 400.0f, 62.5f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 0, 255), },
-		{ 650.0f, 500.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 255, 0), },
-		{ 150.0f, 500.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(255, 0, 0), },
-	};
+		return;
+	}
+
+	std::vector<char> tmp { std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>() };
+	swganh::ByteBuffer data(reinterpret_cast<unsigned char*>(tmp.data()), tmp.size());
+
+	auto terrain_visitor = std::make_shared<swganh::tre::TerrainVisitor>();
+
+	swganh::tre::iff_file::loadIFF(data, terrain_visitor);
+
+	const auto& wmap = terrain_visitor->GetWmap();
+	std::vector<CUSTOMVERTEX> vertices2;
+
+	uint32_t map_width = terrain_visitor->GetMapWidth();
+	uint32_t map_height = terrain_visitor->GetMapHeight();
+
+	for (unsigned int i = 0; i < map_height; ++i)
+	{
+		for (unsigned int j = 0; j < map_width; ++j)
+		{
+			CUSTOMVERTEX v = { (float) j, (float) i, 1.0f, 1.0, D3DCOLOR_XRGB(0, 255, 0) };
+			vertices2.push_back(v);
+			//total += base::read(file, x);
+#if 0
+			std::cout << (unsigned int) x << " ";
+#endif
+		}
+	}
 
 	// create a vertex buffer interface called v_buffer
-	d3ddev->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX),
+	d3ddev->CreateVertexBuffer(vertices2.size() * sizeof(CUSTOMVERTEX),
 		0,
 		CUSTOMFVF,
 		D3DPOOL_MANAGED,
 		&v_buffer,
 		NULL);
-
+	
 	VOID* pVoid;    // a void pointer
-
+	
 	// lock v_buffer and load the vertices into it
 	v_buffer->Lock(0, 0, (void**) &pVoid, 0);
-	memcpy(pVoid, vertices, sizeof(vertices));
+	memcpy(pVoid, vertices2.data(), vertices2.size() * sizeof(CUSTOMVERTEX));
 	v_buffer->Unlock();
+
+
+	//// create the vertices using the CUSTOMVERTEX struct
+	//std::vector<CUSTOMVERTEX> vertices3 =
+	//{
+	//	{ 400.0f, 62.5f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 0, 255), },
+	//	{ 650.0f, 500.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 255, 0), },
+	//	{ 150.0f, 500.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(255, 0, 0), },
+	//};
+	//
+	//// create a vertex buffer interface called v_buffer
+	//d3ddev->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX),
+	//	0,
+	//	CUSTOMFVF,
+	//	D3DPOOL_MANAGED,
+	//	&v_buffer,
+	//	NULL);
+	//
+	//VOID* pVoid;    // a void pointer
+	//
+	//// lock v_buffer and load the vertices into it
+	//v_buffer->Lock(0, 0, (void**) &pVoid, 0);
+	//memcpy(pVoid, vertices3.data(), sizeof(CUSTOMVERTEX) * vertices3.size());
+	//v_buffer->Unlock();
+
+
+	//// create the vertices using the CUSTOMVERTEX struct
+	//CUSTOMVERTEX vertices [] =
+	//{
+	//	{ 400.0f, 62.5f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 0, 255), },
+	//	{ 650.0f, 500.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 255, 0), },
+	//	{ 150.0f, 500.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(255, 0, 0), },
+	//};
+	//
+	//// create a vertex buffer interface called v_buffer
+	//d3ddev->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX),
+	//	0,
+	//	CUSTOMFVF,
+	//	D3DPOOL_MANAGED,
+	//	&v_buffer,
+	//	NULL);
+	//
+	//VOID* pVoid;    // a void pointer
+	//
+	//// lock v_buffer and load the vertices into it
+	//v_buffer->Lock(0, 0, (void**) &pVoid, 0);
+	//memcpy(pVoid, vertices, sizeof(vertices));
+	//v_buffer->Unlock();
 }

@@ -54,6 +54,19 @@ void TerrainVisitor::visit_data(uint32_t depth, std::string name, uint32_t size,
 		working_layer_->Deserialize(data);
 		working_layer_ = nullptr;
 	}
+	else if (name == "WMAP")
+	{
+		wmap_.insert(wmap_.begin(), data.data(), data.data() + size);
+	}
+	else if (name == "SMAP")
+	{
+		smap_.insert(smap_.begin(), data.data(), data.data() + size);
+	}
+	else if (name == "0001DATA")
+	{
+		//Loading basic layer data for the layer
+		footer.Deserialize(data);
+	}
 }
 
 void TerrainVisitor::visit_folder(uint32_t depth, std::string name, uint32_t size)
