@@ -245,31 +245,6 @@ BOOST_AUTO_TEST_CASE(CanAppendBuffers)
     BOOST_CHECK_EQUAL(5, buffer1.peekAt<int>(5 * sizeof(int)));
 }
 
-BOOST_AUTO_TEST_CASE(CanSwapEndian)
-{
-    ByteBuffer buffer;
-    
-    buffer.write<char>(0);
-    buffer.write<char>(0);
-    buffer.write<char>(0);
-    buffer.write<char>(2);
-    
-    BOOST_CHECK_EQUAL(uint32_t(2), buffer.peek<uint32_t>(true));
-
-    // Start a new check with a 64bit value
-    buffer.clear();
-    buffer.write<char>(0);
-    buffer.write<char>(0);
-    buffer.write<char>(0);
-    buffer.write<char>(0);
-    buffer.write<char>(0);
-    buffer.write<char>(0);
-    buffer.write<char>(0);
-    buffer.write<char>(2);
-
-    BOOST_CHECK_EQUAL(uint64_t(2), buffer.peek<uint64_t>(true));
-}
-
 BOOST_AUTO_TEST_CASE(CanCompareByteBuffers) {    
     ByteBuffer buffer1;
     buffer1.write<int>(0);
