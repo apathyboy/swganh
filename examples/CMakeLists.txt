@@ -7,3 +7,4 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 #add_subdirectory(tre_unpacker)
 
 add_subdirectory(terrain_renderer)
+add_subdirectory(terrain_readerwriter)

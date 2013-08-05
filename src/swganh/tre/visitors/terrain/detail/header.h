@@ -10,6 +10,22 @@ namespace swganh
 namespace tre
 {
 
+	struct TrnFooter
+	{
+		void Deserialize(swganh::ByteBuffer buffer)
+		{
+			map_size = buffer.read<float>();
+			chunk_width = buffer.read<float>();
+			map_width = buffer.read<uint32_t>();
+			map_height = buffer.read<uint32_t>();
+		}
+
+		float map_size;
+		float chunk_width;
+		uint32_t map_width;
+		uint32_t map_height;
+	};
+
 struct TrnHeader
 {
 	void Deserialize(swganh::ByteBuffer buffer)

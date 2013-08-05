@@ -14,46 +14,23 @@ namespace swganh {
             uint16_t x = 1;
             return !(*reinterpret_cast<char*>(&x));
         }
-        
-        template<typename T>
-        T swapEndian_(T value, std::integral_constant<size_t, 1>) {
-            return value;
-        }
 
-        template<typename T>
-        T swapEndian_(T value, std::integral_constant<size_t, 2>) {
-          typename std::make_unsigned<T>::type& tmp = reinterpret_cast<typename std::make_unsigned<T>::type&>(value);
-            tmp = (tmp >> 8) | (tmp << 8);
+		template<typename T>
+		T swapBits(T value)
+		{
+			static_assert(std::is_arithmetic<T>::value, "swap_bits<T> requires T to be an integral type.");
 
-            return value;
-        }
-        
-        template<typename T>
-        T swapEndian_(T value, std::integral_constant<size_t, 4>) {
-            typename std::make_unsigned<T>::type& tmp = reinterpret_cast<typename std::make_unsigned<T>::type&>(value);
-            tmp = (tmp >> 24) |
-                   ((tmp & 0x00FF0000) >> 8) | ((tmp & 0x0000FF00) << 8) |
-                   (tmp << 24);
+			int8_t* bits = reinterpret_cast<int8_t*>(&value);
 
-            return value;
-        }
-        
-        template<typename T>
-        T swapEndian_(T value, std::integral_constant<size_t, 8>) {
-            typename std::make_unsigned<T>::type& tmp = reinterpret_cast<typename std::make_unsigned<T>::type&>(value);
-            tmp = (tmp >> 56) |
-                ((tmp & 0x00FF000000000000ULL) >> 40) |
-                ((tmp & 0x0000FF0000000000ULL) >> 24) |
-                ((tmp & 0x000000FF00000000ULL) >> 8)  |
-                ((tmp & 0x00000000FF000000ULL) << 8)  |
-                ((tmp & 0x0000000000FF0000ULL) << 24) |
-                ((tmp & 0x000000000000FF00ULL) << 40) |
-                (tmp  << 56);
+			for (int i = 0, end = sizeof(T) / 2; i < end; ++i)
+			{
+				std::swap(bits[i], bits[sizeof(T) - i - 1]);
+			}
 
-            return value;
-        }
+			return value;
+		}
     }
-
+	
     /*! Swaps the endianness of integral values and returns the results.
     *
     * @param value An integral value for which to swap the endianness.
@@ -61,8 +38,8 @@ namespace swganh {
     */
     template<typename T>
     T swapEndian(T value) {
-        static_assert(std::is_integral<int>::value, "swap_endian<T> requires T to be an integral type.");
-        return detail::swapEndian_<T>(value, std::integral_constant<size_t, sizeof(T)>());
+        static_assert(std::is_arithmetic<T>::value, "swap_endian<T> requires T to be an integral type.");
+		return detail::swapBits(value);
     }
 
     /*! Converts an integral value from host-byte order to little endian.
@@ -72,8 +49,8 @@ namespace swganh {
     */
     template<typename T>
     T hostToLittle(T value) {
-        static_assert(std::is_integral<int>::value, "host_to_little<T> requires T to be an integral type.");
-        return detail::isBigEndian() ? swapEndian(value) : value;
+		static_assert(std::is_arithmetic<T>::value, "host_to_little<T> requires T to be an integral type.");
+		return detail::isBigEndian() ? swapEndian(value) : value;
     }
     
     /*! Converts an integral value from host-byte order to big endian.
@@ -83,8 +60,8 @@ namespace swganh {
     */
     template<typename T>
     T hostToBig(T value) {
-        static_assert(std::is_integral<int>::value, "host_to_big<T> requires T to be an integral type.");
-        return detail::isBigEndian() ? value : swapEndian(value);
+		static_assert(std::is_arithmetic<T>::value, "host_to_big<T> requires T to be an integral type.");
+		return detail::isBigEndian() ? value : swapEndian(value);
     }
     
     /*! Converts an integral value from big endian to host-byte order.
@@ -94,8 +71,8 @@ namespace swganh {
     */
     template<typename T>
     T bigToHost(T value) {
-        static_assert(std::is_integral<int>::value, "big_to_host<T> requires T to be an integral type.");
-        return detail::isBigEndian() ? value : swapEndian(value);
+		static_assert(std::is_arithmetic<T>::value, "big_to_host<T> requires T to be an integral type.");
+		return detail::isBigEndian() ? value : swapEndian(value);
     }
     
     /*! Converts an integral value from little endian to host-byte order.
@@ -105,8 +82,8 @@ namespace swganh {
     */
     template<typename T>
     T littleToHost(T value) {
-        static_assert(std::is_integral<int>::value, "little_to_host<T> requires T to be an integral type.");
-        return detail::isBigEndian() ? swapEndian(value) : value;
+		static_assert(std::is_arithmetic<T>::value, "little_to_host<T> requires T to be an integral type.");
+		return detail::isBigEndian() ? swapEndian(value) : value;
     }
         
     int KeyboardHit();

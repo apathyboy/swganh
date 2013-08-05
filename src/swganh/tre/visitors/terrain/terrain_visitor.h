@@ -50,6 +50,12 @@ namespace tre
 		float GetHeight(float x, float z);
 		bool IsWater(float x, float z);
 
+		const std::vector<unsigned char>& GetSmap() const { return smap_; }
+		const std::vector<unsigned char>& GetWmap() const { return wmap_; }
+
+		uint32_t GetMapWidth() const { return footer.map_width; }
+		uint32_t GetMapHeight() const { return footer.map_height; }
+
 	private:
 		float processLayerHeight(ContainerLayer* layer, float x, float z, float& base_value, float affector_transform, FractalMap& fractals);
 		float calculateFeathering(float value, int featheringType);
@@ -62,8 +68,12 @@ namespace tre
 
 		//This is actual persistance data
 		TrnHeader header;
+		TrnFooter footer;
 		std::map<uint32_t, std::unique_ptr<Fractal>> fractals_;
 		std::vector<std::shared_ptr<ContainerLayer>> layers_;
+
+		std::vector<unsigned char> smap_;
+		std::vector<unsigned char> wmap_;
 	};
 }
 }

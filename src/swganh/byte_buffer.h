@@ -199,11 +199,6 @@ public:
     friend bool operator!=(const ByteBuffer& lhs, const ByteBuffer& rhs);
 
 private:
-    template<typename T> void swapEndian(T& data) const;
-    template<typename T> void swapEndian16(T& data) const;
-    template<typename T> void swapEndian32(T& data) const;
-    template<typename T> void swapEndian64(T& data) const;
-        
     std::vector<unsigned char> data_;
 
     size_t read_position_;
