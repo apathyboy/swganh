@@ -11,6 +11,7 @@
 
 void read_terrain(std::string terrain_filename);
 void print_iff_nodes(swganh::tre::iff_node* head, int depth = 0);
+void process(swganh::tre::iff_node* head);
 
 int main(int argc, char *argv[])
 {
@@ -19,14 +20,14 @@ int main(int argc, char *argv[])
         std::cout << "Usage: " << argv[0] << " <path to terrain file>" << std::endl;
         exit(0);
     }
-    
+
     auto start_time = std::chrono::high_resolution_clock::now();
 
 	read_terrain(argv[1]);
 
     auto stop_time = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Duration: " << 
+    std::cout << "Duration: " <<
         std::chrono::duration_cast<std::chrono::milliseconds>
             (stop_time - start_time).count() << "ms" << std::endl;
 
@@ -42,7 +43,7 @@ void read_terrain(std::string terrain_filename)
 		std::cout << "Invalid filename given: " << terrain_filename << std::endl;
 		return;
 	}
-	
+
 	std::vector<char> tmp { std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>() };
 
 	in.close();
@@ -50,7 +51,7 @@ void read_terrain(std::string terrain_filename)
 	swganh::ByteBuffer data(reinterpret_cast<unsigned char*>(tmp.data()), tmp.size());
 
 	auto iff_head = swganh::tre::parse_iff(data);
-	
+
 	if (iff_head)
 	{
 		print_iff_nodes(iff_head.get());
@@ -71,6 +72,8 @@ void read_terrain(std::string terrain_filename)
 		}
 
 		out.close();
+
+		process(iff_head.get());
 	}
 }
 
@@ -88,10 +91,22 @@ void print_iff_nodes(swganh::tre::iff_node* head, int depth)
 		std::cout << " - " << head->str_form();
 	}
 
-	std::cout << " - (" << head->children.size() << ") " << head->size << "\n";
+	std::cout << " - (" << head->children.size() << ") ";
+
+	if (!head->form)
+	{
+		std::cout << head->data.size();
+	}
+
+	std::cout << "\n";
 
 	for (const auto& child : head->children)
 	{
 		print_iff_nodes(child.get(), depth + 1);
 	}
+}
+
+void process(swganh::tre::iff_node* head)
+{
+	//head->record("PTAT0014DATA")
 }

@@ -76,7 +76,7 @@ FUNCTION(AddANHLibrary name)
         FILE(GLOB_RECURSE HEADERS *.h)
         FILE(GLOB_RECURSE TEST_SOURCES *_unittest.cc *_unittest.cpp mock_*.h)
         FILE(GLOB_RECURSE BINDINGS *_binding.h *_binding.cc *_binding.cpp py_*.h py_*.cc)
-        
+
         LIST(LENGTH BINDINGS _bindings_list_length)
         IF(_bindings_list_length GREATER 0)
             list(REMOVE_ITEM SOURCES ${BINDINGS})
@@ -190,14 +190,21 @@ FUNCTION(AddANHLibrary name)
     	    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/tools/windows/user_project.vcxproj.in
     	        ${CMAKE_CURRENT_BINARY_DIR}/${name}_tests.vcxproj.user @ONLY)
         ENDIF()
-        
+
+        if(WIN32)
+            set(RUNNER_WD "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)")
+        else()
+            set(RUNNER_WD "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+        endif()
+
+
         add_custom_target(
             ${name}_test_runner ALL
             COMMAND ${name}_test --catch_system_error=yes
             DEPENDS ${name}_test
-            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
+            WORKING_DIRECTORY ${RUNNER_WD}
         )
-    
+
         set_target_properties(${name}_test_runner
             PROPERTIES
             FOLDER "test_runners"
