@@ -33,11 +33,15 @@ void TerrainVisitor::visit_data(uint32_t depth, std::string name, uint32_t size,
 	{
 		//Reading a new fractal
 		//working_fractal_ = new Fractal(data);
+#ifdef WIN32
 		auto tmp = std::make_unique<Fractal>(data);
+#else
+		std::unique_ptr<Fractal> tmp(new Fractal(data));
+#endif
 		working_fractal_ = tmp.get();
 		fractals_.insert(std::make_pair(tmp->fractal_id, std::move(tmp)));
-	} 
-	else if(name == "0001DATA" && working_fractal_ != nullptr) 
+	}
+	else if(name == "0001DATA" && working_fractal_ != nullptr)
 	{
 		//Filling in data for a fractal
 		working_fractal_->Deserialize(data);
@@ -57,31 +61,31 @@ void TerrainVisitor::visit_data(uint32_t depth, std::string name, uint32_t size,
 }
 
 void TerrainVisitor::visit_folder(uint32_t depth, std::string name, uint32_t size)
-{	
+{
 	//Get our layer stack back to where it should be
 	while(layer_stack_.size() > 0 && layer_stack_.top().second > depth)
 	{
 		layer_stack_.pop();
 	}
-	
+
 	//If we can create the layer, we have an implementation for it
 	auto test_layer_ = LayerLoader(name);
 	if(test_layer_ != nullptr)
 	{
 		//We created a layer, so set it as the working layer
 		working_layer_ = test_layer_.get();
-	
+
 		//Hook the layer into either the top level layer list, or it's parent
 		if(layer_stack_.size() == 0 && working_layer_->GetType() == LAYER_TYPE_CONTAINER)
 		{
 			layers_.push_back(std::static_pointer_cast<ContainerLayer>(test_layer_));
-		} 
+		}
 		else if(layer_stack_.top().first->GetType() == LAYER_TYPE_CONTAINER)
 		{
 			std::static_pointer_cast<ContainerLayer>(layer_stack_.top().first)
 				->InsertLayer(test_layer_);
 		}
-	
+
 		//Add the layer to the stack
 		layer_stack_.push(std::make_pair(test_layer_, depth));
 	}

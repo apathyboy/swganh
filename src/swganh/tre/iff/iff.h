@@ -21,7 +21,7 @@ namespace tre
 	{
 	public:
 
-		static void loadIFF(swganh::ByteBuffer& input, std::shared_ptr<VisitorInterface> visitor=nullptr);
+		static void loadIFF(swganh::ByteBuffer input, std::shared_ptr<VisitorInterface> visitor=nullptr);
 
 	private:
 		static bool isNodeNameCharacter_(char c);

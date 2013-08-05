@@ -108,7 +108,7 @@ namespace swganh {
         std::set<std::string> cache;
 
         project_manager_->getArchive()->VisitAvailableResources(
-            [this, &item_data, expanded_item, &cache] (std::string resource_name) 
+            [this, &item_data, expanded_item, &cache] (std::string resource_name)
         {
             if (resource_name.compare(0, item_data.size(), item_data) == 0)
             {
@@ -161,7 +161,7 @@ namespace swganh {
             QObject::connect(&futureWatcher, SIGNAL(progressValueChanged(int)), &dialog, SLOT(setValue(int)));
 
 
-            futureWatcher.setFuture(QtConcurrent::run([target_filename, resource] () 
+            futureWatcher.setFuture(QtConcurrent::run([target_filename, resource] ()
             {
                 auto path = bfs::path(target_filename.toStdString());
 
@@ -175,11 +175,11 @@ namespace swganh {
                     bfs::create_directories(path.parent_path());
                 }
 
-                std::basic_ofstream<unsigned char> ofs(path.string(), std::ios::out | std::ios::binary);
+                std::ofstream ofs(path.string(), std::ios::out | std::ios::binary);
 
                 if (resource.size() > 0)
                 {
-                    ofs.write(resource.data(), resource.size());
+                    ofs.write(reinterpret_cast<const char*>(resource.data()), resource.size());
                 }
 
                 ofs.close();
@@ -240,11 +240,11 @@ namespace swganh {
                     bfs::create_directories(path.parent_path());
                 }
 
-                std::basic_ofstream<unsigned char> ofs(path.string(), std::ios::out | std::ios::binary);
+                std::ofstream ofs(path.string(), std::ios::out | std::ios::binary);
 
                 if (resource.size() > 0)
                 {
-                    ofs.write(resource.data(), resource.size());
+                    ofs.write(reinterpret_cast<const char*>(resource.data()), resource.size());
                 }
 
                 ofs.close();

@@ -24,8 +24,10 @@ endif()
 
 cmake_minimum_required(VERSION 2.8.11)
 
+if(WIN32)
 cmake_policy(VERSION 2.8.11.20130628-g46c95)
 cmake_policy(SET CMP0022 NEW)
+endif()
 
 project(swganh CXX)
 

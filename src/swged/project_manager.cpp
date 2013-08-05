@@ -41,12 +41,16 @@ namespace swganh {
             return true;
         }
 
-        if (bf::is_directory(project_directory.toStdString())) 
+        if (bf::is_directory(project_directory.toStdString()))
         {
             closeProject();
 
             project_directory_ = project_directory;
+#ifdef WIN32
             archive_ = std::make_unique<tre::TreArchive>(project_directory.toStdString() + "/live.cfg");
+#else
+            archive_.reset(new tre::TreArchive(project_directory.toStdString() + "/live.cfg"));
+#endif
             tree_files_->load(project_directory);
 
             return true;
@@ -70,7 +74,11 @@ namespace swganh {
 		if (extension.compare(".trn") == 0)
 		{
 			// open terrain editor
+#ifdef WIN32
 			terrain_editor_ = std::make_unique<TerrainEditor>(project_file, this);
+#else
+            terrain_editor_.reset(new TerrainEditor(project_file, this));
+#endif
 			terrain_editor_->show();
 		}
 		else

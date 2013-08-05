@@ -7,7 +7,7 @@
 
 using namespace swganh::tre;
 
-void iff_file::loadIFF(swganh::ByteBuffer& inputstream, std::shared_ptr<VisitorInterface> visitor)
+void iff_file::loadIFF(swganh::ByteBuffer inputstream, std::shared_ptr<VisitorInterface> visitor)
 {
 	//We use a stack instead of recursion to make things more straightforward to follow.
 	std::stack<uint32_t> loader;
@@ -27,13 +27,13 @@ void iff_file::loadIFF(swganh::ByteBuffer& inputstream, std::shared_ptr<VisitorI
 		{
 			//It hasn't, so we get the name of the next node in the stream
 			std::string name = getIFFName_(inputstream);
-			
+
 			//It wasn't an iff, or it had an edge case's name. We continue from here as normal
 			if(name.size() == 0 || name == "NULL") { continue; }
-			
+
 			//It was, so we read in the size information
 			std::uint32_t size = inputstream.read<std::uint32_t>(true);
-			
+
 			//Then we check to see if what it contains is a node or data based the first eight characters
 			if(size >= 4 && isFolderNode_(name))
 			{
@@ -63,11 +63,11 @@ std::string iff_file::getIFFName_(swganh::ByteBuffer& input)
 	//Lets read ahead 8 bytes. We could peek here, but we'll need to adjust our stream position anyway
 	//so lets just read.
 	std::uint64_t name_buf = input.read<std::uint64_t>();
-	
+
 	//Get the size of the name we just read from the stream
 	unsigned int namesize = getNameSize_((char*)&name_buf, 8);
 
-	if(namesize < 4) 
+	if(namesize < 4)
 	{
 		//The name size is 0. Lets backtrack and hope for the best
 		namesize = 0;
@@ -79,7 +79,7 @@ std::string iff_file::getIFFName_(swganh::ByteBuffer& input)
 		namesize = 4;
 		input.read_position_delta(-4);
 	}
-	else 
+	else
 	{
 		//The name size is 8.
 		namesize = 8;
