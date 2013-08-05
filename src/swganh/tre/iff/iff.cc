@@ -12,7 +12,7 @@ using namespace swganh::tre;
 
 iff_node* iff_node::form(char name[4])
 {
-	uint32_t name_int = *reinterpret_cast<uint32_t*>(&name);
+	uint32_t name_int = *reinterpret_cast<uint32_t*>(name);
 
 	for (const auto& child : children)
 	{
@@ -27,7 +27,7 @@ iff_node* iff_node::form(char name[4])
 
 iff_node* iff_node::record(char name[4])
 {
-	uint32_t name_int = *reinterpret_cast<uint32_t*>(&name);
+	uint32_t name_int = *reinterpret_cast<uint32_t*>(name);
 
 	for (const auto& child : children)
 	{

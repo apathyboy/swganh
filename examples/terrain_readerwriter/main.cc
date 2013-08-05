@@ -57,24 +57,24 @@ void read_terrain(std::string terrain_filename)
 	{
 		//print_iff_nodes(iff_head.get());
 
-		//std::ofstream out(terrain_filename + ".alt", std::ios::binary);
-		//if (!out.is_open())
-		//{
-		//	std::cout << "Invalid filename given: " << terrain_filename + ".alt" << std::endl;
-		//	return;
-		//}
-		//
-		//swganh::ByteBuffer out_buffer;
-		//swganh::tre::write_iff(out_buffer, iff_head.get());
-		//
-		//if (out_buffer.size() > 0)
-		//{
-		//	out.write(reinterpret_cast<char*>(out_buffer.data()), out_buffer.size());
-		//}
-		//
-		//out.close();
-
 		process(iff_head.get());
+
+		std::ofstream out(terrain_filename + ".alt", std::ios::binary);
+		if (!out.is_open())
+		{
+			std::cout << "Invalid filename given: " << terrain_filename + ".alt" << std::endl;
+			return;
+		}
+		
+		swganh::ByteBuffer out_buffer;
+		swganh::tre::write_iff(out_buffer, iff_head.get());
+		
+		if (out_buffer.size() > 0)
+		{
+			out.write(reinterpret_cast<char*>(out_buffer.data()), out_buffer.size());
+		}
+		
+		out.close();
 	}
 }
 
@@ -113,5 +113,8 @@ void process(swganh::tre::iff_node* head)
 
 	pt.load();
 
+	pt.set_filename(pt.get_filename() + ".bak");
+
+	pt.save();
 	//head->record("PTAT0014DATA")
 }

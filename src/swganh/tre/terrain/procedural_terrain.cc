@@ -46,12 +46,11 @@ procedural_terrain::~procedural_terrain()
 
 void procedural_terrain::load()
 {
-	auto form00014 = impl_->iff_doc->form("PTAT")->form("0014");
+	auto form00014 = impl_->iff_doc->form("0014");
 
 	impl_->load_header(form00014->record("DATA"));
 	impl_->load_terrain_data(form00014->form("TGEN"));
 	impl_->load_footer(form00014->form("0001"));
-
 }
 
 void procedural_terrain::save()
@@ -61,3 +60,19 @@ void procedural_terrain::save()
 		to_save->save();
 	}
 }
+
+const iff_node& procedural_terrain::iff_doc() const
+{
+	return *impl_->iff_doc;
+}
+
+void procedural_terrain::set_filename(std::string filename)
+{
+	impl_->hdr.filename = filename;
+}
+
+std::string procedural_terrain::get_filename() const
+{
+	return impl_->hdr.filename;
+}
+

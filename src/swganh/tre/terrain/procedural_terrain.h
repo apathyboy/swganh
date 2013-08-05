@@ -20,6 +20,9 @@ namespace tre {
 
 		const iff_node& iff_doc() const;
 
+		void set_filename(std::string filename);
+		std::string get_filename() const;
+
 	private:
 		std::unique_ptr<procedural_terrain_impl> impl_;
 	};
