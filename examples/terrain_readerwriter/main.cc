@@ -8,6 +8,7 @@
 #include <string>
 
 #include "swganh/tre/iff/iff.h"
+#include "swganh/tre/terrain/procedural_terrain.h"
 
 void read_terrain(std::string terrain_filename);
 void print_iff_nodes(swganh::tre::iff_node* head, int depth = 0);
@@ -54,24 +55,24 @@ void read_terrain(std::string terrain_filename)
 
 	if (iff_head)
 	{
-		print_iff_nodes(iff_head.get());
+		//print_iff_nodes(iff_head.get());
 
-		std::ofstream out(terrain_filename + ".alt", std::ios::binary);
-		if (!out.is_open())
-		{
-			std::cout << "Invalid filename given: " << terrain_filename + ".alt" << std::endl;
-			return;
-		}
-
-		swganh::ByteBuffer out_buffer;
-		swganh::tre::write_iff(out_buffer, iff_head.get());
-
-		if (out_buffer.size() > 0)
-		{
-			out.write(reinterpret_cast<char*>(out_buffer.data()), out_buffer.size());
-		}
-
-		out.close();
+		//std::ofstream out(terrain_filename + ".alt", std::ios::binary);
+		//if (!out.is_open())
+		//{
+		//	std::cout << "Invalid filename given: " << terrain_filename + ".alt" << std::endl;
+		//	return;
+		//}
+		//
+		//swganh::ByteBuffer out_buffer;
+		//swganh::tre::write_iff(out_buffer, iff_head.get());
+		//
+		//if (out_buffer.size() > 0)
+		//{
+		//	out.write(reinterpret_cast<char*>(out_buffer.data()), out_buffer.size());
+		//}
+		//
+		//out.close();
 
 		process(iff_head.get());
 	}
@@ -86,14 +87,14 @@ void print_iff_nodes(swganh::tre::iff_node* head, int depth)
 
 	std::cout << head->str_name();
 
-	if (head->form)
+	if (head->form_type)
 	{
-		std::cout << " - " << head->str_form();
+		std::cout << " - " << head->str_form_type();
 	}
 
 	std::cout << " - (" << head->children.size() << ") ";
 
-	if (!head->form)
+	if (!head->form_type)
 	{
 		std::cout << head->data.size();
 	}
@@ -108,5 +109,9 @@ void print_iff_nodes(swganh::tre::iff_node* head, int depth)
 
 void process(swganh::tre::iff_node* head)
 {
+	swganh::tre::procedural_terrain pt(head);
+
+	pt.load();
+
 	//head->record("PTAT0014DATA")
 }

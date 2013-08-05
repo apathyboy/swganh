@@ -10,6 +10,35 @@
 using namespace swganh::tre;
 
 
+iff_node* iff_node::form(char name[4])
+{
+	uint32_t name_int = *reinterpret_cast<uint32_t*>(&name);
+
+	for (const auto& child : children)
+	{
+		if (child->form_type == name_int)
+		{
+			return child.get();
+		}
+	}
+
+	return nullptr;
+}
+
+iff_node* iff_node::record(char name[4])
+{
+	uint32_t name_int = *reinterpret_cast<uint32_t*>(&name);
+
+	for (const auto& child : children)
+	{
+		if (child->name == name_int)
+		{
+			return child.get();
+		}
+	}
+
+	return nullptr;
+}
 
 std::unique_ptr<swganh::tre::iff_node> swganh::tre::parse_iff(ByteBuffer& resource, iff_node* parent)
 {
@@ -27,7 +56,7 @@ std::unique_ptr<swganh::tre::iff_node> swganh::tre::parse_iff(ByteBuffer& resour
 	if (node->str_name().compare("FORM") == 0)
 	{
 		uint32_t final_bit = resource.read_position() + size;
-		node->form = resource.read<uint32_t>();
+		node->form_type = resource.read<uint32_t>();
 
 		while (resource.read_position() < final_bit)
 		{
@@ -48,12 +77,13 @@ void swganh::tre::write_iff(ByteBuffer& resource, swganh::tre::iff_node* node)
 {
 	resource.write(node->name);
 
-	uint32_t write_size = resource.write_position();
+	uint32_t size_offset = resource.write_position();
 	resource.write(uint32_t(0));
+	uint32_t data_start_offset = resource.write_position();
 
 	if (node->str_name().compare("FORM") == 0)
 	{
-		resource.write(node->form);
+		resource.write(node->form_type);
 		for (const auto& child : node->children)
 		{
 			write_iff(resource, child.get());
@@ -61,12 +91,41 @@ void swganh::tre::write_iff(ByteBuffer& resource, swganh::tre::iff_node* node)
 	}
 	else
 	{
-		resource.write(node->data.data(), node->data.size());
+		if (node->data.size() > 0)
+		{
+			resource.write(node->data.data(), node->data.size());
+		}
 	}
 
-	resource.writeAt(write_size, swganh::hostToBig(uint32_t(resource.write_position() - write_size - sizeof(uint32_t))));
+	resource.writeAt(size_offset, swganh::hostToBig(resource.write_position() - data_start_offset));
 }
 
+
+
+void iff_handler_registry::handle(iff_node* node)
+{
+	auto find_iter = handler_map_.find(node->name);
+
+	if (find_iter != handler_map_.end())
+	{
+		find_iter->second(node);
+	}
+}
+
+void iff_handler_registry::add(uint32_t node_type, iff_handler_type && handler)
+{
+	handler_map_.insert(std::make_pair(node_type, std::move(handler)));
+}
+
+void iff_handler_registry::remove(uint32_t node_type)
+{
+	handler_map_.erase(node_type);
+}
+
+bool iff_handler_registry::has_handler(uint32_t node_type)
+{
+	return handler_map_.find(node_type) != handler_map_.end();
+}
 
 void iff_file::loadIFF(swganh::ByteBuffer inputstream, std::shared_ptr<VisitorInterface> visitor)
 {

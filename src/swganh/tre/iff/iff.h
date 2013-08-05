@@ -3,8 +3,10 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <swganh/byte_buffer.h>
@@ -16,26 +18,41 @@ namespace tre {
 	struct iff_node
 	{
 		uint32_t name;
-		uint32_t form;
+		uint32_t form_type;
 		ByteBuffer data;
 		iff_node* parent;
 		std::vector<std::unique_ptr<iff_node>> children;
 
 		iff_node()
 			: name(0)
-			, form(0)
+			, form_type(0)
 			, parent(nullptr)
 		{}
 
+		iff_node* form(char name[4]);
+		iff_node* record(char name[4]);
+
 		std::string str_name() { return std::string(reinterpret_cast<char*>(&name), sizeof(name)); }
-		std::string str_form() { return std::string(reinterpret_cast<char*>(&form), sizeof(form)); }
+		std::string str_form_type() { return std::string(reinterpret_cast<char*>(&form_type), sizeof(form_type)); }
 	};
 
 	std::unique_ptr<iff_node> parse_iff(ByteBuffer& resource, iff_node* parent = nullptr);
 	void write_iff(ByteBuffer& resource, iff_node* node);
 
 	class iff_handler_registry
-	{};
+	{
+	public:
+		typedef std::function < void (iff_node*) > iff_handler_type;
+
+		void handle(iff_node* node);
+
+		void add(uint32_t node_type, iff_handler_type&& handler);
+		void remove(uint32_t node_type);
+		bool has_handler(uint32_t node_type);
+
+	private:
+		std::unordered_map<uint32_t, iff_handler_type> handler_map_;
+	};
 
 	class iff_file
 	{
