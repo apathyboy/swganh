@@ -281,16 +281,6 @@ void Deserialize(ByteBuffer& buffer, T& val)
 template<typename T>
 swganh::ByteBuffer& operator<<(swganh::ByteBuffer& buffer, const T& value);
 
-/*! This helper function provides support for streaming ByteBuffer instances
-* to out output stream (most generally for debugging).
-*
-* @param stream Reference to the output stream to write the ByteBuffer to.
-* @param buffer Reference to a ByteBuffer instance.
-*
-* @return Reference to the output stream.
-*/
-std::ostream& operator<<(std::ostream& message, const swganh::ByteBuffer& buffer);
-
 
 // Move inline implementations to a separate file to
 // clean up the declaration header.
