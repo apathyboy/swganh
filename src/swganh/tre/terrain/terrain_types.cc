@@ -120,3 +120,102 @@ void wmap::serialize(ByteBuffer& buffer)
 {
 	buffer.write(data.data(), data.size());
 }
+
+void shader_family::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+	family_name = buffer.read<std::string>(false, true);
+	surface_properties_file = buffer.read<std::string>(false, true);
+	r = buffer.read<uint8_t>();
+	g = buffer.read<uint8_t>();
+	b = buffer.read<uint8_t>();
+	unknown1 = buffer.read<float>();
+	feather_clamp = buffer.read<float>();
+
+	uint32_t child_count = buffer.read<uint32_t>();
+	for (uint32_t i = 0; i < child_count; ++i)
+	{
+		auto child = std::make_unique<shader_child>();
+		child->name = buffer.read<std::string>(false, true);
+		child->weight = buffer.read<float>();
+
+		children.push_back(std::move(child));
+	}
+}
+
+void shader_family::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+	buffer.write(reinterpret_cast<const unsigned char*>(family_name.c_str()), family_name.size());
+	buffer.write(uint8_t(0));
+	buffer.write(reinterpret_cast<const unsigned char*>(surface_properties_file.c_str()), surface_properties_file.size());
+	buffer.write(uint8_t(0));
+	buffer.write(r);
+	buffer.write(g);
+	buffer.write(b);
+	buffer.write(unknown1);
+	buffer.write(feather_clamp);
+	buffer.write(uint32_t(children.size()));
+
+	for (const auto& child : children)
+	{
+		buffer.write(reinterpret_cast<const unsigned char*>(child->name.c_str()), child->name.size());
+		buffer.write(uint8_t(0));
+		buffer.write(child->weight);
+	}
+}
+
+void flora_family::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+	family_name = buffer.read<std::string>(false, true);
+	r = buffer.read<uint8_t>();
+	g = buffer.read<uint8_t>();
+	b = buffer.read<uint8_t>();
+	density = buffer.read<float>();
+	floats_on_water = buffer.read<uint32_t>() == 1 ? true : false;
+
+	uint32_t child_count = buffer.read<uint32_t>();
+	for (uint32_t i = 0; i < child_count; ++i)
+	{
+		auto child = std::make_unique<flora_child>();
+		child->name = buffer.read<std::string>(false, true);
+		child->weight = buffer.read<float>();
+		child->align_to_terrain = buffer.read<uint32_t>() == 1 ? true : false;
+		child->displacement = buffer.read<float>();
+		child->period = buffer.read<float>();
+		child->sway_flora = buffer.read<uint32_t>() == 1 ? true : false;
+		child->scale_flora = buffer.read<uint32_t>() == 1 ? true : false;
+		child->min_scale = buffer.read<float>();
+		child->max_scale = buffer.read<float>();
+
+		children.push_back(std::move(child));
+	}
+}
+
+void flora_family::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+	buffer.write(reinterpret_cast<const unsigned char*>(family_name.c_str()), family_name.size());
+	buffer.write(uint8_t(0));
+	buffer.write(r);
+	buffer.write(g);
+	buffer.write(b);
+	buffer.write(density);
+	buffer.write(uint32_t(floats_on_water ? 1 : 0));
+	buffer.write(uint32_t(children.size()));
+	
+	for (const auto& child : children)
+	{
+		buffer.write(reinterpret_cast<const unsigned char*>(child->name.c_str()), child->name.size());
+		buffer.write(uint8_t(0));
+		buffer.write(child->weight);
+		buffer.write(uint32_t(child->align_to_terrain ? 1 : 0));
+		buffer.write(child->displacement);
+		buffer.write(child->period);
+		buffer.write(uint32_t(child->sway_flora ? 1 : 0));
+		buffer.write(uint32_t(child->scale_flora ? 1 : 0));
+		buffer.write(child->min_scale);
+		buffer.write(child->max_scale);
+	}
+}

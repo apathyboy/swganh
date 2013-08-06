@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
 
 #include "swganh/byte_buffer.h"
@@ -104,6 +105,58 @@ namespace detail_terrain {
 	struct wmap : public base_terrain_type
 	{
 		std::vector<uint8_t> data;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct shader_family : public base_terrain_type
+	{
+		struct shader_child
+		{
+			std::string name;
+			float weight;
+		};
+
+		uint32_t family_id;
+		std::string family_name;
+		std::string surface_properties_file;
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
+		float unknown1;
+		float feather_clamp;
+
+		std::vector<std::unique_ptr<shader_child>> children;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct flora_family : public base_terrain_type
+	{
+		struct flora_child
+		{
+			std::string name;
+			float weight;
+			bool align_to_terrain;
+			float displacement;
+			float period;
+			bool sway_flora;
+			bool scale_flora;
+			float min_scale;
+			float max_scale;
+		};
+
+		uint32_t family_id;
+		std::string family_name;
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
+		float density;
+		bool floats_on_water;
+
+		std::vector<std::unique_ptr<flora_child>> children;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);

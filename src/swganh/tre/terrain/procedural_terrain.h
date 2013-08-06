@@ -1,6 +1,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "terrain_types.h"
 
 namespace swganh {
@@ -12,7 +15,7 @@ namespace tre {
 	class procedural_terrain
 	{
 	public:
-		explicit procedural_terrain(swganh::tre::iff_node* head);
+		explicit procedural_terrain(iff_node* head);
 		~procedural_terrain();
 
 		void load();
