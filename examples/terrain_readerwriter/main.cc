@@ -113,8 +113,7 @@ void process(swganh::tre::iff_node* head)
 
 	pt.load();
 
-	pt.set_filename(pt.get_filename() + ".bak");
+	// make any modifications here
 
 	pt.save();
-	//head->record("PTAT0014DATA")
 }
