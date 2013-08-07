@@ -118,14 +118,19 @@ struct procedural_terrain_impl
 
 		switch (layer_node->form_type)
 		{
-		case 0x5259414c:
+		case 0x5259414c: // LAYR
 			{
 				layer = load_construction_layer(layer_node);
 			}
 			break;
-		case 0x564e4541:
+		case 0x564e4541: // AENV
 			{
 				layer = load_affector_environment(layer_node);
+			}
+			break;
+		case 0x52464841: // AHFR
+			{
+				layer = load_affector_height_fractal(layer_node);
 			}
 			break;
 		default:
@@ -169,12 +174,22 @@ struct procedural_terrain_impl
 		return layer;
 	}
 	
-	std::unique_ptr<affector_environment> load_affector_environment(iff_node* node)
+	std::unique_ptr<affector_environment> load_affector_environment(iff_node* aenv)
 	{
-		auto aenv0000 = node->form("0000");
+		auto aenv0000 = aenv->form("0000");
 
 		auto layer = make_node_data<affector_environment>(aenv0000->record("DATA"));
 		layer->header = load_layer_header(aenv0000->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<affector_height_fractal> load_affector_height_fractal(iff_node* ahfr)
+	{
+		auto ahfr0003 = ahfr->form("0003");
+
+		auto layer = make_node_data<affector_height_fractal>(ahfr0003->form("DATA")->record("PARM"));
+		layer->header = load_layer_header(ahfr0003->form("IHDR"));
 
 		return layer;
 	}

@@ -12,7 +12,7 @@ namespace swganh {
 namespace tre {
 namespace detail_terrain {
 	
-	enum class combination_rule : uint32_t
+	enum class combination_rules : uint32_t
 	{
 		add = 0,
 		multiply,
@@ -20,7 +20,16 @@ namespace detail_terrain {
 		turbulence,
 		crest_clamp,
 		turbulence_clamp,
-		count
+		COUNT
+	};
+
+	enum class operations : uint32_t
+	{
+		replace = 0,
+		add,
+		subtract,
+		multiply,
+		COUNT
 	};
 
 	struct base_terrain_type
@@ -231,7 +240,7 @@ namespace detail_terrain {
 			float y_scale;
 			float x_offset;
 			float y_offset;
-			combination_rule rule;
+			combination_rules rule;
 
 			void deserialize(ByteBuffer& buffer);
 			void serialize(ByteBuffer& buffer);
@@ -285,7 +294,14 @@ namespace detail_terrain {
 	};
 
 	struct affector_height_fractal : public base_terrain_layer
-	{};
+	{
+		uint32_t family_id;
+		operations operation;
+		float y_scale;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 
 	struct affector_height_terrace : public base_terrain_layer
 	{};

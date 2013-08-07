@@ -323,7 +323,7 @@ void fractal_family::fractal::deserialize(ByteBuffer& buffer)
 	y_scale = buffer.read<float>();
 	x_offset = buffer.read<float>();
 	y_offset = buffer.read<float>();
-	rule = static_cast<combination_rule>(buffer.read<uint32_t>());
+	rule = static_cast<combination_rules>(buffer.read<uint32_t>());
 }
 
 void fractal_family::fractal::serialize(ByteBuffer& buffer)
@@ -384,6 +384,20 @@ void affector_environment::serialize(ByteBuffer& buffer)
 	buffer.write(family_id);
 	buffer.write<uint32_t>(feather_clamp_override ? 1 : 0);
 	buffer.write(clamp);
+}
+
+void affector_height_fractal::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+	operation = static_cast<operations>(buffer.read<uint32_t>());
+	y_scale = buffer.read<float>();
+}
+
+void affector_height_fractal::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+	buffer.write(uint32_t(operation));
+	buffer.write(y_scale);
 }
 
 void construction_layer::deserialize(ByteBuffer& buffer)
