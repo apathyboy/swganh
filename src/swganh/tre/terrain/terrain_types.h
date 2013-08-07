@@ -280,8 +280,15 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_color_ramp_factal : public base_terrain_layer
-	{};
+	struct affector_color_ramp_fractal : public base_terrain_layer
+	{
+		uint32_t family_id;
+		operations operation;
+		std::string ramp;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 
 	struct affector_environment : public base_terrain_layer
 	{
@@ -310,7 +317,14 @@ namespace detail_terrain {
 	{};
 
 	struct affector_shader_constant : public base_terrain_layer
-	{};
+	{
+		uint32_t family_id;
+		bool feather_clamp_override;
+		float clamp;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 	
 	struct boundary_circle : public base_terrain_layer
 	{};

@@ -133,6 +133,16 @@ struct procedural_terrain_impl
 				layer = load_affector_height_fractal(layer_node);
 			}
 			break;
+		case 0x4E435341: // ASCN
+			{
+				layer = load_affector_shader_constant(layer_node);
+			}
+			break;
+		case 0x46524341: // ACRF
+			{
+				layer = load_affector_color_ramp_fractal(layer_node);
+			}
+			break;
 		default:
 			{
 				if (layer_node->children[0]->children[1]->children.size() > 0) 
@@ -174,6 +184,16 @@ struct procedural_terrain_impl
 		return layer;
 	}
 	
+	std::unique_ptr<affector_color_ramp_fractal> load_affector_color_ramp_fractal(iff_node* acrf)
+	{
+		auto acrf0001 = acrf->form("0001");
+
+		auto layer = make_node_data<affector_color_ramp_fractal>(acrf0001->form("DATA")->record("PARM"));
+		layer->header = load_layer_header(acrf0001->form("IHDR"));
+
+		return layer;
+	}
+
 	std::unique_ptr<affector_environment> load_affector_environment(iff_node* aenv)
 	{
 		auto aenv0000 = aenv->form("0000");
@@ -190,6 +210,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_height_fractal>(ahfr0003->form("DATA")->record("PARM"));
 		layer->header = load_layer_header(ahfr0003->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<affector_shader_constant> load_affector_shader_constant(iff_node* ascn)
+	{
+		auto ascn0001 = ascn->form("0001");
+
+		auto layer = make_node_data<affector_shader_constant>(ascn0001->record("DATA"));
+		layer->header = load_layer_header(ascn0001->form("IHDR"));
 
 		return layer;
 	}

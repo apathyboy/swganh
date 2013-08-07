@@ -372,6 +372,21 @@ void default_layer::serialize(ByteBuffer& buffer)
 	}
 }
 
+void affector_color_ramp_fractal::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+	operation = static_cast<operations>(buffer.read<uint32_t>());
+	ramp = buffer.read<std::string>(false, true);
+}
+
+void affector_color_ramp_fractal::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+	buffer.write(uint32_t(operation));
+	buffer.write(reinterpret_cast<const unsigned char*>(ramp.c_str()), ramp.size());
+	buffer.write(uint8_t(0));
+}
+
 void affector_environment::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();
@@ -398,6 +413,20 @@ void affector_height_fractal::serialize(ByteBuffer& buffer)
 	buffer.write(family_id);
 	buffer.write(uint32_t(operation));
 	buffer.write(y_scale);
+}
+
+void affector_shader_constant::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+	feather_clamp_override = buffer.read<uint32_t>() == 1 ? true : false;
+	clamp = buffer.read<float>();
+}
+
+void affector_shader_constant::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+	buffer.write<uint32_t>(feather_clamp_override ? 1 : 0);
+	buffer.write(clamp);
 }
 
 void construction_layer::deserialize(ByteBuffer& buffer)
