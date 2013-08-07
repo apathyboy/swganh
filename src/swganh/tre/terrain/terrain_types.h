@@ -80,11 +80,11 @@ namespace detail_terrain {
 		flora_dynamic_near_constant,
 		flora_dynamic_far_constant,
 		exclude,
-		passable,
+		passable, // missing example
 		road,
 		river,
 		environment,
-		ribbon,
+		ribbon, // missing example
 		COUNT
 	};
 
@@ -458,6 +458,42 @@ namespace detail_terrain {
 		bool remove_all_radial_flora;
 		bool density_override;
 		float density;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct affector_river : public base_terrain_layer
+	{
+		struct river_segment : public base_terrain_type
+		{
+			struct control_point
+			{
+				float x_pos;
+				float z_pos;
+				float height;
+			};
+
+			std::vector<control_point> control_points;
+
+			void deserialize(ByteBuffer& buffer);
+			void serialize(ByteBuffer& buffer);
+		};
+
+		std::vector<std::unique_ptr<river_segment>> segments;
+		std::vector<glm::vec2> control_points;
+		float feathering_distance;
+		e_feathering_function feathering_function;
+		uint32_t bank_shader;
+		uint32_t bottom_shader;
+		float width;
+		float trench_depth;
+		float velocity;
+		bool has_water;
+		float water_depth;
+		float water_width;
+		float water_shader_size;
+		std::string water_shader;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);

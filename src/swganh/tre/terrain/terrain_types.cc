@@ -544,6 +544,81 @@ void affector_radial_near_constant::serialize(ByteBuffer& buffer)
 	buffer.write(density);
 }
 
+void affector_river::deserialize(ByteBuffer& buffer)
+{
+	uint32_t size = buffer.read<uint32_t>();
+
+	for (uint32_t i = 0; i < size; ++i)
+	{
+		glm::vec2 control_point;
+		control_point.x = buffer.read<float>();
+		control_point.y = buffer.read<float>();
+
+		control_points.push_back(control_point);
+	}
+
+	feathering_distance = buffer.read<float>();
+	feathering_function = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	bank_shader = buffer.read<uint32_t>();
+	bottom_shader = buffer.read<uint32_t>();
+	width = buffer.read<float>();
+	trench_depth = buffer.read<float>();
+	velocity = buffer.read<float>();
+	has_water = buffer.read<uint32_t>() == 1 ? true : false;
+	water_depth = buffer.read<float>();
+	water_width = buffer.read<float>();
+	water_shader_size = buffer.read<float>();
+	water_shader = buffer.read<std::string>(false, true);
+}
+
+void affector_river::serialize(ByteBuffer& buffer)
+{
+	buffer.write(uint32_t(control_points.size()));
+
+	for (const auto& point : control_points)
+	{
+		buffer.write(point.x);
+		buffer.write(point.y);
+	}
+
+	buffer.write(feathering_distance);
+	buffer.write(uint32_t(feathering_function));
+	buffer.write(bank_shader);
+	buffer.write(bottom_shader);
+	buffer.write(width);
+	buffer.write(trench_depth);
+	buffer.write(velocity);
+	buffer.write<uint32_t>(has_water ? 1 : 0);
+	buffer.write(water_depth);
+	buffer.write(water_width);
+	buffer.write(water_shader_size);
+	buffer.write(reinterpret_cast<const unsigned char*>(water_shader.c_str()), water_shader.size());
+	buffer.write(uint8_t(0));
+}
+
+void affector_river::river_segment::deserialize(ByteBuffer& buffer)
+{
+	while (buffer.read_position() < buffer.size())
+	{
+		control_point point;
+		point.x_pos = buffer.read<float>();
+		point.z_pos = buffer.read<float>();
+		point.height = buffer.read<float>();
+
+		control_points.push_back(point);
+	}
+}
+
+void affector_river::river_segment::serialize(ByteBuffer& buffer)
+{
+	for (const auto& point : control_points)
+	{
+		buffer.write(point.x_pos);
+		buffer.write(point.z_pos);
+		buffer.write(point.height);
+	}
+}
+
 void affector_road::deserialize(ByteBuffer& buffer)
 {
 	uint32_t size = buffer.read<uint32_t>();

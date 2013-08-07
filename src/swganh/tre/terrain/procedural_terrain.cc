@@ -183,6 +183,11 @@ struct procedural_terrain_impl
 				layer = load_affector_height_terrace(layer_node);
 			}
 			break;
+		case 0x56495241: // ARIV
+			{
+				layer = load_affector_river(layer_node);
+			}
+			break;
 		case 0x414f5241: // AROA
 			{
 				layer = load_affector_road(layer_node);
@@ -404,6 +409,22 @@ struct procedural_terrain_impl
 		return layer;
 	}
 
+	std::unique_ptr<affector_river> load_affector_river(iff_node* ariv)
+	{
+		auto ariv0005 = ariv->form("0005");
+
+		auto layer = make_node_data<affector_river>(ariv0005->form("DATA")->record("DATA"));
+		layer->header = load_layer_header(ariv0005->form("IHDR"));
+
+		for (const auto& child : ariv0005->form("DATA")->form("HDTA")->form("0001")->children)
+		{
+			auto segment = make_node_data<affector_river::river_segment>(child.get());
+			layer->segments.push_back(std::move(segment));
+		}
+
+		return layer;
+	}
+
 	std::unique_ptr<affector_road> load_affector_road(iff_node* aroa)
 	{
 		auto aroa0005 = aroa->form("0005");
@@ -553,11 +574,14 @@ procedural_terrain::~procedural_terrain()
 
 void procedural_terrain::load()
 {
-	auto form00014 = impl_->iff_doc->form("0014");
+	auto form0014 = impl_->iff_doc->form("0014");
 
-	impl_->load_header(form00014->record("DATA"));
-	impl_->load_terrain_data(form00014->form("TGEN"));
-	impl_->load_footer(form00014->form("0001"));
+	if (form0014)
+	{
+		impl_->load_header(form0014->record("DATA"));
+		impl_->load_terrain_data(form0014->form("TGEN"));
+		impl_->load_footer(form0014->form("0001"));
+	}
 }
 
 void procedural_terrain::save()
