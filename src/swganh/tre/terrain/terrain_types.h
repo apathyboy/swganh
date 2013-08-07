@@ -336,6 +336,17 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
+	struct affector_color_constant : public base_terrain_layer
+	{
+		operations operation;
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
 	struct affector_color_ramp_fractal : public base_terrain_layer
 	{
 		uint32_t family_id;

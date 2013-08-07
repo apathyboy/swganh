@@ -123,6 +123,11 @@ struct procedural_terrain_impl
 				layer = load_construction_layer(layer_node);
 			}
 			break;
+		case 0x4e434341: // ACCN
+			{
+				layer = load_affector_color_constant(layer_node);
+			}
+			break;
 		case 0x46524341: // ACRF
 			{
 				layer = load_affector_color_ramp_fractal(layer_node);
@@ -240,6 +245,16 @@ struct procedural_terrain_impl
 			auto child = load_layer(layr0003->children[i].get(), layer.get());
 			layer->children.push_back(std::move(child));
 		}
+
+		return layer;
+	}
+
+	std::unique_ptr<affector_color_constant> load_affector_color_constant(iff_node* accn)
+	{
+		auto accn0000 = accn->form("0000");
+
+		auto layer = make_node_data<affector_color_constant>(accn0000->record("DATA"));
+		layer->header = load_layer_header(accn0000->form("IHDR"));
 
 		return layer;
 	}

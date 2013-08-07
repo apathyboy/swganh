@@ -372,6 +372,22 @@ void default_layer::serialize(ByteBuffer& buffer)
 	}
 }
 
+void affector_color_constant::deserialize(ByteBuffer& buffer)
+{
+	operation = static_cast<operations>(buffer.read<uint32_t>());
+	r = buffer.read<uint8_t>();
+	g = buffer.read<uint8_t>();
+	b = buffer.read<uint8_t>();
+}
+
+void affector_color_constant::serialize(ByteBuffer& buffer)
+{
+	buffer.write(uint32_t(operation));
+	buffer.write(r);
+	buffer.write(g);
+	buffer.write(b);
+}
+
 void affector_color_ramp_fractal::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();
