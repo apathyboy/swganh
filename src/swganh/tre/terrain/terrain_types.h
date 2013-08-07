@@ -48,6 +48,13 @@ namespace detail_terrain {
 		COUNT
 	};
 
+	enum class e_flora_operation : uint32_t
+	{
+		add = 0,
+		remove,
+		COUNT
+	};
+
 	struct base_terrain_type
 	{
 		base_terrain_type()
@@ -316,6 +323,19 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
+	// flora constant (collidable/non-collidable/near-radial)
+	struct affector_flora_non_collidable_constant : public base_terrain_layer
+	{
+		uint32_t adjust;
+		e_flora_operation operation;
+		bool remove_all_radial_flora;
+		bool density_override;
+		float density;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
 	struct affector_height_fractal : public base_terrain_layer
 	{
 		uint32_t family_id;
@@ -329,8 +349,18 @@ namespace detail_terrain {
 	struct affector_height_terrace : public base_terrain_layer
 	{};
 
+	// flora constant (collidable/non-collidable/near-radial)
 	struct affector_radial_near_constant : public base_terrain_layer
-	{};
+	{
+		uint32_t adjust;
+		e_flora_operation operation;
+		bool remove_all_radial_flora;
+		bool density_override;
+		float density;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 
 	struct affector_shader_constant : public base_terrain_layer
 	{

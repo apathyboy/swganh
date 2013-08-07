@@ -123,9 +123,24 @@ struct procedural_terrain_impl
 				layer = load_construction_layer(layer_node);
 			}
 			break;
+		case 0x46524341: // ACRF
+			{
+				layer = load_affector_color_ramp_fractal(layer_node);
+			}
+			break;
 		case 0x564e4541: // AENV
 			{
 				layer = load_affector_environment(layer_node);
+			}
+			break;
+		case 0x4e444641: // AFDN
+			{
+				layer = load_affector_radial_near_constant(layer_node);
+			}
+			break;
+		case 0x4e534641: // AFSN
+			{
+				layer = load_affector_flora_non_collidable_constant(layer_node);
 			}
 			break;
 		case 0x52464841: // AHFR
@@ -138,12 +153,7 @@ struct procedural_terrain_impl
 				layer = load_affector_shader_constant(layer_node);
 			}
 			break;
-		case 0x46524341: // ACRF
-			{
-				layer = load_affector_color_ramp_fractal(layer_node);
-			}
-			break;
-		case 0x504c5346: // ACRF
+		case 0x504c5346: // FSLP
 			{
 				layer = load_filter_slope(layer_node);
 			}
@@ -209,12 +219,32 @@ struct procedural_terrain_impl
 		return layer;
 	}
 
+	std::unique_ptr<affector_flora_non_collidable_constant> load_affector_flora_non_collidable_constant(iff_node* afsn)
+	{
+		auto afsn0004 = afsn->form("0004");
+
+		auto layer = make_node_data<affector_flora_non_collidable_constant>(afsn0004->record("DATA"));
+		layer->header = load_layer_header(afsn0004->form("IHDR"));
+
+		return layer;
+	}
+
 	std::unique_ptr<affector_height_fractal> load_affector_height_fractal(iff_node* ahfr)
 	{
 		auto ahfr0003 = ahfr->form("0003");
 
 		auto layer = make_node_data<affector_height_fractal>(ahfr0003->form("DATA")->record("PARM"));
 		layer->header = load_layer_header(ahfr0003->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<affector_radial_near_constant> load_affector_radial_near_constant(iff_node* afdn)
+	{
+		auto afdn0002 = afdn->form("0002");
+
+		auto layer = make_node_data<affector_radial_near_constant>(afdn0002->record("DATA"));
+		layer->header = load_layer_header(afdn0002->form("IHDR"));
 
 		return layer;
 	}

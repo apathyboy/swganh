@@ -401,6 +401,24 @@ void affector_environment::serialize(ByteBuffer& buffer)
 	buffer.write(clamp);
 }
 
+void affector_flora_non_collidable_constant::deserialize(ByteBuffer& buffer)
+{
+	adjust = buffer.read<uint32_t>();
+	operation = static_cast<e_flora_operation>(buffer.read<uint32_t>());
+	remove_all_radial_flora = buffer.read<uint32_t>() == 1 ? true : false;
+	density_override = buffer.read<uint32_t>() == 1 ? true : false;
+	density = buffer.read<float>();
+}
+
+void affector_flora_non_collidable_constant::serialize(ByteBuffer& buffer)
+{
+	buffer.write(adjust);
+	buffer.write(uint32_t(operation));
+	buffer.write<uint32_t>(remove_all_radial_flora ? 1 : 0);
+	buffer.write<uint32_t>(density_override ? 1 : 0);
+	buffer.write(density);
+}
+
 void affector_height_fractal::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();
@@ -413,6 +431,24 @@ void affector_height_fractal::serialize(ByteBuffer& buffer)
 	buffer.write(family_id);
 	buffer.write(uint32_t(operation));
 	buffer.write(y_scale);
+}
+
+void affector_radial_near_constant::deserialize(ByteBuffer& buffer)
+{
+	adjust = buffer.read<uint32_t>();
+	operation = static_cast<e_flora_operation>(buffer.read<uint32_t>());
+	remove_all_radial_flora = buffer.read<uint32_t>() == 1 ? true : false;
+	density_override = buffer.read<uint32_t>() == 1 ? true : false;
+	density = buffer.read<float>();
+}
+
+void affector_radial_near_constant::serialize(ByteBuffer& buffer)
+{
+	buffer.write(adjust);
+	buffer.write(uint32_t(operation));
+	buffer.write<uint32_t>(remove_all_radial_flora ? 1 : 0);
+	buffer.write<uint32_t>(density_override ? 1 : 0);
+	buffer.write(density);
 }
 
 void affector_shader_constant::deserialize(ByteBuffer& buffer)
