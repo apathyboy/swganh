@@ -133,6 +133,11 @@ struct procedural_terrain_impl
 				layer = load_affector_environment(layer_node);
 			}
 			break;
+		case 0x43584541: // AEXC
+			{
+				layer = load_affector_exclude(layer_node);
+			}
+			break;
 		case 0x4e444641: // AFDN
 			{
 				layer = load_affector_radial_near_constant(layer_node);
@@ -151,6 +156,11 @@ struct procedural_terrain_impl
 		case 0x4E435341: // ASCN
 			{
 				layer = load_affector_shader_constant(layer_node);
+			}
+			break;
+		case 0x43455242: // BREC
+			{
+				layer = load_boundary_rectangle(layer_node);
 			}
 			break;
 		case 0x44485346: // FSHD
@@ -224,6 +234,16 @@ struct procedural_terrain_impl
 		return layer;
 	}
 
+	std::unique_ptr<affector_exclude> load_affector_exclude(iff_node* aexc)
+	{
+		auto aexc0000 = aexc->form("0000");
+
+		auto layer = make_node_data<affector_exclude>(aexc0000->record("DATA"));
+		layer->header = load_layer_header(aexc0000->form("IHDR"));
+
+		return layer;
+	}
+
 	std::unique_ptr<affector_flora_non_collidable_constant> load_affector_flora_non_collidable_constant(iff_node* afsn)
 	{
 		auto afsn0004 = afsn->form("0004");
@@ -250,6 +270,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_radial_near_constant>(afdn0002->record("DATA"));
 		layer->header = load_layer_header(afdn0002->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<boundary_rectangle> load_boundary_rectangle(iff_node* brec)
+	{
+		auto brec0003 = brec->form("0003");
+
+		auto layer = make_node_data<boundary_rectangle>(brec0003->record("DATA"));
+		layer->header = load_layer_header(brec0003->form("IHDR"));
 
 		return layer;
 	}

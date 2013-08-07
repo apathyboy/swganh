@@ -55,6 +55,37 @@ namespace detail_terrain {
 		COUNT
 	};
 
+	enum class e_water_type : int32_t
+	{
+		invalid = -1,
+		water = 0,
+		lava,
+		COUNT
+	};
+
+	enum class e_affector_type : uint32_t
+	{
+		height_terrace = 0,
+		height_constant,
+		height_fractal,
+		color_constant,
+		color_ramp_height,
+		color_ramp_fractal,
+		shader_constant,
+		shader_replace,
+		flora_static_collidable_constant,
+		flora_static_non_collidable_constant,
+		flora_dynamic_near_constant,
+		flora_dynamic_far_constant,
+		exclude,
+		passable,
+		road,
+		river,
+		environment,
+		ribbon,
+		COUNT
+	};
+
 	struct base_terrain_type
 	{
 		base_terrain_type()
@@ -322,6 +353,12 @@ namespace detail_terrain {
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
 	};
+	
+	struct affector_exclude : public base_terrain_layer
+	{
+		void deserialize(ByteBuffer& buffer) {}
+		void serialize(ByteBuffer& buffer) {}
+	};
 
 	// flora constant (collidable/non-collidable/near-radial)
 	struct affector_flora_non_collidable_constant : public base_terrain_layer
@@ -377,6 +414,24 @@ namespace detail_terrain {
 
 	struct boundary_polygon : public base_terrain_layer
 	{};
+
+	struct boundary_rectangle : public base_terrain_layer
+	{
+		float x1;
+		float z1;
+		float x2;
+		float z2;
+		e_feathering_function function;
+		float distance;
+		bool is_local_water_table;
+		e_water_type water_type;
+		float local_water_table_height;
+		float local_water_table_shader_size;
+		std::string local_water_table_shader_template_name;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 
 	struct construction_layer : public base_terrain_layer
 	{

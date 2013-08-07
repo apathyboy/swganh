@@ -465,6 +465,37 @@ void affector_shader_constant::serialize(ByteBuffer& buffer)
 	buffer.write(clamp);
 }
 
+void boundary_rectangle::deserialize(ByteBuffer& buffer)
+{
+	x1 = buffer.read<float>();
+	z1 = buffer.read<float>();
+	x2 = buffer.read<float>();
+	z2 = buffer.read<float>();
+	function = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	distance = buffer.read<float>();
+	is_local_water_table = buffer.read<uint32_t>() == 1 ? true : false;
+	water_type = static_cast<e_water_type>(buffer.read<uint32_t>());
+	local_water_table_height = buffer.read<float>();
+	local_water_table_shader_size = buffer.read<float>();
+	local_water_table_shader_template_name = buffer.read<std::string>(false, true);
+}
+
+void boundary_rectangle::serialize(ByteBuffer& buffer)
+{
+	buffer.write(x1);
+	buffer.write(z1);
+	buffer.write(x2);
+	buffer.write(z2);
+	buffer.write(uint32_t(function));
+	buffer.write(distance);
+	buffer.write<uint32_t>(is_local_water_table ? 1 : 0);
+	buffer.write(uint32_t(water_type));
+	buffer.write(local_water_table_height);
+	buffer.write(local_water_table_shader_size);
+	buffer.write(reinterpret_cast<const unsigned char*>(local_water_table_shader_template_name.c_str()), local_water_table_shader_template_name.size());
+	buffer.write(uint8_t(0));
+}
+
 void construction_layer::deserialize(ByteBuffer& buffer)
 {
 	invert_boundaries = buffer.read<uint32_t>() == 1 ? true : false;
