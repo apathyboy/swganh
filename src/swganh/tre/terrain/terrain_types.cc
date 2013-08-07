@@ -219,3 +219,58 @@ void flora_family::serialize(ByteBuffer& buffer)
 		buffer.write(child->max_scale);
 	}
 }
+
+void radial_family::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+	family_name = buffer.read<std::string>(false, true);
+	r = buffer.read<uint8_t>();
+	g = buffer.read<uint8_t>();
+	b = buffer.read<uint8_t>();
+	density = buffer.read<float>();
+
+	uint32_t child_count = buffer.read<uint32_t>();
+	for (uint32_t i = 0; i < child_count; ++i)
+	{
+		auto child = std::make_unique<radial_child>();
+		child->name = buffer.read<std::string>(false, true);
+		child->weight = buffer.read<float>();
+		child->distance = buffer.read<float>();
+		child->width = buffer.read<float>();
+		child->height = buffer.read<float>();
+		child->maintain_aspect_ration = buffer.read<uint32_t>() == 1 ? true : false;
+		child->displacement = buffer.read<float>();
+		child->period = buffer.read<float>();
+		child->sway_flora = buffer.read<uint32_t>() == 1 ? true : false;
+		child->unk9 = buffer.read<uint32_t>();
+
+		children.push_back(std::move(child));
+	}
+}
+
+void radial_family::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+	buffer.write(reinterpret_cast<const unsigned char*>(family_name.c_str()), family_name.size());
+	buffer.write(uint8_t(0));
+	buffer.write(r);
+	buffer.write(g);
+	buffer.write(b);
+	buffer.write(density);
+	buffer.write(uint32_t(children.size()));
+
+	for (const auto& child : children)
+	{
+		buffer.write(reinterpret_cast<const unsigned char*>(child->name.c_str()), child->name.size());
+		buffer.write(uint8_t(0));
+		buffer.write(child->weight);
+		buffer.write(child->distance);
+		buffer.write(child->width);
+		buffer.write(child->height);
+		buffer.write(uint32_t(child->maintain_aspect_ration ? 1 : 0));
+		buffer.write(child->displacement);
+		buffer.write(child->period);
+		buffer.write(uint32_t(child->sway_flora ? 1 : 0));
+		buffer.write(child->unk9);
+	}
+}

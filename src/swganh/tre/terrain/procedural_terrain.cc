@@ -66,7 +66,18 @@ struct procedural_terrain_impl
 	}
 
 	void load_radial_group(iff_node* rgrp)
-	{}
+	{
+		auto rgrp0003 = rgrp->form("0003");
+
+		for (const auto& child : rgrp0003->children)
+		{
+			auto radial_fam = std::make_unique<radial_family>();
+			radial_fam->load(child.get());
+
+			save_list.push_back(radial_fam.get());
+			radial_group.push_back(std::move(radial_fam));
+		}
+	}
 
 	void load_environment_group(iff_node* egrp)
 	{}
@@ -85,6 +96,7 @@ struct procedural_terrain_impl
 
 	std::vector<std::unique_ptr<shader_family>> shader_group;
 	std::vector<std::unique_ptr<flora_family>> flora_group;
+	std::vector<std::unique_ptr<radial_family>> radial_group;
 };
 
 procedural_terrain::procedural_terrain(swganh::tre::iff_node* head)

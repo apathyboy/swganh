@@ -162,4 +162,33 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
+	struct radial_family : public base_terrain_type
+	{
+		struct radial_child
+		{
+			std::string name;
+			float weight;
+			float distance;
+			float width;
+			float height;
+			bool maintain_aspect_ration;
+			float displacement;
+			float period;
+			bool sway_flora;
+			int unk9;
+		};
+
+		uint32_t family_id;
+		std::string family_name;
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
+		float density;
+
+		std::vector<std::unique_ptr<radial_child>> children;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
 }}}
