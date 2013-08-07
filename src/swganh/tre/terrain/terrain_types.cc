@@ -295,3 +295,50 @@ void environment_family::serialize(ByteBuffer& buffer)
 	buffer.write(b);
 	buffer.write(feather_clamp);
 }
+
+void fractal_family::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+	family_name = buffer.read<std::string>(false, true);
+}
+
+void fractal_family::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+	buffer.write(reinterpret_cast<const unsigned char*>(family_name.c_str()), family_name.size());
+	buffer.write(uint8_t(0));
+}
+
+void fractal_family::fractal::deserialize(ByteBuffer& buffer)
+{
+	seed = buffer.read<uint32_t>();
+	use_bias = buffer.read<uint32_t>() == 1 ? true : false;
+	bias = buffer.read<float>();
+	use_gain = buffer.read<uint32_t>() == 1 ? true : false;
+	gain = buffer.read<float>();
+	unknown1 = buffer.read<uint32_t>();
+	octaves = buffer.read<float>();
+	amplitude = buffer.read<float>();
+	x_scale = buffer.read<float>();
+	y_scale = buffer.read<float>();
+	x_offset = buffer.read<float>();
+	y_offset = buffer.read<float>();
+	rule = static_cast<combination_rule>(buffer.read<uint32_t>());
+}
+
+void fractal_family::fractal::serialize(ByteBuffer& buffer)
+{
+	buffer.write(seed);
+	buffer.write(uint32_t(use_bias ? 1 : 0));
+	buffer.write(bias);
+	buffer.write(uint32_t(use_gain ? 1 : 0));
+	buffer.write(gain);
+	buffer.write(unknown1);
+	buffer.write(octaves);
+	buffer.write(amplitude);
+	buffer.write(x_scale);
+	buffer.write(y_scale);
+	buffer.write(x_offset);
+	buffer.write(y_offset);
+	buffer.write(uint32_t(rule));
+}

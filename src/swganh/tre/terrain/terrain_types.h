@@ -12,6 +12,17 @@ namespace swganh {
 namespace tre {
 namespace detail_terrain {
 	
+	enum class combination_rule : uint32_t
+	{
+		add = 0,
+		multiply,
+		crest,
+		turbulence,
+		crest_clamp,
+		turbulence_clamp,
+		count
+	};
+
 	struct base_terrain_type
 	{
 		base_terrain_type()
@@ -199,6 +210,37 @@ namespace detail_terrain {
 		uint8_t g;
 		uint8_t b;
 		float feather_clamp;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct fractal_family : public base_terrain_type
+	{
+		struct fractal : public base_terrain_type
+		{
+			uint32_t seed;
+			bool use_bias;
+			float bias;
+			bool use_gain;
+			float gain;
+			uint32_t unknown1;
+			float octaves;
+			float amplitude;
+			float x_scale;
+			float y_scale;
+			float x_offset;
+			float y_offset;
+			combination_rule rule;
+
+			void deserialize(ByteBuffer& buffer);
+			void serialize(ByteBuffer& buffer);
+		};
+
+		uint32_t family_id;
+		std::string family_name;
+
+		std::unique_ptr<fractal> fractal_data;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);

@@ -94,7 +94,26 @@ struct procedural_terrain_impl
 	}
 
 	void load_fractal_group(iff_node* mgrp)
-	{}
+	{
+		auto mgrp0000 = mgrp->form("0000");
+
+		for (const auto& child : mgrp0000->children)
+		{
+			auto data = child->record("DATA");
+			auto fractal = child->form("MFRC")->form("0001")->record("DATA");
+
+			auto fractal_fam = std::make_unique<fractal_family>();
+			fractal_fam->load(data);
+
+			fractal_fam->fractal_data = std::make_unique<fractal_family::fractal>();
+			fractal_fam->fractal_data->load(fractal);
+
+			save_list.push_back(fractal_fam.get());
+			save_list.push_back(fractal_fam->fractal_data.get());
+
+			fractal_group.push_back(std::move(fractal_fam));
+		}
+	}
 
 	void load_layers(iff_node* lyrs)
 	{}
@@ -109,6 +128,7 @@ struct procedural_terrain_impl
 	std::vector<std::unique_ptr<flora_family>> flora_group;
 	std::vector<std::unique_ptr<radial_family>> radial_group;
 	std::vector<std::unique_ptr<environment_family>> environment_group;
+	std::vector<std::unique_ptr<fractal_family>> fractal_group;
 };
 
 procedural_terrain::procedural_terrain(swganh::tre::iff_node* head)
