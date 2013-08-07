@@ -433,6 +433,38 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
+	struct affector_road : public base_terrain_layer
+	{
+		struct road_segment : public base_terrain_type
+		{
+			struct control_point
+			{
+				float x_pos;
+				float z_pos;
+				float height;
+			};
+
+			std::vector<control_point> control_points;
+
+			void deserialize(ByteBuffer& buffer);
+			void serialize(ByteBuffer& buffer);
+		};
+
+		std::vector<std::unique_ptr<road_segment>> segments;
+		std::vector<glm::vec2> control_points;
+		float width;
+		uint32_t shader;
+
+		e_feathering_function height_feathering_function;
+		float height_feathering_distance;
+
+		e_feathering_function shader_feathering_function;
+		float shader_feathering_distance;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
 	struct affector_shader_constant : public base_terrain_layer
 	{
 		uint32_t family_id;

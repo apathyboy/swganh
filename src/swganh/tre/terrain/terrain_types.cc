@@ -497,6 +497,72 @@ void affector_radial_near_constant::serialize(ByteBuffer& buffer)
 	buffer.write(density);
 }
 
+void affector_road::deserialize(ByteBuffer& buffer)
+{
+	uint32_t size = buffer.read<uint32_t>();
+
+	for (uint32_t i = 0; i < size; ++i)
+	{
+		glm::vec2 control_point;
+		control_point.x = buffer.read<float>();
+		control_point.y = buffer.read<float>();
+
+		control_points.push_back(control_point);
+	}
+
+	width = buffer.read<float>();
+	shader = buffer.read<uint32_t>();
+
+	height_feathering_function = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	height_feathering_distance = buffer.read<float>();
+
+	shader_feathering_function = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	shader_feathering_distance = buffer.read<float>();
+}
+
+void affector_road::serialize(ByteBuffer& buffer)
+{
+	buffer.write(uint32_t(control_points.size()));
+
+	for (const auto& point : control_points)
+	{
+		buffer.write(point.x);
+		buffer.write(point.y);
+	}
+
+	buffer.write(width);
+	buffer.write(shader);
+
+	buffer.write(uint32_t(height_feathering_function));
+	buffer.write(height_feathering_distance);
+
+	buffer.write(uint32_t(shader_feathering_function));
+	buffer.write(shader_feathering_distance);
+}
+
+void affector_road::road_segment::deserialize(ByteBuffer& buffer)
+{
+	while (buffer.read_position() < buffer.size())
+	{
+		control_point point;
+		point.x_pos = buffer.read<float>();
+		point.z_pos = buffer.read<float>();
+		point.height = buffer.read<float>();
+
+		control_points.push_back(point);
+	}
+}
+
+void affector_road::road_segment::serialize(ByteBuffer& buffer)
+{
+	for (const auto& point : control_points)
+	{
+		buffer.write(point.x_pos);
+		buffer.write(point.z_pos);
+		buffer.write(point.height);
+	}
+}
+
 void affector_shader_constant::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();

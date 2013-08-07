@@ -168,6 +168,11 @@ struct procedural_terrain_impl
 				layer = load_affector_height_fractal(layer_node);
 			}
 			break;
+		case 0x414f5241: // AROA
+			{
+				layer = load_affector_road(layer_node);
+			}
+			break;
 		case 0x4e435341: // ASCN
 			{
 				layer = load_affector_shader_constant(layer_node);
@@ -335,6 +340,22 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_radial_near_constant>(afdn0002->record("DATA"));
 		layer->header = load_layer_header(afdn0002->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<affector_road> load_affector_road(iff_node* aroa)
+	{
+		auto aroa0005 = aroa->form("0005");
+
+		auto layer = make_node_data<affector_road>(aroa0005->form("DATA")->record("DATA"));
+		layer->header = load_layer_header(aroa0005->form("IHDR"));
+
+		for (const auto& child : aroa0005->form("DATA")->form("HDTA")->form("0001")->children)
+		{
+			auto segment = make_node_data<affector_road::road_segment>(child.get());
+			layer->segments.push_back(std::move(segment));
+		}
 
 		return layer;
 	}
