@@ -153,6 +153,11 @@ struct procedural_terrain_impl
 				layer = load_affector_shader_constant(layer_node);
 			}
 			break;
+		case 0x44485346: // FSHD
+			{
+				layer = load_filter_shader(layer_node);
+			}
+			break;
 		case 0x504c5346: // FSLP
 			{
 				layer = load_filter_slope(layer_node);
@@ -255,6 +260,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_shader_constant>(ascn0001->record("DATA"));
 		layer->header = load_layer_header(ascn0001->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<filter_shader> load_filter_shader(iff_node* fshd)
+	{
+		auto fshd0000 = fshd->form("0000");
+
+		auto layer = make_node_data<filter_shader>(fshd0000->record("DATA"));
+		layer->header = load_layer_header(fshd0000->form("IHDR"));
 
 		return layer;
 	}

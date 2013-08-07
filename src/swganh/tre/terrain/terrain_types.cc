@@ -482,6 +482,16 @@ void construction_layer::serialize(ByteBuffer& buffer)
 	buffer.write(uint8_t(0));
 }
 
+void filter_shader::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+}
+
+void filter_shader::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+}
+
 void filter_slope::deserialize(ByteBuffer& buffer)
 {
 	min_angle = buffer.read<float>();

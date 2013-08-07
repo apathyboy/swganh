@@ -395,6 +395,14 @@ namespace detail_terrain {
 	struct filter_height : public base_terrain_layer
 	{};
 
+	struct filter_shader : public base_terrain_layer
+	{
+		uint32_t family_id;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
 	struct filter_slope : public base_terrain_layer
 	{
 		float min_angle;
