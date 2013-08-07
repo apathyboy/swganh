@@ -148,6 +148,11 @@ struct procedural_terrain_impl
 				layer = load_affector_radial_near_constant(layer_node);
 			}
 			break;
+		case 0x46444641: // AFDF
+			{
+				layer = load_affector_radial_far_constant(layer_node);
+			}
+			break;
 		case 0x43534641: // AFSC
 			{
 				layer = load_affector_flora_collidable_constant(layer_node);
@@ -355,6 +360,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_height_terrace>(ahtr0004->record("DATA"));
 		layer->header = load_layer_header(ahtr0004->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<affector_radial_far_constant> load_affector_radial_far_constant(iff_node* afdf)
+	{
+		auto afdf0002 = afdf->form("0002");
+
+		auto layer = make_node_data<affector_radial_far_constant>(afdf0002->record("DATA"));
+		layer->header = load_layer_header(afdf0002->form("IHDR"));
 
 		return layer;
 	}

@@ -491,6 +491,24 @@ void affector_height_terrace::serialize(ByteBuffer& buffer)
 	buffer.write(flat_ratio);
 }
 
+void affector_radial_far_constant::deserialize(ByteBuffer& buffer)
+{
+	adjust = buffer.read<uint32_t>();
+	operation = static_cast<e_flora_operation>(buffer.read<uint32_t>());
+	remove_all_radial_flora = buffer.read<uint32_t>() == 1 ? true : false;
+	density_override = buffer.read<uint32_t>() == 1 ? true : false;
+	density = buffer.read<float>();
+}
+
+void affector_radial_far_constant::serialize(ByteBuffer& buffer)
+{
+	buffer.write(adjust);
+	buffer.write(uint32_t(operation));
+	buffer.write<uint32_t>(remove_all_radial_flora ? 1 : 0);
+	buffer.write<uint32_t>(density_override ? 1 : 0);
+	buffer.write(density);
+}
+
 void affector_radial_near_constant::deserialize(ByteBuffer& buffer)
 {
 	adjust = buffer.read<uint32_t>();

@@ -428,6 +428,18 @@ namespace detail_terrain {
 	};
 
 	// flora constant (collidable/non-collidable/near-radial)
+	struct affector_radial_far_constant : public base_terrain_layer
+	{
+		uint32_t adjust;
+		e_flora_operation operation;
+		bool remove_all_radial_flora;
+		bool density_override;
+		float density;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
 	struct affector_radial_near_constant : public base_terrain_layer
 	{
 		uint32_t adjust;
