@@ -357,6 +357,17 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
+	struct affector_color_ramp_height : public base_terrain_layer
+	{
+		operations operation;
+		float low_height;
+		float high_height;
+		std::string ramp;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
 	struct affector_environment : public base_terrain_layer
 	{
 		uint32_t family_id;
@@ -487,6 +498,17 @@ namespace detail_terrain {
 	struct affector_shader_constant : public base_terrain_layer
 	{
 		uint32_t family_id;
+		bool feather_clamp_override;
+		float clamp;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct affector_shader_replace : public base_terrain_layer
+	{
+		uint32_t source_family;
+		uint32_t destination_family;
 		bool feather_clamp_override;
 		float clamp;
 
