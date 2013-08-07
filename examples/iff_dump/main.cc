@@ -76,8 +76,13 @@ void print_iff_nodes(swganh::tre::iff_node* head, int depth)
 
 	if (!head->form_type)
 	{
-		std::cout << head->data.size() << "\n";
-		std::cout << head->data;
+		std::cout << head->data.size();
+		
+		if (head->data.size() > 0)
+		{
+			std::cout << "\n";
+			std::cout << head->data;
+		}
 	}
 
 	std::cout << "\n";
