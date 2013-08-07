@@ -488,7 +488,17 @@ namespace detail_terrain {
 	};
 
 	struct filter_fractal : public base_terrain_layer
-	{};
+	{
+		uint32_t family_id;
+		e_feathering_function feathering;
+		float feather_distance;
+		float low;
+		float high;
+		float step;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 
 	struct filter_height : public base_terrain_layer
 	{};

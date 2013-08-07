@@ -601,6 +601,26 @@ void construction_layer::serialize(ByteBuffer& buffer)
 	buffer.write(uint8_t(0));
 }
 
+void filter_fractal::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+	feathering = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	feather_distance = buffer.read<float>();
+	low = buffer.read<float>();
+	high = buffer.read<float>();
+	step = buffer.read<float>();
+}
+
+void filter_fractal::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+	buffer.write(uint32_t(feathering));
+	buffer.write(feather_distance);
+	buffer.write(low);
+	buffer.write(high);
+	buffer.write(step);
+}
+
 void filter_shader::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();

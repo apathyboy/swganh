@@ -183,6 +183,11 @@ struct procedural_terrain_impl
 				layer = load_boundary_rectangle(layer_node);
 			}
 			break;
+		case 0x41524646: // FFRA
+			{
+				layer = load_filter_fractal(layer_node);
+			}
+			break;
 		case 0x44485346: // FSHD
 			{
 				layer = load_filter_shader(layer_node);
@@ -350,6 +355,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_shader_constant>(ascn0001->record("DATA"));
 		layer->header = load_layer_header(ascn0001->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<filter_fractal> load_filter_fractal(iff_node* ffra)
+	{
+		auto ffra0005 = ffra->form("0005");
+
+		auto layer = make_node_data<filter_fractal>(ffra0005->form("DATA")->record("PARM"));
+		layer->header = load_layer_header(ffra0005->form("IHDR"));
 
 		return layer;
 	}
