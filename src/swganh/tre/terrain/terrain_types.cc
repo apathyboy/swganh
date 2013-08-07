@@ -465,6 +465,44 @@ void affector_shader_constant::serialize(ByteBuffer& buffer)
 	buffer.write(clamp);
 }
 
+void boundary_polygon::deserialize(ByteBuffer& buffer)
+{
+	uint32_t size = buffer.read<uint32_t>();
+	for (uint32_t i = 0; i < size; ++i)
+	{
+		glm::vec2 control_point;
+		control_point.x = buffer.read<float>();
+		control_point.y = buffer.read<float>();
+
+		control_points.push_back(control_point);
+	}
+
+	function = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	distance = buffer.read<float>();
+	is_local_water_table = buffer.read<uint32_t>() == 1 ? true : false;
+	water_height = buffer.read<float>();
+	water_shader_size = buffer.read<float>();
+	water_shader = buffer.read<std::string>(false, true);
+}
+
+void boundary_polygon::serialize(ByteBuffer& buffer)
+{
+	buffer.write<uint32_t>(control_points.size());
+	for (const auto& point : control_points)
+	{
+		buffer.write(point.x);
+		buffer.write(point.y);
+	}
+
+	buffer.write(uint32_t(function));
+	buffer.write(distance);
+	buffer.write<uint32_t>(is_local_water_table ? 1 : 0);
+	buffer.write(water_height);
+	buffer.write(water_shader_size);
+	buffer.write(reinterpret_cast<const unsigned char*>(water_shader.c_str()), water_shader.size());
+	buffer.write(uint8_t(0));
+}
+
 void boundary_rectangle::deserialize(ByteBuffer& buffer)
 {
 	x1 = buffer.read<float>();
@@ -474,10 +512,10 @@ void boundary_rectangle::deserialize(ByteBuffer& buffer)
 	function = static_cast<e_feathering_function>(buffer.read<uint32_t>());
 	distance = buffer.read<float>();
 	is_local_water_table = buffer.read<uint32_t>() == 1 ? true : false;
-	water_type = static_cast<e_water_type>(buffer.read<uint32_t>());
-	local_water_table_height = buffer.read<float>();
-	local_water_table_shader_size = buffer.read<float>();
-	local_water_table_shader_template_name = buffer.read<std::string>(false, true);
+	local_global_water_table = buffer.read<uint32_t>() == 1 ? true : false;
+	water_height = buffer.read<float>();
+	water_shader_size = buffer.read<float>();
+	water_shader = buffer.read<std::string>(false, true);
 }
 
 void boundary_rectangle::serialize(ByteBuffer& buffer)
@@ -489,10 +527,10 @@ void boundary_rectangle::serialize(ByteBuffer& buffer)
 	buffer.write(uint32_t(function));
 	buffer.write(distance);
 	buffer.write<uint32_t>(is_local_water_table ? 1 : 0);
-	buffer.write(uint32_t(water_type));
-	buffer.write(local_water_table_height);
-	buffer.write(local_water_table_shader_size);
-	buffer.write(reinterpret_cast<const unsigned char*>(local_water_table_shader_template_name.c_str()), local_water_table_shader_template_name.size());
+	buffer.write<uint32_t>(local_global_water_table ? 1 : 0);
+	buffer.write(water_height);
+	buffer.write(water_shader_size);
+	buffer.write(reinterpret_cast<const unsigned char*>(water_shader.c_str()), water_shader.size());
 	buffer.write(uint8_t(0));
 }
 

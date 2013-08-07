@@ -5,6 +5,8 @@
 #include <memory>
 #include <string>
 
+#include <glm/glm.hpp>
+
 #include "swganh/byte_buffer.h"
 #include "swganh/tre/iff/iff.h"
 
@@ -413,7 +415,18 @@ namespace detail_terrain {
 	{};
 
 	struct boundary_polygon : public base_terrain_layer
-	{};
+	{
+		std::vector<glm::vec2> control_points;
+		e_feathering_function function;
+		float distance;
+		bool is_local_water_table;
+		float water_height;
+		float water_shader_size;
+		std::string water_shader;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 
 	struct boundary_rectangle : public base_terrain_layer
 	{
@@ -424,10 +437,10 @@ namespace detail_terrain {
 		e_feathering_function function;
 		float distance;
 		bool is_local_water_table;
-		e_water_type water_type;
-		float local_water_table_height;
-		float local_water_table_shader_size;
-		std::string local_water_table_shader_template_name;
+		bool local_global_water_table;
+		float water_height;
+		float water_shader_size;
+		std::string water_shader;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);

@@ -153,9 +153,14 @@ struct procedural_terrain_impl
 				layer = load_affector_height_fractal(layer_node);
 			}
 			break;
-		case 0x4E435341: // ASCN
+		case 0x4e435341: // ASCN
 			{
 				layer = load_affector_shader_constant(layer_node);
+			}
+			break;
+		case 0x4c4f5042: // BPOL
+			{
+				layer = load_boundary_polygon(layer_node);
 			}
 			break;
 		case 0x43455242: // BREC
@@ -270,6 +275,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_radial_near_constant>(afdn0002->record("DATA"));
 		layer->header = load_layer_header(afdn0002->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<boundary_polygon> load_boundary_polygon(iff_node* bpol)
+	{
+		auto bpol0005 = bpol->form("0005");
+
+		auto layer = make_node_data<boundary_polygon>(bpol0005->record("DATA"));
+		layer->header = load_layer_header(bpol0005->form("IHDR"));
 
 		return layer;
 	}
