@@ -54,11 +54,7 @@ struct procedural_terrain_impl
 
 		for (const auto& child : sgrp0006->children)
 		{
-			auto shader_fam = std::make_unique<shader_family>();
-			shader_fam->load(child.get());
-
-			save_list.push_back(shader_fam.get());
-			shader_group.push_back(std::move(shader_fam));
+			shader_group.push_back(make_node_data<shader_family>(child.get()));
 		}
 	}
 
@@ -68,11 +64,7 @@ struct procedural_terrain_impl
 
 		for (const auto& child : fgrp0008->children)
 		{
-			auto flora_fam = std::make_unique<flora_family>();
-			flora_fam->load(child.get());
-
-			save_list.push_back(flora_fam.get());
-			flora_group.push_back(std::move(flora_fam));
+			flora_group.push_back(make_node_data<flora_family>(child.get()));
 		}
 	}
 
@@ -82,11 +74,7 @@ struct procedural_terrain_impl
 
 		for (const auto& child : rgrp0003->children)
 		{
-			auto radial_fam = std::make_unique<radial_family>();
-			radial_fam->load(child.get());
-
-			save_list.push_back(radial_fam.get());
-			radial_group.push_back(std::move(radial_fam));
+			radial_group.push_back(make_node_data<radial_family>(child.get()));
 		}
 	}
 
@@ -96,11 +84,7 @@ struct procedural_terrain_impl
 
 		for (const auto& child : egrp0002->children)
 		{
-			auto environment_fam = std::make_unique<environment_family>();
-			environment_fam->load(child->record("DATA"));
-
-			save_list.push_back(environment_fam.get());
-			environment_group.push_back(std::move(environment_fam));
+			environment_group.push_back(make_node_data<environment_family>(child->record("DATA")));
 		}
 	}
 
@@ -113,14 +97,8 @@ struct procedural_terrain_impl
 			auto data = child->record("DATA");
 			auto fractal = child->form("MFRC")->form("0001")->record("DATA");
 
-			auto fractal_fam = std::make_unique<fractal_family>();
-			fractal_fam->load(data);
-
-			fractal_fam->fractal_data = std::make_unique<fractal_family::fractal>();
-			fractal_fam->fractal_data->load(fractal);
-
-			save_list.push_back(fractal_fam.get());
-			save_list.push_back(fractal_fam->fractal_data.get());
+			auto fractal_fam = make_node_data<fractal_family>(data);
+			fractal_fam->fractal_data = make_node_data<fractal_family::fractal>(fractal);
 
 			fractal_group.push_back(std::move(fractal_fam));
 		}
@@ -152,20 +130,16 @@ struct procedural_terrain_impl
 			break;
 		default:
 			{
-				layer = std::make_unique<default_layer>();
-
 				if (layer_node->children[0]->children[1]->children.size() > 0) 
 				{
-					layer->load(layer_node->children[0]->children[1]->children[0].get());
+					layer = make_node_data<default_layer>(layer_node->children[0]->children[1]->children[0].get());
 				}
 				else
 				{
-					layer->load(layer_node->children[0]->children[1].get());
+					layer = make_node_data<default_layer>(layer_node->children[0]->children[1].get());
 				}
 
 				layer->header = load_layer_header(layer_node->children[0]->children[0].get());
-
-				save_list.push_back(layer.get());
 			}
 		}
 
@@ -176,22 +150,16 @@ struct procedural_terrain_impl
 
 	std::unique_ptr<layer_header> load_layer_header(iff_node* header_node)
 	{
-		auto header = std::make_unique<layer_header>();
-		header->load(header_node->form("0001")->record("DATA"));
-		save_list.push_back(header.get());
-		return header;
+		return make_node_data<layer_header>(header_node->form("0001")->record("DATA"));
 	}
 
 	std::unique_ptr<construction_layer> load_construction_layer(iff_node* node)
 	{
 		auto layr0003 = node->form("0003");
 
-		auto layer = std::make_unique<construction_layer>();
+		auto layer = make_node_data<construction_layer>(layr0003->record("ADTA"));
 		layer->header = load_layer_header(layr0003->form("IHDR"));
-		layer->load(layr0003->record("ADTA"));
-
-		save_list.push_back(layer.get());
-
+		
 		for (uint32_t i = 2; i < layr0003->children.size(); ++i)
 		{
 			auto child = load_layer(layr0003->children[i].get(), layer.get());
