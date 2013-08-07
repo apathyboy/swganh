@@ -479,6 +479,18 @@ void affector_height_fractal::serialize(ByteBuffer& buffer)
 	buffer.write(y_scale);
 }
 
+void affector_height_terrace::deserialize(ByteBuffer& buffer)
+{
+	terrace_height = buffer.read<float>();
+	flat_ratio = buffer.read<float>();
+}
+
+void affector_height_terrace::serialize(ByteBuffer& buffer)
+{
+	buffer.write(terrace_height);
+	buffer.write(flat_ratio);
+}
+
 void affector_radial_near_constant::deserialize(ByteBuffer& buffer)
 {
 	adjust = buffer.read<uint32_t>();

@@ -168,6 +168,11 @@ struct procedural_terrain_impl
 				layer = load_affector_height_fractal(layer_node);
 			}
 			break;
+		case 0x52544841: // ATR
+			{
+				layer = load_affector_height_terrace(layer_node);
+			}
+			break;
 		case 0x414f5241: // AROA
 			{
 				layer = load_affector_road(layer_node);
@@ -340,6 +345,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_height_fractal>(ahfr0003->form("DATA")->record("PARM"));
 		layer->header = load_layer_header(ahfr0003->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<affector_height_terrace> load_affector_height_terrace(iff_node* ahtr)
+	{
+		auto ahtr0004 = ahtr->form("0004");
+
+		auto layer = make_node_data<affector_height_terrace>(ahtr0004->record("DATA"));
+		layer->header = load_layer_header(ahtr0004->form("IHDR"));
 
 		return layer;
 	}
