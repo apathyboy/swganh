@@ -445,3 +445,19 @@ void construction_layer::serialize(ByteBuffer& buffer)
 	buffer.write(reinterpret_cast<const unsigned char*>(notes.c_str()), notes.size());
 	buffer.write(uint8_t(0));
 }
+
+void filter_slope::deserialize(ByteBuffer& buffer)
+{
+	min_angle = buffer.read<float>();
+	max_angle = buffer.read<float>();
+	feathering = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	feather_distance = buffer.read<float>();
+}
+
+void filter_slope::serialize(ByteBuffer& buffer)
+{
+	buffer.write(min_angle);
+	buffer.write(max_angle);
+	buffer.write(uint32_t(feathering));
+	buffer.write(feather_distance);
+}

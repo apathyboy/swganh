@@ -143,6 +143,11 @@ struct procedural_terrain_impl
 				layer = load_affector_color_ramp_fractal(layer_node);
 			}
 			break;
+		case 0x504c5346: // ACRF
+			{
+				layer = load_filter_slope(layer_node);
+			}
+			break;
 		default:
 			{
 				if (layer_node->children[0]->children[1]->children.size() > 0) 
@@ -220,6 +225,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_shader_constant>(ascn0001->record("DATA"));
 		layer->header = load_layer_header(ascn0001->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<filter_slope> load_filter_slope(iff_node* fslp)
+	{
+		auto fslp0002 = fslp->form("0002");
+
+		auto layer = make_node_data<filter_slope>(fslp0002->record("DATA"));
+		layer->header = load_layer_header(fslp0002->form("IHDR"));
 
 		return layer;
 	}

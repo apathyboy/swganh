@@ -32,6 +32,22 @@ namespace detail_terrain {
 		COUNT
 	};
 
+	enum class e_feathering_function : uint32_t
+	{
+		linear = 0,
+		easeIn,
+		easeOut,
+		easeInOut,
+		COUNT
+	};
+
+	enum class e_adjust_type : uint32_t
+	{
+		adjustBorder = 0,
+		adjustOutside,
+		COUNT
+	};
+
 	struct base_terrain_type
 	{
 		base_terrain_type()
@@ -350,5 +366,13 @@ namespace detail_terrain {
 	{};
 
 	struct filter_slope : public base_terrain_layer
-	{};
+	{
+		float min_angle;
+		float max_angle;
+		e_feathering_function feathering;
+		float feather_distance;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 }}}
