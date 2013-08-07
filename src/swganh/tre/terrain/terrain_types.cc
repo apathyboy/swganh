@@ -635,6 +635,37 @@ void boundary_polygon::serialize(ByteBuffer& buffer)
 	buffer.write(uint8_t(0));
 }
 
+void boundary_polyline::deserialize(ByteBuffer& buffer)
+{
+	uint32_t size = buffer.read<uint32_t>();
+	for (uint32_t i = 0; i < size; ++i)
+	{
+		glm::vec2 control_point;
+		control_point.x = buffer.read<float>();
+		control_point.y = buffer.read<float>();
+
+		control_points.push_back(control_point);
+	}
+
+	function = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	distance = buffer.read<float>();
+	width = buffer.read<float>();
+}
+
+void boundary_polyline::serialize(ByteBuffer& buffer)
+{
+	buffer.write<uint32_t>(control_points.size());
+	for (const auto& point : control_points)
+	{
+		buffer.write(point.x);
+		buffer.write(point.y);
+	}
+
+	buffer.write(uint32_t(function));
+	buffer.write(distance);
+	buffer.write(width);
+}
+
 void boundary_rectangle::deserialize(ByteBuffer& buffer)
 {
 	x1 = buffer.read<float>();
@@ -681,6 +712,22 @@ void construction_layer::serialize(ByteBuffer& buffer)
 	buffer.write(unknown1);
 	buffer.write(reinterpret_cast<const unsigned char*>(notes.c_str()), notes.size());
 	buffer.write(uint8_t(0));
+}
+
+void filter_direction::deserialize(ByteBuffer& buffer)
+{
+	min_angle = buffer.read<float>();
+	max_angle = buffer.read<float>();
+	feathering = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	feather_distance = buffer.read<float>();
+}
+
+void filter_direction::serialize(ByteBuffer& buffer)
+{
+	buffer.write(min_angle);
+	buffer.write(max_angle);
+	buffer.write(uint32_t(feathering));
+	buffer.write(feather_distance);
 }
 
 void filter_fractal::deserialize(ByteBuffer& buffer)

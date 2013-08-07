@@ -183,6 +183,11 @@ struct procedural_terrain_impl
 				layer = load_boundary_circle(layer_node);
 			}
 			break;
+		case 0x4e4c5042: // BPLN
+			{
+				layer = load_boundary_polyline(layer_node);
+			}
+			break;
 		case 0x4c4f5042: // BPOL
 			{
 				layer = load_boundary_polygon(layer_node);
@@ -191,6 +196,11 @@ struct procedural_terrain_impl
 		case 0x43455242: // BREC
 			{
 				layer = load_boundary_rectangle(layer_node);
+			}
+			break;
+		case 0x52494446: // FDIR
+			{
+				layer = load_filter_direction(layer_node);
 			}
 			break;
 		case 0x41524646: // FFRA
@@ -360,6 +370,16 @@ struct procedural_terrain_impl
 		return layer;
 	}
 
+	std::unique_ptr<affector_shader_constant> load_affector_shader_constant(iff_node* ascn)
+	{
+		auto ascn0001 = ascn->form("0001");
+
+		auto layer = make_node_data<affector_shader_constant>(ascn0001->record("DATA"));
+		layer->header = load_layer_header(ascn0001->form("IHDR"));
+
+		return layer;
+	}
+
 	std::unique_ptr<boundary_circle> load_boundary_circle(iff_node* bcir)
 	{
 		auto bcir0002 = bcir->form("0002");
@@ -380,6 +400,16 @@ struct procedural_terrain_impl
 		return layer;
 	}
 
+	std::unique_ptr<boundary_polyline> load_boundary_polyline(iff_node* bpln)
+	{
+		auto bpln0001 = bpln->form("0001");
+
+		auto layer = make_node_data<boundary_polyline>(bpln0001->record("DATA"));
+		layer->header = load_layer_header(bpln0001->form("IHDR"));
+
+		return layer;
+	}
+
 	std::unique_ptr<boundary_rectangle> load_boundary_rectangle(iff_node* brec)
 	{
 		auto brec0003 = brec->form("0003");
@@ -390,12 +420,12 @@ struct procedural_terrain_impl
 		return layer;
 	}
 
-	std::unique_ptr<affector_shader_constant> load_affector_shader_constant(iff_node* ascn)
+	std::unique_ptr<filter_direction> load_filter_direction(iff_node* fdir)
 	{
-		auto ascn0001 = ascn->form("0001");
+		auto fdir0000 = fdir->form("0000");
 
-		auto layer = make_node_data<affector_shader_constant>(ascn0001->record("DATA"));
-		layer->header = load_layer_header(ascn0001->form("IHDR"));
+		auto layer = make_node_data<filter_direction>(fdir0000->record("DATA"));
+		layer->header = load_layer_header(fdir0000->form("IHDR"));
 
 		return layer;
 	}

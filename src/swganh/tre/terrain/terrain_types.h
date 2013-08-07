@@ -417,8 +417,15 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
+	// AHTR
 	struct affector_height_terrace : public base_terrain_layer
-	{};
+	{
+		float terrace_height;
+		float flat_ratio;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 
 	// flora constant (collidable/non-collidable/near-radial)
 	struct affector_radial_near_constant : public base_terrain_layer
@@ -501,6 +508,17 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
+	struct boundary_polyline : public base_terrain_layer
+	{
+		std::vector<glm::vec2> control_points;
+		e_feathering_function function;
+		float distance;
+		float width;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
 	struct boundary_rectangle : public base_terrain_layer
 	{
 		float x1;
@@ -525,6 +543,17 @@ namespace detail_terrain {
 		bool invert_filters;
 		uint32_t unknown1;
 		std::string notes;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct filter_direction : public base_terrain_layer
+	{
+		float min_angle;
+		float max_angle;
+		e_feathering_function feathering;
+		float feather_distance;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
