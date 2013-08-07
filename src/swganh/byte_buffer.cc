@@ -213,6 +213,8 @@ const std::wstring ByteBuffer::read<std::wstring>(bool do_swap_endian, bool null
 }
 
 std::ostream& swganh::operator<<(std::ostream& message, const ByteBuffer& buffer) {
+	if (buffer.size() == 0) return message;
+
     size_t length = buffer.size();
     const unsigned char* data = buffer.data();
     
