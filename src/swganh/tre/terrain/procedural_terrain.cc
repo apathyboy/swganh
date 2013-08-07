@@ -148,6 +148,11 @@ struct procedural_terrain_impl
 				layer = load_affector_flora_non_collidable_constant(layer_node);
 			}
 			break;
+		case 0x4e434841: // AHCN
+			{
+				layer = load_affector_height_constant(layer_node);
+			}
+			break;
 		case 0x52464841: // AHFR
 			{
 				layer = load_affector_height_fractal(layer_node);
@@ -255,6 +260,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_flora_non_collidable_constant>(afsn0004->record("DATA"));
 		layer->header = load_layer_header(afsn0004->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<affector_height_constant> load_affector_height_constant(iff_node* ahcn)
+	{
+		auto ahcn0000 = ahcn->form("0000");
+
+		auto layer = make_node_data<affector_height_constant>(ahcn0000->record("DATA"));
+		layer->header = load_layer_header(ahcn0000->form("IHDR"));
 
 		return layer;
 	}

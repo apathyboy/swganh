@@ -419,6 +419,18 @@ void affector_flora_non_collidable_constant::serialize(ByteBuffer& buffer)
 	buffer.write(density);
 }
 
+void affector_height_constant::deserialize(ByteBuffer& buffer)
+{
+	operation = static_cast<operations>(buffer.read<uint32_t>());
+	value = buffer.read<float>();
+}
+
+void affector_height_constant::serialize(ByteBuffer& buffer)
+{
+	buffer.write(uint32_t(operation));
+	buffer.write(value);
+}
+
 void affector_height_fractal::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();
