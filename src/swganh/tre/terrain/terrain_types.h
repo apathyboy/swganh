@@ -501,7 +501,15 @@ namespace detail_terrain {
 	};
 
 	struct filter_height : public base_terrain_layer
-	{};
+	{
+		float low_height;
+		float high_height;
+		e_feathering_function feathering;
+		float feather_distance;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 
 	struct filter_shader : public base_terrain_layer
 	{

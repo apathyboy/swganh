@@ -621,6 +621,22 @@ void filter_fractal::serialize(ByteBuffer& buffer)
 	buffer.write(step);
 }
 
+void filter_height::deserialize(ByteBuffer& buffer)
+{
+	low_height = buffer.read<float>();
+	high_height = buffer.read<float>();
+	feathering = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	feather_distance = buffer.read<float>();
+}
+
+void filter_height::serialize(ByteBuffer& buffer)
+{
+	buffer.write(low_height);
+	buffer.write(high_height);
+	buffer.write(uint32_t(feathering));
+	buffer.write(feather_distance);
+}
+
 void filter_shader::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();

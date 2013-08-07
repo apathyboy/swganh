@@ -188,6 +188,11 @@ struct procedural_terrain_impl
 				layer = load_filter_fractal(layer_node);
 			}
 			break;
+		case 0x54474846: // FHGT
+			{
+				layer = load_filter_height(layer_node);
+			}
+			break;
 		case 0x44485346: // FSHD
 			{
 				layer = load_filter_shader(layer_node);
@@ -365,6 +370,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<filter_fractal>(ffra0005->form("DATA")->record("PARM"));
 		layer->header = load_layer_header(ffra0005->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<filter_height> load_filter_height(iff_node* fhgt)
+	{
+		auto fhgt0002 = fhgt->form("0002");
+
+		auto layer = make_node_data<filter_height>(fhgt0002->record("DATA"));
+		layer->header = load_layer_header(fhgt0002->form("IHDR"));
 
 		return layer;
 	}
