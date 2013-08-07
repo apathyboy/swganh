@@ -272,15 +272,17 @@ namespace detail_terrain {
 	};
 
 	struct affector_color_ramp_factal : public base_terrain_layer
+	{};
+
+	struct affector_environment : public base_terrain_layer
 	{
-		std::vector<uint8_t> data;
-		
+		uint32_t family_id;
+		bool feather_clamp_override;
+		float clamp;
+
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
 	};
-
-	struct affector_environment : public base_terrain_layer
-	{};
 
 	struct affector_height_fractal : public base_terrain_layer
 	{};

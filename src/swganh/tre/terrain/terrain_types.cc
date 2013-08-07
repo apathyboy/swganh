@@ -372,6 +372,20 @@ void default_layer::serialize(ByteBuffer& buffer)
 	}
 }
 
+void affector_environment::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+	feather_clamp_override = buffer.read<uint32_t>() == 1 ? true : false;
+	clamp = buffer.read<float>();
+}
+
+void affector_environment::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+	buffer.write<uint32_t>(feather_clamp_override ? 1 : 0);
+	buffer.write(clamp);
+}
+
 void construction_layer::deserialize(ByteBuffer& buffer)
 {
 	invert_boundaries = buffer.read<uint32_t>() == 1 ? true : false;

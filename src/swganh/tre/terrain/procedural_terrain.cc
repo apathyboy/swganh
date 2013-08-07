@@ -13,6 +13,17 @@ struct procedural_terrain_impl
 	procedural_terrain_impl(iff_node* head)
 		: iff_doc(head) {}
 
+	template<typename T>
+	std::unique_ptr<T> make_node_data(iff_node* node)
+	{
+		auto node_data = std::make_unique<T>();
+		node_data->load(node);
+
+		save_list.push_back(node_data.get());
+
+		return node_data;
+	}
+
 	void load_header(iff_node* data)
 	{
 		hdr.load(data);
@@ -134,6 +145,11 @@ struct procedural_terrain_impl
 				layer = load_construction_layer(layer_node);
 			}
 			break;
+		case 0x564e4541:
+			{
+				layer = load_affector_environment(layer_node);
+			}
+			break;
 		default:
 			{
 				layer = std::make_unique<default_layer>();
@@ -181,6 +197,16 @@ struct procedural_terrain_impl
 			auto child = load_layer(layr0003->children[i].get(), layer.get());
 			layer->children.push_back(std::move(child));
 		}
+
+		return layer;
+	}
+	
+	std::unique_ptr<affector_environment> load_affector_environment(iff_node* node)
+	{
+		auto aenv0000 = node->form("0000");
+
+		auto layer = make_node_data<affector_environment>(aenv0000->record("DATA"));
+		layer->header = load_layer_header(aenv0000->form("IHDR"));
 
 		return layer;
 	}
