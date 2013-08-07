@@ -191,4 +191,17 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
+	struct environment_family : public base_terrain_type
+	{
+		uint32_t family_id;
+		std::string family_name;
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
+		float feather_clamp;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
 }}}

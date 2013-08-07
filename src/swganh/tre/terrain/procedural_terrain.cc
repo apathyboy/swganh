@@ -80,7 +80,18 @@ struct procedural_terrain_impl
 	}
 
 	void load_environment_group(iff_node* egrp)
-	{}
+	{
+		auto egrp0002 = egrp->form("0002");
+
+		for (const auto& child : egrp0002->children)
+		{
+			auto environment_fam = std::make_unique<environment_family>();
+			environment_fam->load(child->record("DATA"));
+
+			save_list.push_back(environment_fam.get());
+			environment_group.push_back(std::move(environment_fam));
+		}
+	}
 
 	void load_fractal_group(iff_node* mgrp)
 	{}
@@ -97,6 +108,7 @@ struct procedural_terrain_impl
 	std::vector<std::unique_ptr<shader_family>> shader_group;
 	std::vector<std::unique_ptr<flora_family>> flora_group;
 	std::vector<std::unique_ptr<radial_family>> radial_group;
+	std::vector<std::unique_ptr<environment_family>> environment_group;
 };
 
 procedural_terrain::procedural_terrain(swganh::tre::iff_node* head)

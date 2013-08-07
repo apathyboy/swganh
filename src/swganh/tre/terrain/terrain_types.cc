@@ -274,3 +274,24 @@ void radial_family::serialize(ByteBuffer& buffer)
 		buffer.write(child->unk9);
 	}
 }
+
+void environment_family::deserialize(ByteBuffer& buffer)
+{
+	family_id = buffer.read<uint32_t>();
+	family_name = buffer.read<std::string>(false, true);
+	r = buffer.read<uint8_t>();
+	g = buffer.read<uint8_t>();
+	b = buffer.read<uint8_t>();
+	feather_clamp = buffer.read<float>();
+}
+
+void environment_family::serialize(ByteBuffer& buffer)
+{
+	buffer.write(family_id);
+	buffer.write(reinterpret_cast<const unsigned char*>(family_name.c_str()), family_name.size());
+	buffer.write(uint8_t(0));
+	buffer.write(r);
+	buffer.write(g);
+	buffer.write(b);
+	buffer.write(feather_clamp);
+}
