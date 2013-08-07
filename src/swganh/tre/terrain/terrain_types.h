@@ -246,4 +246,77 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
+	struct layer_header : public base_terrain_type
+	{
+		bool enabled;
+		std::string name;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct base_terrain_layer : public base_terrain_type
+	{
+		std::unique_ptr<layer_header> header;
+
+		base_terrain_layer* parent;
+		std::vector<std::unique_ptr<base_terrain_layer>> children;
+	};
+
+	struct default_layer : public base_terrain_layer
+	{
+		std::vector<uint8_t> data;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct affector_color_ramp_factal : public base_terrain_layer
+	{
+		std::vector<uint8_t> data;
+		
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct affector_environment : public base_terrain_layer
+	{};
+
+	struct affector_height_fractal : public base_terrain_layer
+	{};
+
+	struct affector_height_terrace : public base_terrain_layer
+	{};
+
+	struct affector_radial_near_constant : public base_terrain_layer
+	{};
+
+	struct affector_shader_constant : public base_terrain_layer
+	{};
+	
+	struct boundary_circle : public base_terrain_layer
+	{};
+
+	struct boundary_polygon : public base_terrain_layer
+	{};
+
+	struct construction_layer : public base_terrain_layer
+	{
+		bool invert_boundaries;
+		bool invert_filters;
+		uint32_t unknown1;
+		std::string notes;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct filter_fractal : public base_terrain_layer
+	{};
+
+	struct filter_height : public base_terrain_layer
+	{};
+
+	struct filter_slope : public base_terrain_layer
+	{};
 }}}

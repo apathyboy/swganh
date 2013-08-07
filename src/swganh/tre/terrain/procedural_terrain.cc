@@ -116,7 +116,74 @@ struct procedural_terrain_impl
 	}
 
 	void load_layers(iff_node* lyrs)
-	{}
+	{
+		for (const auto& child : lyrs->children)
+		{
+			layers.push_back(load_layer(child.get()));
+		}
+	}
+	
+	std::unique_ptr<base_terrain_layer> load_layer(iff_node* layer_node, base_terrain_layer* parent = nullptr)
+	{
+		std::unique_ptr<base_terrain_layer> layer = nullptr;
+
+		switch (layer_node->form_type)
+		{
+		case 0x5259414c:
+			{
+				layer = load_construction_layer(layer_node);
+			}
+			break;
+		default:
+			{
+				layer = std::make_unique<default_layer>();
+
+				if (layer_node->children[0]->children[1]->children.size() > 0) 
+				{
+					layer->load(layer_node->children[0]->children[1]->children[0].get());
+				}
+				else
+				{
+					layer->load(layer_node->children[0]->children[1].get());
+				}
+
+				layer->header = load_layer_header(layer_node->children[0]->children[0].get());
+
+				save_list.push_back(layer.get());
+			}
+		}
+
+		layer->parent = parent;
+
+		return layer;
+	}
+
+	std::unique_ptr<layer_header> load_layer_header(iff_node* header_node)
+	{
+		auto header = std::make_unique<layer_header>();
+		header->load(header_node->form("0001")->record("DATA"));
+		save_list.push_back(header.get());
+		return header;
+	}
+
+	std::unique_ptr<construction_layer> load_construction_layer(iff_node* node)
+	{
+		auto layr0003 = node->form("0003");
+
+		auto layer = std::make_unique<construction_layer>();
+		layer->header = load_layer_header(layr0003->form("IHDR"));
+		layer->load(layr0003->record("ADTA"));
+
+		save_list.push_back(layer.get());
+
+		for (uint32_t i = 2; i < layr0003->children.size(); ++i)
+		{
+			auto child = load_layer(layr0003->children[i].get(), layer.get());
+			layer->children.push_back(std::move(child));
+		}
+
+		return layer;
+	}
 	
 	iff_node* iff_doc;
 	std::vector<base_terrain_type*> save_list;
@@ -129,6 +196,7 @@ struct procedural_terrain_impl
 	std::vector<std::unique_ptr<radial_family>> radial_group;
 	std::vector<std::unique_ptr<environment_family>> environment_group;
 	std::vector<std::unique_ptr<fractal_family>> fractal_group;
+	std::vector<std::unique_ptr<base_terrain_layer>> layers;
 };
 
 procedural_terrain::procedural_terrain(swganh::tre::iff_node* head)

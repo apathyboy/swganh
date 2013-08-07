@@ -342,3 +342,49 @@ void fractal_family::fractal::serialize(ByteBuffer& buffer)
 	buffer.write(y_offset);
 	buffer.write(uint32_t(rule));
 }
+
+void layer_header::deserialize(ByteBuffer& buffer)
+{
+	enabled = buffer.read<uint32_t>() == 1 ? true : false;
+	name = buffer.read<std::string>(false, true);
+}
+
+void layer_header::serialize(ByteBuffer& buffer)
+{
+	buffer.write<uint32_t>(enabled ? 1 : 0);
+	buffer.write(reinterpret_cast<const unsigned char*>(name.c_str()), name.size());
+	buffer.write(uint8_t(0));
+}
+
+void default_layer::deserialize(ByteBuffer& buffer)
+{
+	if (buffer.size() > 0)
+	{
+		data = std::vector<uint8_t>(buffer.data(), buffer.data() + buffer.size());
+	}
+}
+
+void default_layer::serialize(ByteBuffer& buffer)
+{
+	if (data.size() > 0)
+	{
+		buffer.write(data.data(), data.size());
+	}
+}
+
+void construction_layer::deserialize(ByteBuffer& buffer)
+{
+	invert_boundaries = buffer.read<uint32_t>() == 1 ? true : false;
+	invert_filters = buffer.read<uint32_t>() == 1 ? true : false;
+	unknown1 = buffer.read<uint32_t>();
+	notes = buffer.read<std::string>(false, true);
+}
+
+void construction_layer::serialize(ByteBuffer& buffer)
+{
+	buffer.write<uint32_t>(invert_boundaries ? 1 : 0);
+	buffer.write<uint32_t>(invert_filters ? 1 : 0);
+	buffer.write(unknown1);
+	buffer.write(reinterpret_cast<const unsigned char*>(notes.c_str()), notes.size());
+	buffer.write(uint8_t(0));
+}
