@@ -362,6 +362,18 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer) {}
 	};
 
+	struct affector_flora_collidable_constant : public base_terrain_layer
+	{
+		uint32_t adjust;
+		e_flora_operation operation;
+		bool remove_all_radial_flora;
+		bool density_override;
+		float density;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
 	// flora constant (collidable/non-collidable/near-radial)
 	struct affector_flora_non_collidable_constant : public base_terrain_layer
 	{
@@ -421,7 +433,16 @@ namespace detail_terrain {
 	};
 	
 	struct boundary_circle : public base_terrain_layer
-	{};
+	{
+		float center_x;
+		float center_z;
+		float radius;
+		e_feathering_function function;
+		float distance;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
 
 	struct boundary_polygon : public base_terrain_layer
 	{

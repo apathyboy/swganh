@@ -143,6 +143,11 @@ struct procedural_terrain_impl
 				layer = load_affector_radial_near_constant(layer_node);
 			}
 			break;
+		case 0x43534641: // AFSC
+			{
+				layer = load_affector_flora_collidable_constant(layer_node);
+			}
+			break;
 		case 0x4e534641: // AFSN
 			{
 				layer = load_affector_flora_non_collidable_constant(layer_node);
@@ -161,6 +166,11 @@ struct procedural_terrain_impl
 		case 0x4e435341: // ASCN
 			{
 				layer = load_affector_shader_constant(layer_node);
+			}
+			break;
+		case 0x52494342: // BCIR
+			{
+				layer = load_boundary_circle(layer_node);
 			}
 			break;
 		case 0x4c4f5042: // BPOL
@@ -254,6 +264,16 @@ struct procedural_terrain_impl
 		return layer;
 	}
 
+	std::unique_ptr<affector_flora_collidable_constant> load_affector_flora_collidable_constant(iff_node* afsc)
+	{
+		auto afsc0004 = afsc->form("0004");
+
+		auto layer = make_node_data<affector_flora_collidable_constant>(afsc0004->record("DATA"));
+		layer->header = load_layer_header(afsc0004->form("IHDR"));
+
+		return layer;
+	}
+
 	std::unique_ptr<affector_flora_non_collidable_constant> load_affector_flora_non_collidable_constant(iff_node* afsn)
 	{
 		auto afsn0004 = afsn->form("0004");
@@ -290,6 +310,16 @@ struct procedural_terrain_impl
 
 		auto layer = make_node_data<affector_radial_near_constant>(afdn0002->record("DATA"));
 		layer->header = load_layer_header(afdn0002->form("IHDR"));
+
+		return layer;
+	}
+
+	std::unique_ptr<boundary_circle> load_boundary_circle(iff_node* bcir)
+	{
+		auto bcir0002 = bcir->form("0002");
+
+		auto layer = make_node_data<boundary_circle>(bcir0002->record("DATA"));
+		layer->header = load_layer_header(bcir0002->form("IHDR"));
 
 		return layer;
 	}

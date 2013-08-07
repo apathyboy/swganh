@@ -401,6 +401,24 @@ void affector_environment::serialize(ByteBuffer& buffer)
 	buffer.write(clamp);
 }
 
+void affector_flora_collidable_constant::deserialize(ByteBuffer& buffer)
+{
+	adjust = buffer.read<uint32_t>();
+	operation = static_cast<e_flora_operation>(buffer.read<uint32_t>());
+	remove_all_radial_flora = buffer.read<uint32_t>() == 1 ? true : false;
+	density_override = buffer.read<uint32_t>() == 1 ? true : false;
+	density = buffer.read<float>();
+}
+
+void affector_flora_collidable_constant::serialize(ByteBuffer& buffer)
+{
+	buffer.write(adjust);
+	buffer.write(uint32_t(operation));
+	buffer.write<uint32_t>(remove_all_radial_flora ? 1 : 0);
+	buffer.write<uint32_t>(density_override ? 1 : 0);
+	buffer.write(density);
+}
+
 void affector_flora_non_collidable_constant::deserialize(ByteBuffer& buffer)
 {
 	adjust = buffer.read<uint32_t>();
@@ -475,6 +493,26 @@ void affector_shader_constant::serialize(ByteBuffer& buffer)
 	buffer.write(family_id);
 	buffer.write<uint32_t>(feather_clamp_override ? 1 : 0);
 	buffer.write(clamp);
+}
+
+void boundary_circle::deserialize(ByteBuffer& buffer)
+{
+	center_x = buffer.read<float>();
+	center_z = buffer.read<float>();
+	radius = buffer.read<float>();
+
+	function = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	distance = buffer.read<float>();
+}
+
+void boundary_circle::serialize(ByteBuffer& buffer)
+{
+	buffer.write(center_x);
+	buffer.write(center_z);
+	buffer.write(radius);
+
+	buffer.write(uint32_t(function));
+	buffer.write(distance);
 }
 
 void boundary_polygon::deserialize(ByteBuffer& buffer)
