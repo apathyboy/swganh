@@ -4,30 +4,29 @@
 #include <vector>
 
 using namespace swganh::tre::detail_terrain;
+using swganh::ByteBuffer;
 using swganh::tre::iff_node;
 using swganh::tre::procedural_terrain;
 using swganh::tre::procedural_terrain_impl;
 
 struct procedural_terrain_impl
 {
-	procedural_terrain_impl(iff_node* head)
-		: iff_doc(head) {}
-
 	template<typename T>
 	std::unique_ptr<T> make_node_data(iff_node* node)
 	{
 		auto node_data = std::make_unique<T>();
-		node_data->load(node);
 
-		save_list.push_back(node_data.get());
+		node_data->deserialize(node->data);
+
+		save_list.push_back(std::make_pair(node, node_data.get()));
 
 		return node_data;
 	}
 
 	void load_header(iff_node* data)
 	{
-		hdr.load(data);
-		save_list.push_back(&hdr);
+		hdr.deserialize(data->data);
+		save_list.push_back(std::make_pair(data, &hdr));
 	}
 
 	void load_terrain_data(iff_node* tgen)
@@ -44,8 +43,10 @@ struct procedural_terrain_impl
 
 	void load_footer(iff_node* form0001)
 	{
-		ftr.load(form0001->record("DATA"));
-		save_list.push_back(&ftr);
+		auto footer_data = form0001->record("DATA");
+
+		ftr.deserialize(footer_data->data);
+		save_list.push_back(std::make_pair(footer_data, &ftr));
 	}
 
 	void load_shader_group(iff_node* sgrp)
@@ -54,7 +55,7 @@ struct procedural_terrain_impl
 
 		for (const auto& child : sgrp0006->children)
 		{
-			shader_group.push_back(make_node_data<shader_family>(child.get()));
+			shader_group.add_family(make_node_data<shader_family>(child.get()));
 		}
 	}
 
@@ -64,7 +65,7 @@ struct procedural_terrain_impl
 
 		for (const auto& child : fgrp0008->children)
 		{
-			flora_group.push_back(make_node_data<flora_family>(child.get()));
+			flora_group.add_family(make_node_data<flora_family>(child.get()));
 		}
 	}
 
@@ -74,7 +75,7 @@ struct procedural_terrain_impl
 
 		for (const auto& child : rgrp0003->children)
 		{
-			radial_group.push_back(make_node_data<radial_family>(child.get()));
+			radial_group.add_family(make_node_data<radial_family>(child.get()));
 		}
 	}
 
@@ -84,7 +85,7 @@ struct procedural_terrain_impl
 
 		for (const auto& child : egrp0002->children)
 		{
-			environment_group.push_back(make_node_data<environment_family>(child->record("DATA")));
+			environment_group.add_family(make_node_data<environment_family>(child->record("DATA")));
 		}
 	}
 
@@ -100,7 +101,7 @@ struct procedural_terrain_impl
 			auto fractal_fam = make_node_data<fractal_family>(data);
 			fractal_fam->fractal_data = make_node_data<fractal_family::fractal>(fractal);
 
-			fractal_group.push_back(std::move(fractal_fam));
+			fractal_group.add_family(std::move(fractal_fam));
 		}
 	}
 
@@ -250,16 +251,7 @@ struct procedural_terrain_impl
 			break;
 		default:
 			{
-				if (layer_node->children[0]->children[1]->children.size() > 0) 
-				{
-					layer = make_node_data<default_layer>(layer_node->children[0]->children[1]->children[0].get());
-				}
-				else
-				{
-					layer = make_node_data<default_layer>(layer_node->children[0]->children[1].get());
-				}
-
-				layer->header = load_layer_header(layer_node->children[0]->children[0].get());
+				throw std::runtime_error("Unknown layer type: " + layer_node->str_form_type());
 			}
 		}
 
@@ -551,26 +543,31 @@ struct procedural_terrain_impl
 		return layer;
 	}
 	
-	iff_node* iff_doc;
-	std::vector<base_terrain_type*> save_list;
+	std::unique_ptr<iff_node> iff_doc;
+	std::vector<std::pair<iff_node*, base_terrain_type*>> save_list;
 	
 	header hdr;
 	footer ftr;
 
-	std::vector<std::unique_ptr<shader_family>> shader_group;
-	std::vector<std::unique_ptr<flora_family>> flora_group;
-	std::vector<std::unique_ptr<radial_family>> radial_group;
-	std::vector<std::unique_ptr<environment_family>> environment_group;
-	std::vector<std::unique_ptr<fractal_family>> fractal_group;
+	terrain_group<shader_family> shader_group;
+	terrain_group<flora_family> flora_group;
+	terrain_group<radial_family> radial_group;
+	terrain_group<environment_family> environment_group;
+	terrain_group<fractal_family> fractal_group;
 	std::vector<std::unique_ptr<base_terrain_layer>> layers;
 };
 
-procedural_terrain::procedural_terrain(swganh::tre::iff_node* head)
-	: impl_(new procedural_terrain_impl(head))
-{}
+procedural_terrain::procedural_terrain(ByteBuffer& buffer)
+	: impl_(new procedural_terrain_impl())
+{
+	impl_->iff_doc = parse_iff(buffer);
+	load();
+}
 
 procedural_terrain::~procedural_terrain()
-{}
+{
+	save();
+}
 
 void procedural_terrain::load()
 {
@@ -586,24 +583,44 @@ void procedural_terrain::load()
 
 void procedural_terrain::save()
 {
-	for (auto to_save : impl_->save_list)
+	for (const auto& to_save : impl_->save_list)
 	{
-		to_save->save();
+		to_save.first->data.clear();
+		to_save.second->serialize(to_save.first->data);
 	}
 }
 
-const iff_node& procedural_terrain::iff_doc() const
+iff_node* procedural_terrain::iff_doc() const
 {
-	return *impl_->iff_doc;
+	return impl_->iff_doc.get();
 }
 
-void procedural_terrain::set_filename(std::string filename)
+terrain_group<shader_family>& procedural_terrain::shader_group()
 {
-	impl_->hdr.filename = filename;
+	return impl_->shader_group;
 }
 
-std::string procedural_terrain::get_filename() const
+terrain_group<flora_family>& procedural_terrain::flora_group()
 {
-	return impl_->hdr.filename;
+	return impl_->flora_group;
 }
 
+terrain_group<radial_family>& procedural_terrain::radial_group()
+{
+	return impl_->radial_group;
+}
+
+terrain_group<environment_family>& procedural_terrain::environment_group()
+{
+	return impl_->environment_group;
+}
+
+terrain_group<fractal_family>& procedural_terrain::fractal_group()
+{
+	return impl_->fractal_group;
+}
+
+std::vector<std::unique_ptr<base_terrain_layer>>& procedural_terrain::layers()
+{
+	return impl_->layers;
+}
