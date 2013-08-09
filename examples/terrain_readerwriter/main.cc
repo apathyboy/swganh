@@ -10,9 +10,8 @@
 #include "swganh/tre/iff/iff.h"
 #include "swganh/tre/terrain/procedural_terrain.h"
 
-void read_terrain(std::string terrain_filename);
-void print_iff_nodes(swganh::tre::iff_node* head, int depth = 0);
-void process(swganh::tre::iff_node* head);
+swganh::tre::procedural_terrain read_terrain(std::string terrain_filename);
+void write_to_file(std::string filename, swganh::tre::iff_node* head);
 
 int main(int argc, char *argv[])
 {
@@ -24,7 +23,8 @@ int main(int argc, char *argv[])
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
-	read_terrain(argv[1]);
+	auto pt = read_terrain(argv[1]);
+	write_to_file(argv[1], pt.iff_doc());
 
     auto stop_time = std::chrono::high_resolution_clock::now();
 
@@ -35,14 +35,13 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void read_terrain(std::string terrain_filename)
+swganh::tre::procedural_terrain read_terrain(std::string terrain_filename)
 {
 	std::ifstream in(terrain_filename, std::ios::binary);
 
 	if (!in.is_open())
 	{
-		std::cout << "Invalid filename given: " << terrain_filename << std::endl;
-		return;
+		throw std::runtime_error("Invalid filename given: " + terrain_filename);
 	}
 
 	std::vector<char> tmp { std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>() };
@@ -51,69 +50,25 @@ void read_terrain(std::string terrain_filename)
 
 	swganh::ByteBuffer data(reinterpret_cast<unsigned char*>(tmp.data()), tmp.size());
 
-	auto iff_head = swganh::tre::parse_iff(data);
-
-	if (iff_head)
-	{
-		//print_iff_nodes(iff_head.get());
-
-		process(iff_head.get());
-
-		std::ofstream out(terrain_filename + ".alt", std::ios::binary);
-		if (!out.is_open())
-		{
-			std::cout << "Invalid filename given: " << terrain_filename + ".alt" << std::endl;
-			return;
-		}
-		
-		swganh::ByteBuffer out_buffer;
-		swganh::tre::write_iff(out_buffer, iff_head.get());
-		
-		if (out_buffer.size() > 0)
-		{
-			out.write(reinterpret_cast<char*>(out_buffer.data()), out_buffer.size());
-		}
-		
-		out.close();
-	}
+	return swganh::tre::procedural_terrain(data);
 }
 
-void print_iff_nodes(swganh::tre::iff_node* head, int depth)
+void write_to_file(std::string filename, swganh::tre::iff_node* head)
 {
-	for (int i = 0; i < depth; ++i)
+	std::ofstream out(filename + ".alt", std::ios::binary);
+	if (!out.is_open())
 	{
-		std::cout << " ";
+		std::cout << "Invalid filename given: " << filename + ".alt" << std::endl;
+		return;
 	}
 
-	std::cout << head->str_name();
+	swganh::ByteBuffer out_buffer;
+	swganh::tre::write_iff(out_buffer, head);
 
-	if (head->form_type)
+	if (out_buffer.size() > 0)
 	{
-		std::cout << " - " << head->str_form_type();
+		out.write(reinterpret_cast<char*>(out_buffer.data()), out_buffer.size());
 	}
 
-	std::cout << " - (" << head->children.size() << ") ";
-
-	if (!head->form_type)
-	{
-		std::cout << head->data.size();
-	}
-
-	std::cout << "\n";
-
-	for (const auto& child : head->children)
-	{
-		print_iff_nodes(child.get(), depth + 1);
-	}
-}
-
-void process(swganh::tre::iff_node* head)
-{
-	swganh::tre::procedural_terrain pt(head);
-
-	pt.load();
-
-	// make any modifications here
-
-	pt.save();
+	out.close();
 }
