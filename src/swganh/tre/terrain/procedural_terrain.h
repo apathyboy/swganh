@@ -22,7 +22,7 @@ namespace tre {
 		detail_terrain::terrain_group<detail_terrain::radial_family> radial_group;
 		detail_terrain::terrain_group<detail_terrain::environment_family> environment_group;
 		detail_terrain::terrain_group<detail_terrain::fractal_family> fractal_group;
-		std::vector<std::unique_ptr<detail_terrain::base_terrain_layer>> layers;
+		std::vector<std::unique_ptr<detail_terrain::construction_layer>> layers;
 	};
 
 	std::unique_ptr<procedural_terrain> read_procedural_terrain(ByteBuffer& buffer);

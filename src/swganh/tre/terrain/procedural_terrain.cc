@@ -36,7 +36,6 @@ struct terrain_iff_reader
 		terrain.footer.deserialize(footer_data->data);
 	}
 
-
 	template<typename T>
 	static void load_group(terrain_group<T>& group, iff_node* group_node)
 	{
@@ -44,6 +43,18 @@ struct terrain_iff_reader
 		{
 			auto family = std::make_unique<T>();
 			family->deserialize(child->data);
+
+			group.add_family(std::move(family));
+		}
+	}
+
+	template<>
+	static void load_group(terrain_group<environment_family>& group, iff_node* group_node)
+	{
+		for (const auto& child : group_node->children)
+		{
+			auto family = std::make_unique<environment_family>();
+			family->deserialize(child->record("DATA")->data);
 
 			group.add_family(std::move(family));
 		}
@@ -66,11 +77,179 @@ struct terrain_iff_reader
 		}	
 	}
 
-	static void load_layers(std::vector<std::unique_ptr<base_terrain_layer>>& layers, iff_node* lyrs)
+	static void load_layers(std::vector<std::unique_ptr<construction_layer>>& layers, iff_node* lyrs)
 	{
 		for (const auto& child : lyrs->children)
 		{
-			layers.push_back(load_layer(child.get()));
+			layers.push_back(load_construction_layer(child.get()));
+		}
+	}
+
+	static void load_layer(iff_node* layer_node, construction_layer* parent = nullptr)
+	{
+		switch (layer_node->form_type)
+		{
+		case 0x5259414c: // LAYR
+			{
+				load_construction_layer(layer_node, parent);
+			}
+			break;
+		case 0x4e434341: // ACCN
+			{
+				auto accn0000 = layer_node->form("0000");
+				load_affector<affector_color_constant>(accn0000, accn0000->record("DATA"), parent);
+			}
+			break;
+		case 0x46524341: // ACRF
+			{
+				auto acrf0001 = layer_node->form("0001");
+				load_affector<affector_color_ramp_fractal>(acrf0001, acrf0001->form("DATA")->record("PARM"), parent);
+			}
+			break;
+		case 0x48524341: // ACRH
+			{
+				auto acrh0000 = layer_node->form("0000");
+				load_affector<affector_color_ramp_height>(acrh0000, acrh0000->record("DATA"), parent);
+			}
+			break;
+		case 0x564e4541: // AENV
+			{
+				auto aenv0000 = layer_node->form("0000");
+				load_affector<affector_environment>(aenv0000, aenv0000->record("DATA"), parent);
+			}
+			break;
+		case 0x43584541: // AEXC
+			{
+				auto aexc0000 = layer_node->form("0000");
+				load_affector<affector_exclude>(aexc0000, aexc0000->record("DATA"), parent);
+			}
+			break;
+		case 0x4e444641: // AFDN
+			{
+				auto afdn0002 = layer_node->form("0002");
+				load_affector<affector_radial_near_constant>(afdn0002, afdn0002->record("DATA"), parent);
+			}
+			break;
+		case 0x46444641: // AFDF
+			{
+				auto afdf0002 = layer_node->form("0002");
+				load_affector<affector_radial_far_constant>(afdf0002, afdf0002->record("DATA"), parent);
+			}
+			break;
+		case 0x43534641: // AFSC
+			{
+				auto afsc0004 = layer_node->form("0004");
+				load_affector<affector_flora_collidable_constant>(afsc0004, afsc0004->record("DATA"), parent);
+			}
+			break;
+		case 0x4e534641: // AFSN
+			{
+				auto afsn0004 = layer_node->form("0004");
+				load_affector<affector_flora_non_collidable_constant>(afsn0004, afsn0004->record("DATA"), parent);
+			}
+			break;
+		case 0x4e434841: // AHCN
+			{
+				auto ahcn0000 = layer_node->form("0000");
+				load_affector<affector_height_constant>(ahcn0000, ahcn0000->record("DATA"), parent);
+			}
+			break;
+		case 0x52464841: // AHFR
+			{
+				auto ahfr0003 = layer_node->form("0003");
+				load_affector<affector_height_fractal>(ahfr0003, ahfr0003->form("DATA")->record("PARM"), parent);
+			}
+			break;
+		case 0x52544841: // AHTR
+			{
+				auto ahtr0004 = layer_node->form("0004");
+				load_affector<affector_height_terrace>(ahtr0004, ahtr0004->record("DATA"), parent);
+			}
+			break;
+		case 0x56495241: // ARIV
+			{
+				auto ariv0005 = layer_node->form("0005");
+				auto affector = load_affector<affector_river>(ariv0005, ariv0005->form("DATA")->record("DATA"), parent);
+				load_height_data<affector_river>(affector, ariv0005->form("DATA")->form("HDTA")->form("0001"));
+			}
+			break;
+		case 0x414f5241: // AROA
+			{
+				auto aroa0005 = layer_node->form("0005");
+				auto affector = load_affector<affector_road>(aroa0005, aroa0005->form("DATA")->record("DATA"), parent);
+				load_height_data<affector_road>(affector, aroa0005->form("DATA")->form("HDTA")->form("0001"));
+			}
+			break;
+		case 0x4e435341: // ASCN
+			{
+				auto ascn0001 = layer_node->form("0001");
+				load_affector<affector_shader_constant>(ascn0001, ascn0001->record("DATA"), parent);
+			}
+			break;
+		case 0x50525341: // ASRP
+			{
+				auto asrp0001 = layer_node->form("0001");
+				load_affector<affector_shader_replace>(asrp0001, asrp0001->record("DATA"), parent);
+			}
+			break;
+		case 0x52494342: // BCIR
+			{
+				auto bcir0002 = layer_node->form("0002");
+				load_boundary<boundary_circle>(bcir0002, bcir0002->record("DATA"), parent);
+			}
+			break;
+		case 0x4e4c5042: // BPLN
+			{
+				auto bpln0001 = layer_node->form("0001");
+				load_boundary<boundary_polyline>(bpln0001, bpln0001->record("DATA"), parent);
+			}
+			break;
+		case 0x4c4f5042: // BPOL
+			{
+				auto bpol0005 = layer_node->form("0005");
+				load_boundary<boundary_polygon>(bpol0005, bpol0005->record("DATA"), parent);
+			}
+			break;
+		case 0x43455242: // BREC
+			{
+				auto brec0003 = layer_node->form("0003");
+				load_boundary<boundary_rectangle>(brec0003, brec0003->record("DATA"), parent);
+			}
+			break;
+		case 0x52494446: // FDIR
+			{
+				auto fdir0000 = layer_node->form("0000");
+				load_filter<filter_direction>(fdir0000, fdir0000->record("DATA"), parent);
+			}
+			break;
+		case 0x41524646: // FFRA
+			{
+				auto ffra0005 = layer_node->form("0005");
+				load_filter<filter_fractal>(ffra0005, ffra0005->form("DATA")->record("PARM"), parent);
+			}
+			break;
+		case 0x54474846: // FHGT
+			{
+				auto fhgt0002 = layer_node->form("0002");
+				load_filter<filter_height>(fhgt0002, fhgt0002->record("DATA"), parent);
+			}
+			break;
+		case 0x44485346: // FSHD
+			{
+				auto fshd0000 = layer_node->form("0000");
+				load_filter<filter_shader>(fshd0000, fshd0000->record("DATA"), parent);
+			}
+			break;
+		case 0x504c5346: // FSLP
+			{
+				auto fslp0002 = layer_node->form("0002");
+				load_filter<filter_slope>(fslp0002, fslp0002->record("DATA"), parent);
+			}
+			break;
+		default:
+			{
+				throw std::runtime_error("Unknown layer type: " + layer_node->str_form_type());
+			}
 		}
 	}
 
@@ -82,187 +261,13 @@ struct terrain_iff_reader
 
 		for (uint32_t i = 2; i < layr0003->children.size(); ++i)
 		{
-			auto child = load_layer(layr0003->children[i].get(), layer.get());
-			layer->children.push_back(std::move(child));
+			load_layer(layr0003->children[i].get(), layer.get());
 		}
 
-		return layer;
-	}
-
-	static std::unique_ptr<base_terrain_layer> load_layer(iff_node* layer_node, construction_layer* parent = nullptr)
-	{
-		std::unique_ptr<base_terrain_layer> layer = nullptr;
-	
-		switch (layer_node->form_type)
+		if (parent)
 		{
-		case 0x5259414c: // LAYR
-			{
-				layer = load_construction_layer(layer_node, parent);
-			}
-			break;
-		case 0x4e434341: // ACCN
-			{
-				auto accn0000 = layer_node->form("0000");				
-				layer = load_affector<affector_color_constant>(accn0000, accn0000->record("DATA"), parent);
-			}
-			break;
-		case 0x46524341: // ACRF
-			{
-				auto acrf0001 = layer_node->form("0001");
-				layer = load_affector<affector_color_ramp_fractal>(acrf0001, acrf0001->form("DATA")->record("PARM"), parent);
-			}
-			break;
-		case 0x48524341: // ACRH
-			{
-				auto acrh0000 = layer_node->form("0000");
-				layer = load_affector<affector_color_ramp_height>(acrh0000, acrh0000->record("DATA"), parent);
-			}
-			break;
-		case 0x564e4541: // AENV
-			{
-				auto aenv0000 = layer_node->form("0000");
-				layer = load_affector<affector_environment>(aenv0000, aenv0000->record("DATA"), parent);
-			}
-			break;
-		case 0x43584541: // AEXC
-			{
-				auto aexc0000 = layer_node->form("0000");
-				layer = load_affector<affector_exclude>(aexc0000, aexc0000->record("DATA"), parent);
-			}
-			break;
-		case 0x4e444641: // AFDN
-			{
-				auto afdn0002 = layer_node->form("0002");
-				layer = load_affector<affector_radial_near_constant>(afdn0002, afdn0002->record("DATA"), parent);
-			}
-			break;
-		case 0x46444641: // AFDF
-			{
-				auto afdf0002 = layer_node->form("0002");
-				layer = load_affector<affector_radial_far_constant>(afdf0002, afdf0002->record("DATA"), parent);
-			}
-			break;
-		case 0x43534641: // AFSC
-			{
-				auto afsc0004 = layer_node->form("0004");
-				layer = load_affector<affector_flora_collidable_constant>(afsc0004, afsc0004->record("DATA"), parent);
-			}
-			break;
-		case 0x4e534641: // AFSN
-			{
-				auto afsn0004 = layer_node->form("0004");
-				layer = load_affector<affector_flora_non_collidable_constant>(afsn0004, afsn0004->record("DATA"), parent);
-			}
-			break;
-		case 0x4e434841: // AHCN
-			{
-				auto ahcn0000 = layer_node->form("0000");
-				layer = load_affector<affector_height_constant>(ahcn0000, ahcn0000->record("DATA"), parent);
-			}
-			break;
-		case 0x52464841: // AHFR
-			{
-				auto ahfr0003 = layer_node->form("0003");
-				layer = load_affector<affector_height_fractal>(ahfr0003, ahfr0003->form("DATA")->record("PARM"), parent);
-			}
-			break;
-		case 0x52544841: // AHTR
-			{
-				auto ahtr0004 = layer_node->form("0004");
-				layer = load_affector<affector_height_terrace>(ahtr0004, ahtr0004->record("DATA"), parent);
-			}
-			break;
-		case 0x56495241: // ARIV
-			{
-				auto ariv0005 = layer_node->form("0005");
-
-				layer = load_affector<affector_river>(ariv0005, ariv0005->form("DATA")->record("DATA"), parent);
-				load_height_data<affector_river>(static_cast<affector_river*>(layer.get()), ariv0005->form("DATA")->form("HDTA")->form("0001"));
-			}
-			break;
-		case 0x414f5241: // AROA
-			{
-				auto aroa0005 = layer_node->form("0005");
-
-				layer = load_affector<affector_road>(aroa0005, aroa0005->form("DATA")->record("DATA"), parent);
-				load_height_data<affector_road>(static_cast<affector_road*>(layer.get()), aroa0005->form("DATA")->form("HDTA")->form("0001"));
-			}
-			break;
-		case 0x4e435341: // ASCN
-			{
-				auto ascn0001 = layer_node->form("0001");
-				layer = load_affector<affector_shader_constant>(ascn0001, ascn0001->record("DATA"), parent);
-			}
-			break;
-		case 0x50525341: // ASRP
-			{
-				auto asrp0001 = layer_node->form("0001");
-				layer = load_affector<affector_shader_replace>(asrp0001, asrp0001->record("DATA"), parent);
-			}
-			break;
-		case 0x52494342: // BCIR
-			{
-				auto bcir0002 = layer_node->form("0002");
-				layer = load_boundary<boundary_circle>(bcir0002, bcir0002->record("DATA"), parent);
-			}
-			break;
-		case 0x4e4c5042: // BPLN
-			{
-				auto bpln0001 = layer_node->form("0001");
-				layer = load_boundary<boundary_polyline>(bpln0001, bpln0001->record("DATA"), parent);
-			}
-			break;
-		case 0x4c4f5042: // BPOL
-			{
-				auto bpol0005 = layer_node->form("0005");
-				layer = load_boundary<boundary_polygon>(bpol0005, bpol0005->record("DATA"), parent);
-			}
-			break;
-		case 0x43455242: // BREC
-			{
-				auto brec0003 = layer_node->form("0003");
-				layer = load_boundary<boundary_rectangle>(brec0003, brec0003->record("DATA"), parent);
-			}
-			break;
-		case 0x52494446: // FDIR
-			{
-				auto fdir0000 = layer_node->form("0000");
-				layer = load_filter<filter_direction>(fdir0000, fdir0000->record("DATA"), parent);
-			}
-			break;
-		case 0x41524646: // FFRA
-			{
-				auto ffra0005 = layer_node->form("0005");
-				layer = load_filter<filter_fractal>(ffra0005, ffra0005->form("DATA")->record("PARM"), parent);
-			}
-			break;
-		case 0x54474846: // FHGT
-			{
-				auto fhgt0002 = layer_node->form("0002");
-				layer = load_filter<filter_height>(fhgt0002, fhgt0002->record("DATA"), parent);
-			}
-			break;
-		case 0x44485346: // FSHD
-			{
-				auto fshd0000 = layer_node->form("0000");
-				layer = load_filter<filter_shader>(fshd0000, fshd0000->record("DATA"), parent);
-			}
-			break;
-		case 0x504c5346: // FSLP
-			{
-				auto fslp0002 = layer_node->form("0002");
-				layer = load_filter<filter_slope>(fslp0002, fslp0002->record("DATA"), parent);
-			}
-			break;
-		default:
-			{
-				throw std::runtime_error("Unknown layer type: " + layer_node->str_form_type());
-			}
-		}
-	
-		if (layer)
-		{
-			layer->parent = parent;
+			parent->containers.push_back(std::move(layer));
+			layer = nullptr;
 		}
 
 		return layer;
@@ -280,33 +285,39 @@ struct terrain_iff_reader
 	}
 
 	template<typename T>
-	static std::unique_ptr<T> load_affector(iff_node* layer_node, iff_node* data_node, construction_layer* parent)
+	static T* load_affector(iff_node* layer_node, iff_node* data_node, construction_layer* parent)
 	{
 		auto layer = load_layer<T>(layer_node, data_node);
 
-		parent->affectors.push_back(layer.get());
+		T* result = layer.get();
 
-		return layer;
+		parent->affectors.push_back(std::move(layer));
+
+		return result;
 	}
 
 	template<typename T>
-	static std::unique_ptr<T> load_boundary(iff_node* layer_node, iff_node* data_node, construction_layer* parent)
+	static T* load_boundary(iff_node* layer_node, iff_node* data_node, construction_layer* parent)
 	{
 		auto layer = load_layer<T>(layer_node, data_node);
 
-		parent->boundaries.push_back(layer.get());
+		T* result = layer.get();
 
-		return layer;
+		parent->boundaries.push_back(std::move(layer));
+
+		return result;
 	}
 
 	template<typename T>
-	static std::unique_ptr<T> load_filter(iff_node* layer_node, iff_node* data_node, construction_layer* parent)
+	static T* load_filter(iff_node* layer_node, iff_node* data_node, construction_layer* parent)
 	{
 		auto layer = load_layer<T>(layer_node, data_node);
 
-		parent->filters.push_back(layer.get());
+		T* result = layer.get();
 
-		return layer;
+		parent->filters.push_back(std::move(layer));
+
+		return result;
 	}
 	
 	template<typename T>
@@ -334,7 +345,7 @@ std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuf
 {
 	auto iff_doc = parse_iff(buffer);
 
-	std::unique_ptr<procedural_terrain> pt;
+	auto pt = std::make_unique<procedural_terrain>();
 
 	auto form0014 = iff_doc->form("0014");
 
