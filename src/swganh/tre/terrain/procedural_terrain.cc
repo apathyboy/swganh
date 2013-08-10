@@ -285,6 +285,14 @@ struct terrain_iff_reader
 	}
 };
 
+struct terrain_iff_writer
+{
+	static std::unique_ptr<iff_node> create_root_node()
+	{
+
+	}
+};
+
 std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuffer& buffer)
 {
 	auto iff_doc = parse_iff(buffer);
@@ -305,5 +313,7 @@ std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuf
 
 ByteBuffer swganh::tre::write_procedural_terrain(procedural_terrain& terrain)
 {
+	auto iff_doc = std::make_unique<iff_node>();
+
 	return ByteBuffer();
 }

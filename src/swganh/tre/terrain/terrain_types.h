@@ -87,6 +87,26 @@ namespace detail_terrain {
 		COUNT
 	};
 
+	enum class e_boundary_type : uint32_t
+	{
+		circle = 0,
+		rectangle,
+		polygon,
+		polyline,
+		COUNT
+	};
+
+	enum class e_filter_type : uint32_t
+	{
+		height = 0,
+		fractal,
+		slope,
+		direction,
+		shader,
+		bitmap,
+		COUNT
+	};
+
 	template<typename T>
 	class terrain_group
 	{
@@ -377,8 +397,30 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_color_constant : public base_terrain_layer
+	struct base_affector_layer : public base_terrain_layer
+	{};
+
+	struct base_boundary_layer : public base_terrain_layer
+	{};
+
+	struct base_filter_layer : public base_terrain_layer
+	{};
+
+	struct construction_layer : public base_terrain_layer
 	{
+		bool invert_boundaries;
+		bool invert_filters;
+		uint32_t unknown1;
+		std::string notes;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
+	};
+
+	struct affector_color_constant : public base_affector_layer
+	{
+		static const e_affector_type affector_type = e_affector_type::color_constant;
+
 		operations operation;
 		uint8_t r;
 		uint8_t g;
@@ -388,8 +430,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_color_ramp_fractal : public base_terrain_layer
+	struct affector_color_ramp_fractal : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::color_ramp_fractal;
+
 		uint32_t family_id;
 		operations operation;
 		std::string ramp;
@@ -398,8 +442,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_color_ramp_height : public base_terrain_layer
+	struct affector_color_ramp_height : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::color_ramp_height;
+
 		operations operation;
 		float low_height;
 		float high_height;
@@ -409,8 +455,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_environment : public base_terrain_layer
+	struct affector_environment : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::environment;
+
 		uint32_t family_id;
 		bool feather_clamp_override;
 		float clamp;
@@ -419,14 +467,18 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 	
-	struct affector_exclude : public base_terrain_layer
+	struct affector_exclude : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::exclude;
+
 		void deserialize(ByteBuffer& buffer) {}
 		void serialize(ByteBuffer& buffer) {}
 	};
 
-	struct affector_flora_collidable_constant : public base_terrain_layer
+	struct affector_flora_collidable_constant : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::flora_static_collidable_constant;
+
 		uint32_t adjust;
 		e_flora_operation operation;
 		bool remove_all_radial_flora;
@@ -438,8 +490,10 @@ namespace detail_terrain {
 	};
 
 	// flora constant (collidable/non-collidable/near-radial)
-	struct affector_flora_non_collidable_constant : public base_terrain_layer
+	struct affector_flora_non_collidable_constant : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::flora_static_non_collidable_constant;
+
 		uint32_t adjust;
 		e_flora_operation operation;
 		bool remove_all_radial_flora;
@@ -450,8 +504,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_height_constant : public base_terrain_layer
+	struct affector_height_constant : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::height_constant;
+
 		operations operation;
 		float value;
 
@@ -459,8 +515,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_height_fractal : public base_terrain_layer
+	struct affector_height_fractal : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::height_fractal;
+
 		uint32_t family_id;
 		operations operation;
 		float y_scale;
@@ -470,8 +528,10 @@ namespace detail_terrain {
 	};
 
 	// AHTR
-	struct affector_height_terrace : public base_terrain_layer
+	struct affector_height_terrace : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::height_terrace;
+
 		float terrace_height;
 		float flat_ratio;
 
@@ -480,8 +540,10 @@ namespace detail_terrain {
 	};
 
 	// flora constant (collidable/non-collidable/near-radial)
-	struct affector_radial_far_constant : public base_terrain_layer
+	struct affector_radial_far_constant : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::flora_dynamic_far_constant;
+
 		uint32_t adjust;
 		e_flora_operation operation;
 		bool remove_all_radial_flora;
@@ -492,8 +554,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_radial_near_constant : public base_terrain_layer
+	struct affector_radial_near_constant : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::flora_dynamic_near_constant;
+
 		uint32_t adjust;
 		e_flora_operation operation;
 		bool remove_all_radial_flora;
@@ -504,8 +568,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_river : public base_terrain_layer
+	struct affector_river : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::river;
+
 		struct segment
 		{
 			struct control_point
@@ -540,8 +606,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_road : public base_terrain_layer
+	struct affector_road : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::road;
+
 		struct segment
 		{
 			struct control_point
@@ -572,8 +640,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_shader_constant : public base_terrain_layer
+	struct affector_shader_constant : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::shader_constant;
+
 		uint32_t family_id;
 		bool feather_clamp_override;
 		float clamp;
@@ -582,8 +652,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct affector_shader_replace : public base_terrain_layer
+	struct affector_shader_replace : public base_affector_layer
 	{
+		static const e_affector_type affector_type = e_affector_type::shader_replace;
+
 		uint32_t source_family;
 		uint32_t destination_family;
 		bool feather_clamp_override;
@@ -593,8 +665,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 	
-	struct boundary_circle : public base_terrain_layer
+	struct boundary_circle : public base_boundary_layer
 	{
+		static const e_boundary_type boundary_type = e_boundary_type::circle;
+
 		float center_x;
 		float center_z;
 		float radius;
@@ -605,8 +679,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct boundary_polygon : public base_terrain_layer
+	struct boundary_polygon : public base_boundary_layer
 	{
+		static const e_boundary_type boundary_type = e_boundary_type::polygon;
+
 		std::vector<glm::vec2> control_points;
 		e_feathering_function function;
 		float distance;
@@ -619,8 +695,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct boundary_polyline : public base_terrain_layer
+	struct boundary_polyline : public base_boundary_layer
 	{
+		static const e_boundary_type boundary_type = e_boundary_type::polyline;
+
 		std::vector<glm::vec2> control_points;
 		e_feathering_function function;
 		float distance;
@@ -630,8 +708,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct boundary_rectangle : public base_terrain_layer
+	struct boundary_rectangle : public base_boundary_layer
 	{
+		static const e_boundary_type boundary_type = e_boundary_type::rectangle;
+
 		float x1;
 		float z1;
 		float x2;
@@ -648,19 +728,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct construction_layer : public base_terrain_layer
+	struct filter_direction : public base_filter_layer
 	{
-		bool invert_boundaries;
-		bool invert_filters;
-		uint32_t unknown1;
-		std::string notes;
+		static const e_filter_type filter_type = e_filter_type::direction;
 
-		void deserialize(ByteBuffer& buffer);
-		void serialize(ByteBuffer& buffer);
-	};
-
-	struct filter_direction : public base_terrain_layer
-	{
 		float min_angle;
 		float max_angle;
 		e_feathering_function feathering;
@@ -670,8 +741,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct filter_fractal : public base_terrain_layer
+	struct filter_fractal : public base_filter_layer
 	{
+		static const e_filter_type filter_type = e_filter_type::fractal;
+
 		uint32_t family_id;
 		e_feathering_function feathering;
 		float feather_distance;
@@ -683,8 +756,10 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct filter_height : public base_terrain_layer
+	struct filter_height : public base_filter_layer
 	{
+		static const e_filter_type filter_type = e_filter_type::height;
+
 		float low_height;
 		float high_height;
 		e_feathering_function feathering;
@@ -694,16 +769,20 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct filter_shader : public base_terrain_layer
+	struct filter_shader : public base_filter_layer
 	{
+		static const e_filter_type filter_type = e_filter_type::shader;
+
 		uint32_t family_id;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct filter_slope : public base_terrain_layer
+	struct filter_slope : public base_filter_layer
 	{
+		static const e_filter_type filter_type = e_filter_type::slope;
+
 		float min_angle;
 		float max_angle;
 		e_feathering_function feathering;
