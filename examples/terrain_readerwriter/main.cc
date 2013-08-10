@@ -10,8 +10,8 @@
 #include "swganh/tre/iff/iff.h"
 #include "swganh/tre/terrain/procedural_terrain.h"
 
-swganh::tre::procedural_terrain read_terrain(std::string terrain_filename);
-void write_to_file(std::string filename, swganh::tre::iff_node* head);
+std::unique_ptr<swganh::tre::procedural_terrain> read_terrain(std::string terrain_filename);
+void write_to_file(std::string filename, swganh::ByteBuffer data);
 
 int main(int argc, char *argv[])
 {
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     auto start_time = std::chrono::high_resolution_clock::now();
 
 	auto pt = read_terrain(argv[1]);
-	write_to_file(argv[1], pt.iff_doc());
+	write_to_file(argv[1], write_procedural_terrain(*pt));
 
     auto stop_time = std::chrono::high_resolution_clock::now();
 
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-swganh::tre::procedural_terrain read_terrain(std::string terrain_filename)
+std::unique_ptr<swganh::tre::procedural_terrain> read_terrain(std::string terrain_filename)
 {
 	std::ifstream in(terrain_filename, std::ios::binary);
 
@@ -50,10 +50,10 @@ swganh::tre::procedural_terrain read_terrain(std::string terrain_filename)
 
 	swganh::ByteBuffer data(reinterpret_cast<unsigned char*>(tmp.data()), tmp.size());
 
-	return swganh::tre::procedural_terrain(data);
+	return swganh::tre::read_procedural_terrain(data);
 }
 
-void write_to_file(std::string filename, swganh::tre::iff_node* head)
+void write_to_file(std::string filename, swganh::ByteBuffer data)
 {
 	std::ofstream out(filename + ".alt", std::ios::binary);
 	if (!out.is_open())
@@ -62,12 +62,9 @@ void write_to_file(std::string filename, swganh::tre::iff_node* head)
 		return;
 	}
 
-	swganh::ByteBuffer out_buffer;
-	swganh::tre::write_iff(out_buffer, head);
-
-	if (out_buffer.size() > 0)
+	if (data.size() > 0)
 	{
-		out.write(reinterpret_cast<char*>(out_buffer.data()), out_buffer.size());
+		out.write(reinterpret_cast<char*>(data.data()), data.size());
 	}
 
 	out.close();

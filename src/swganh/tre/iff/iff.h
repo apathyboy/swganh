@@ -39,6 +39,18 @@ namespace tre {
 	std::unique_ptr<iff_node> parse_iff(ByteBuffer& resource, iff_node* parent = nullptr);
 	void write_iff(ByteBuffer& resource, iff_node* node);
 
+	class base_iff_document
+	{
+	public:
+		explicit base_iff_document(ByteBuffer& resource);
+		virtual ~base_iff_document() {}
+
+
+	
+	private:
+		std::unique_ptr<iff_node> root_;
+	};
+
 	class iff_handler_registry
 	{
 	public:

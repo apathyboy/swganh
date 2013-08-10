@@ -88,6 +88,92 @@ namespace detail_terrain {
 		COUNT
 	};
 
+	template<typename T>
+	class terrain_group
+	{
+	public:
+		typedef T family_type;
+
+		family_type* add_family(std::string name)
+		{
+			family_type* family = nullptr;
+
+			auto new_family = std::make_unique<family_type>();
+			new_family->family_name = name;
+			new_family->family_id = next_family_id();
+
+			family = new_family.get();
+			families_.push_back(std::move(new_family));
+
+			return family;
+		}
+
+		void add_family(std::unique_ptr<family_type> family)
+		{
+			family_type* existing_family = find_family_by_id(family->family_id);
+			if (existing_family)
+			{
+				throw std::runtime_error("family id already exists (" + existing_family->family_id + std::string(") ") + existing_family->family_name);
+			}
+
+			families_.push_back(std::move(family));
+		}
+
+		void remove_family(uint32_t id)
+		{
+			auto remove_iter = std::remove_if(families_.begin(), families_.end(), [id](const std::unique_ptr<T>& family)
+			{
+				return family->id == id;
+			});
+
+			families_.erase(remove_iter, families_.end());
+		}
+
+		family_type* find_family_by_id(uint32_t id)
+		{
+			for (const auto& family : families_)
+			{
+				if (family->family_id == id)
+				{
+					return family.get();
+				}
+			}
+
+			return nullptr;
+		}
+
+		family_type* find_family_by_name(const std::string& name)
+		{
+			for (const auto& family : families_)
+			{
+				if (family->family_name.compare(name) == 0)
+				{
+					return family.get();
+				}
+			}
+
+			return nullptr;
+		}
+
+	private:
+		uint32_t next_family_id() const
+		{
+			uint32_t last_id = 0;
+
+			for (const auto& family : families_)
+			{
+				if (family->family_id > last_id)
+				{
+					last_id = family->family_id;
+				}
+			}
+
+			return ++last_id;
+		}
+
+		std::vector<std::unique_ptr<family_type>> families_;
+	};
+
 	struct base_terrain_type
 	{
 		base_terrain_type()
@@ -207,92 +293,6 @@ namespace detail_terrain {
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
-	};
-
-	template<typename T>
-	class terrain_group
-	{
-	public:
-		typedef T family_type;
-
-		family_type* add_family(std::string name)
-		{
-			family_type* family = nullptr;
-
-			auto new_family = std::make_unique<family_type>();
-			new_family->family_name = name;
-			new_family->family_id = next_family_id();
-
-			family = new_family.get();
-			families_.push_back(std::move(new_family));
-
-			return family;
-		}
-
-		void add_family(std::unique_ptr<family_type> family)
-		{
-			family_type* existing_family = find_family_by_id(family->family_id);
-			if (existing_family)
-			{
-				throw std::runtime_error("family id already exists (" + existing_family->family_id + std::string(") ") + existing_family->family_name);
-			}
-
-			families_.push_back(std::move(family));
-		}
-
-		void remove_family(uint32_t id)
-		{
-			auto remove_iter = std::remove_if(families_.begin(), families_.end(), [id](const std::unique_ptr<T>& family)
-			{
-				return family->id == id;
-			});
-
-			families_.erase(remove_iter, families_.end());
-		}
-
-		family_type* find_family_by_id(uint32_t id)
-		{
-			for (const auto& family : families_)
-			{
-				if (family->family_id == id)
-				{
-					return family.get();
-				}
-			}
-
-			return nullptr;
-		}
-
-		family_type* find_family_by_name(const std::string& name)
-		{
-			for (const auto& family : families_)
-			{
-				if (family->family_name.compare(name) == 0)
-				{
-					return family.get();
-				}
-			}
-
-			return nullptr;
-		}
-
-	private:
-		uint32_t next_family_id() const
-		{
-			uint32_t last_id = 0;
-
-			for (const auto& family : families_)
-			{
-				if (family->family_id > last_id)
-				{
-					last_id = family->family_id;
-				}
-			}
-
-			return ++last_id;
-		}
-
-		std::vector<std::unique_ptr<family_type>> families_;
 	};
 
 	struct flora_family : public base_terrain_type
