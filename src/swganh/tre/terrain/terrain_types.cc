@@ -356,22 +356,6 @@ void base_terrain_layer::serialize(ByteBuffer& buffer)
 	buffer.write(uint8_t(0));
 }
 
-void default_layer::deserialize(ByteBuffer& buffer)
-{
-	if (buffer.size() > 0)
-	{
-		data = std::vector<uint8_t>(buffer.data(), buffer.data() + buffer.size());
-	}
-}
-
-void default_layer::serialize(ByteBuffer& buffer)
-{
-	if (data.size() > 0)
-	{
-		buffer.write(data.data(), data.size());
-	}
-}
-
 void affector_color_constant::deserialize(ByteBuffer& buffer)
 {
 	operation = static_cast<operations>(buffer.read<uint32_t>());
@@ -596,7 +580,7 @@ void affector_river::serialize(ByteBuffer& buffer)
 	buffer.write(uint8_t(0));
 }
 
-void affector_river::river_segment::deserialize(ByteBuffer& buffer)
+void affector_river::segment::deserialize(ByteBuffer& buffer)
 {
 	while (buffer.read_position() < buffer.size())
 	{
@@ -609,7 +593,7 @@ void affector_river::river_segment::deserialize(ByteBuffer& buffer)
 	}
 }
 
-void affector_river::river_segment::serialize(ByteBuffer& buffer)
+void affector_river::segment::serialize(ByteBuffer& buffer)
 {
 	for (const auto& point : control_points)
 	{
@@ -662,7 +646,7 @@ void affector_road::serialize(ByteBuffer& buffer)
 	buffer.write(shader_feathering_distance);
 }
 
-void affector_road::road_segment::deserialize(ByteBuffer& buffer)
+void affector_road::segment::deserialize(ByteBuffer& buffer)
 {
 	while (buffer.read_position() < buffer.size())
 	{
@@ -675,7 +659,7 @@ void affector_road::road_segment::deserialize(ByteBuffer& buffer)
 	}
 }
 
-void affector_road::road_segment::serialize(ByteBuffer& buffer)
+void affector_road::segment::serialize(ByteBuffer& buffer)
 {
 	for (const auto& point : control_points)
 	{

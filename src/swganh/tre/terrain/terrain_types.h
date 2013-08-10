@@ -8,7 +8,6 @@
 #include <glm/glm.hpp>
 
 #include "swganh/byte_buffer.h"
-#include "swganh/tre/iff/iff.h"
 
 namespace swganh {
 namespace tre {
@@ -173,39 +172,8 @@ namespace detail_terrain {
 
 		std::vector<std::unique_ptr<family_type>> families_;
 	};
-
-	struct base_terrain_type
-	{
-		base_terrain_type()
-			: node(nullptr) {}
-
-		virtual ~base_terrain_type() {}
-
-		virtual void deserialize(ByteBuffer& buffer) = 0;
-		virtual void serialize(ByteBuffer& buffer) = 0;
-
-		void load(iff_node* input)
-		{
-			node = input;
-			deserialize(node->data);
-		}
-
-		void save()
-		{
-			if (node)
-			{
-				node->data.clear();
-				serialize(node->data);
-			}
-		}
-
-		bool is_loaded() const { return node != nullptr; }
-
-		iff_node* node;
-	};
-
-
-	struct header : public base_terrain_type
+	
+	struct header
 	{
 		std::string filename;
 		float map_width;
@@ -245,7 +213,7 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct footer : public base_terrain_type
+	struct footer
 	{
 		float map_size;
 		float chunk_width;
@@ -256,7 +224,7 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct smap : public base_terrain_type
+	struct smap
 	{
 		std::vector<uint8_t> data;
 
@@ -264,7 +232,7 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct wmap : public base_terrain_type
+	struct wmap
 	{
 		std::vector<uint8_t> data;
 
@@ -272,7 +240,7 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct shader_family : public base_terrain_type
+	struct shader_family
 	{
 		struct shader_child
 		{
@@ -295,7 +263,7 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct flora_family : public base_terrain_type
+	struct flora_family
 	{
 		struct flora_child
 		{
@@ -324,7 +292,7 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct radial_family : public base_terrain_type
+	struct radial_family
 	{
 		struct radial_child
 		{
@@ -353,7 +321,7 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct environment_family : public base_terrain_type
+	struct environment_family
 	{
 		uint32_t family_id;
 		std::string family_name;
@@ -366,9 +334,9 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct fractal_family : public base_terrain_type
+	struct fractal_family
 	{
-		struct fractal : public base_terrain_type
+		struct fractal
 		{
 			uint32_t seed;
 			bool use_bias;
@@ -397,21 +365,13 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct base_terrain_layer : public base_terrain_type
+	struct base_terrain_layer
 	{
 		bool enabled;
 		std::string name;
 
 		base_terrain_layer* parent;
 		std::vector<std::unique_ptr<base_terrain_layer>> children;
-
-		void deserialize(ByteBuffer& buffer);
-		void serialize(ByteBuffer& buffer);
-	};
-
-	struct default_layer : public base_terrain_layer
-	{
-		std::vector<uint8_t> data;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
@@ -546,7 +506,7 @@ namespace detail_terrain {
 
 	struct affector_river : public base_terrain_layer
 	{
-		struct river_segment : public base_terrain_type
+		struct segment
 		{
 			struct control_point
 			{
@@ -561,7 +521,7 @@ namespace detail_terrain {
 			void serialize(ByteBuffer& buffer);
 		};
 
-		std::vector<std::unique_ptr<river_segment>> segments;
+		std::vector<std::unique_ptr<segment>> segments;
 		std::vector<glm::vec2> control_points;
 		float feathering_distance;
 		e_feathering_function feathering_function;
@@ -582,7 +542,7 @@ namespace detail_terrain {
 
 	struct affector_road : public base_terrain_layer
 	{
-		struct road_segment : public base_terrain_type
+		struct segment
 		{
 			struct control_point
 			{
@@ -597,7 +557,7 @@ namespace detail_terrain {
 			void serialize(ByteBuffer& buffer);
 		};
 
-		std::vector<std::unique_ptr<road_segment>> segments;
+		std::vector<std::unique_ptr<segment>> segments;
 		std::vector<glm::vec2> control_points;
 		float width;
 		uint32_t shader;
