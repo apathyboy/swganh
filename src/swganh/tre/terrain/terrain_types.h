@@ -413,6 +413,11 @@ namespace detail_terrain {
 		uint32_t unknown1;
 		std::string notes;
 
+		std::vector<base_affector_layer*> affectors;
+		std::vector<base_boundary_layer*> boundaries;
+		std::vector<base_filter_layer*> filters;
+		std::vector<construction_layer*> containers;
+
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
 	};
