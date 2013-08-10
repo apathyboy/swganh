@@ -343,13 +343,13 @@ void fractal_family::fractal::serialize(ByteBuffer& buffer)
 	buffer.write(uint32_t(rule));
 }
 
-void layer_header::deserialize(ByteBuffer& buffer)
+void base_terrain_layer::deserialize(ByteBuffer& buffer)
 {
 	enabled = buffer.read<uint32_t>() == 1 ? true : false;
 	name = buffer.read<std::string>(false, true);
 }
 
-void layer_header::serialize(ByteBuffer& buffer)
+void base_terrain_layer::serialize(ByteBuffer& buffer)
 {
 	buffer.write<uint32_t>(enabled ? 1 : 0);
 	buffer.write(reinterpret_cast<const unsigned char*>(name.c_str()), name.size());

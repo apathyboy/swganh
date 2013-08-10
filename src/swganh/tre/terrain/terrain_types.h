@@ -397,21 +397,16 @@ namespace detail_terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct layer_header : public base_terrain_type
+	struct base_terrain_layer : public base_terrain_type
 	{
 		bool enabled;
 		std::string name;
 
-		void deserialize(ByteBuffer& buffer);
-		void serialize(ByteBuffer& buffer);
-	};
-
-	struct base_terrain_layer : public base_terrain_type
-	{
-		std::unique_ptr<layer_header> header;
-
 		base_terrain_layer* parent;
 		std::vector<std::unique_ptr<base_terrain_layer>> children;
+
+		void deserialize(ByteBuffer& buffer);
+		void serialize(ByteBuffer& buffer);
 	};
 
 	struct default_layer : public base_terrain_layer
