@@ -416,7 +416,7 @@ namespace detail_terrain {
 		std::vector<base_affector_layer*> affectors;
 		std::vector<base_boundary_layer*> boundaries;
 		std::vector<base_filter_layer*> filters;
-		std::vector<construction_layer*> containers;
+		std::vector<std::unique_ptr<construction_layer>> containers;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);

@@ -74,6 +74,21 @@ struct terrain_iff_reader
 		}
 	}
 
+	static std::unique_ptr<construction_layer> load_construction_layer(iff_node* layer_node, construction_layer* parent = nullptr)
+	{
+		auto layr0003 = layer_node->form("0003");
+
+		auto layer = load_layer<construction_layer>(layr0003, layr0003->record("ADTA"));
+
+		for (uint32_t i = 2; i < layr0003->children.size(); ++i)
+		{
+			auto child = load_layer(layr0003->children[i].get(), layer.get());
+			layer->children.push_back(std::move(child));
+		}
+
+		return layer;
+	}
+
 	static std::unique_ptr<base_terrain_layer> load_layer(iff_node* layer_node, construction_layer* parent = nullptr)
 	{
 		std::unique_ptr<base_terrain_layer> layer = nullptr;
@@ -82,17 +97,7 @@ struct terrain_iff_reader
 		{
 		case 0x5259414c: // LAYR
 			{
-				auto layr0003 = layer_node->form("0003");
-
-				layer = load_layer<construction_layer>(layr0003, layr0003->record("ADTA"));
-
-				for (uint32_t i = 2; i < layr0003->children.size(); ++i)
-				{
-					auto child = load_layer(layr0003->children[i].get(), static_cast<construction_layer*>(layer.get()));
-					static_cast<construction_layer*>(layer.get())->children.push_back(std::move(child));
-				}
-
-				if (parent)	parent->containers.push_back(static_cast<construction_layer*>(layer.get()));
+				layer = load_construction_layer(layer_node, parent);
 			}
 			break;
 		case 0x4e434341: // ACCN
