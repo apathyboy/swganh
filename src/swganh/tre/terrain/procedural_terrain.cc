@@ -20,11 +20,11 @@ struct terrain_iff_helper
 	{
 		auto tgen0000 = tgen->form("0000");
 	
-		load_shader_group(terrain.shader_group_, tgen0000->form("SGRP"));
-		//load_flora_group(tgen0000->form("FGRP"));
-		//load_radial_group(tgen0000->form("RGRP"));
-		//load_environment_group(tgen0000->form("EGRP"));
-		//load_fractal_group(tgen0000->form("MGRP"));
+		load_group(terrain.shader_group_, tgen0000->form("SGRP")->form("0006"));
+		load_group(terrain.flora_group_, tgen0000->form("FGRP")->form("0008"));
+		load_group(terrain.radial_group_, tgen0000->form("RGRP")->form("0003"));
+		load_group(terrain.environment_group_, tgen0000->form("EGRP")->form("0002"));
+		load_group(terrain.fractal_group_, tgen0000->form("MGRP")->form("0000"));
 		//load_layers(tgen0000->form("LYRS"));
 	}
 	
@@ -35,64 +35,35 @@ struct terrain_iff_helper
 		terrain.footer.deserialize(footer_data->data);
 	}
 
-	static void load_shader_group(terrain_group<shader_family>& shader_group, iff_node* sgrp)
+
+	template<typename T>
+	static void load_group(terrain_group<T>& group, iff_node* group_node)
 	{
-		auto sgrp0006 = sgrp->form("0006");
-	
-		for (const auto& child : sgrp0006->children)
+		for (const auto& child : group_node->children)
 		{
-			auto family = std::make_unique<shader_family>();
+			auto family = std::make_unique<T>();
 			family->deserialize(child->data);
 
-			shader_group.add_family(std::move(family));
+			group.add_family(std::move(family));
 		}
 	}
 
-	//void load_flora_group(iff_node* fgrp)
-	//{
-	//	auto fgrp0008 = fgrp->form("0008");
-	//
-	//	for (const auto& child : fgrp0008->children)
-	//	{
-	//		flora_group.add_family(make_node_data<flora_family>(child.get()));
-	//	}
-	//}
-
-	//void load_radial_group(iff_node* rgrp)
-	//{
-	//	auto rgrp0003 = rgrp->form("0003");
-	//
-	//	for (const auto& child : rgrp0003->children)
-	//	{
-	//		radial_group.add_family(make_node_data<radial_family>(child.get()));
-	//	}
-	//}
-
-	//void load_environment_group(iff_node* egrp)
-	//{
-	//	auto egrp0002 = egrp->form("0002");
-	//
-	//	for (const auto& child : egrp0002->children)
-	//	{
-	//		environment_group.add_family(make_node_data<environment_family>(child->record("DATA")));
-	//	}
-	//}
-
-	//void load_fractal_group(iff_node* mgrp)
-	//{
-	//	auto mgrp0000 = mgrp->form("0000");
-	//
-	//	for (const auto& child : mgrp0000->children)
-	//	{
-	//		auto data = child->record("DATA");
-	//		auto fractal = child->form("MFRC")->form("0001")->record("DATA");
-	//
-	//		auto fractal_fam = make_node_data<fractal_family>(data);
-	//		fractal_fam->fractal_data = make_node_data<fractal_family::fractal>(fractal);
-	//
-	//		fractal_group.add_family(std::move(fractal_fam));
-	//	}
-	//}
+	template<>
+	static void load_group(terrain_group<fractal_family>& group, iff_node* group_node)
+	{
+		for (const auto& child : group_node->children)
+		{
+			auto data = child->record("DATA");
+			auto fractal = child->form("MFRC")->form("0001")->record("DATA");
+	
+			auto fractal_fam = std::make_unique<fractal_family>();
+			fractal_fam->deserialize(data->data);
+			fractal_fam->fractal_data = std::make_unique<fractal_family::fractal>();
+			fractal_fam->fractal_data->deserialize(fractal->data);
+	
+			group.add_family(std::move(fractal_fam));
+		}	
+	}
 
 	//void load_layers(iff_node* lyrs)
 	//{
