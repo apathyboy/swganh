@@ -17,6 +17,9 @@ namespace tre {
 		detail_terrain::header header;
 		detail_terrain::footer footer;
 
+		detail_terrain::wmap water_map;
+		detail_terrain::smap slope_map;
+
 		detail_terrain::terrain_group<detail_terrain::shader_family> shader_group;
 		detail_terrain::terrain_group<detail_terrain::flora_family> flora_group;
 		detail_terrain::terrain_group<detail_terrain::radial_family> radial_group;

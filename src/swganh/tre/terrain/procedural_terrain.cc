@@ -31,9 +31,9 @@ struct terrain_iff_reader
 
 	static void load_footer(procedural_terrain& terrain, iff_node* form0001)
 	{
-		auto footer_data = form0001->record("DATA");
-
-		terrain.footer.deserialize(footer_data->data);
+		terrain.footer.deserialize(form0001->record("DATA")->data);
+		terrain.water_map.deserialize(form0001->record("WMAP")->data);
+		terrain.slope_map.deserialize(form0001->record("SMAP")->data);
 	}
 
 	template<typename T>
@@ -343,6 +343,25 @@ struct terrain_iff_writer
 
 		parent->children.push_back(std::move(data_record));
 	}
+
+	static void store_footer(procedural_terrain& terrain, iff_node* parent)
+	{
+		auto form0001 = swganh::tre::make_form("0001", parent);
+
+		auto data_record = swganh::tre::make_record("DATA", form0001.get());
+		auto wmap_record = swganh::tre::make_record("WMAP", form0001.get());
+		auto smap_record = swganh::tre::make_record("SMAP", form0001.get());
+
+		terrain.footer.serialize(data_record->data);
+		terrain.water_map.serialize(wmap_record->data);
+		terrain.slope_map.serialize(smap_record->data);
+
+		form0001->children.push_back(std::move(data_record));
+		form0001->children.push_back(std::move(wmap_record));
+		form0001->children.push_back(std::move(smap_record));
+
+		parent->children.push_back(std::move(form0001));
+	}
 };
 
 std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuffer& buffer)
@@ -369,6 +388,7 @@ ByteBuffer swganh::tre::write_procedural_terrain(procedural_terrain& terrain)
 	auto form0014 = iff_doc->form("0014");
 
 	terrain_iff_writer::store_header(terrain, form0014);
+	terrain_iff_writer::store_footer(terrain, form0014);
 
 	swganh::ByteBuffer out_buffer;
 
