@@ -20,7 +20,7 @@ struct terrain_iff_reader
 	static void load_terrain_data(procedural_terrain& terrain, iff_node* tgen)
 	{
 		auto tgen0000 = tgen->form("0000");
-	
+
 		load_group(terrain.shader_group, tgen0000->form("SGRP")->form("0006"));
 		load_group(terrain.flora_group, tgen0000->form("FGRP")->form("0008"));
 		load_group(terrain.radial_group, tgen0000->form("RGRP")->form("0003"));
@@ -28,11 +28,11 @@ struct terrain_iff_reader
 		load_group(terrain.fractal_group, tgen0000->form("MGRP")->form("0000"));
 		load_layers(terrain.layers, tgen0000->form("LYRS"));
 	}
-	
+
 	static void load_footer(procedural_terrain& terrain, iff_node* form0001)
 	{
 		auto footer_data = form0001->record("DATA");
-	
+
 		terrain.footer.deserialize(footer_data->data);
 	}
 
@@ -67,17 +67,17 @@ struct terrain_iff_reader
 		{
 			auto data = child->record("DATA");
 			auto fractal = child->form("MFRC")->form("0001")->record("DATA");
-	
+
 			auto fractal_fam = std::make_unique<fractal_family>();
 			fractal_fam->deserialize(data->data);
 			fractal_fam->fractal_data = std::make_unique<fractal_family::fractal>();
 			fractal_fam->fractal_data->deserialize(fractal->data);
-	
+
 			group.add_family(std::move(fractal_fam));
-		}	
+		}
 	}
 
-	static void load_layers(std::vector<std::unique_ptr<construction_layer>>& layers, iff_node* lyrs)
+	static void load_layers(std::vector < std::unique_ptr < construction_layer >> &layers, iff_node* lyrs)
 	{
 		for (const auto& child : lyrs->children)
 		{
@@ -319,7 +319,7 @@ struct terrain_iff_reader
 
 		return result;
 	}
-	
+
 	template<typename T>
 	static void load_height_data(T* layer, iff_node* height_data_node)
 	{
@@ -335,9 +335,13 @@ struct terrain_iff_reader
 
 struct terrain_iff_writer
 {
-	static std::unique_ptr<iff_node> create_root_node()
+	static void store_header(procedural_terrain& terrain, iff_node* parent)
 	{
+		auto data_record = swganh::tre::make_record("DATA", parent);
 
+		terrain.header.serialize(data_record->data);
+
+		parent->children.push_back(std::move(data_record));
 	}
 };
 
@@ -361,7 +365,14 @@ std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuf
 
 ByteBuffer swganh::tre::write_procedural_terrain(procedural_terrain& terrain)
 {
-	auto iff_doc = std::make_unique<iff_node>();
+	auto iff_doc = swganh::tre::make_version_form("PTAT", "0014");
+	auto form0014 = iff_doc->form("0014");
 
-	return ByteBuffer();
+	terrain_iff_writer::store_header(terrain, form0014);
+
+	swganh::ByteBuffer out_buffer;
+
+	write_iff(out_buffer, iff_doc.get());
+
+	return out_buffer;
 }
