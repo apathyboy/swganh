@@ -10,11 +10,11 @@
 using namespace swganh::tre;
 
 
-std::unique_ptr<iff_node> swganh::tre::make_form(char name[4], char form_type[4], iff_node* parent)
+std::unique_ptr<iff_node> swganh::tre::make_form(char form_type[4], iff_node* parent)
 {
 	auto new_form = std::make_unique<iff_node>();
 
-	new_form->name = *reinterpret_cast<uint32_t*>(name);
+	new_form->name = *reinterpret_cast<uint32_t*>("FORM");
 	new_form->form_type = *reinterpret_cast<uint32_t*>(form_type);
 	new_form->parent = parent;
 
@@ -23,8 +23,8 @@ std::unique_ptr<iff_node> swganh::tre::make_form(char name[4], char form_type[4]
 
 std::unique_ptr<iff_node> swganh::tre::make_version_form(char form_type[4], char form_version[4], iff_node* parent)
 {
-	auto type_form = make_form("FORM", form_type, parent);
-	auto version_form = make_form("FORM", form_version, type_form.get());
+	auto type_form = make_form(form_type, parent);
+	auto version_form = make_form(form_version, type_form.get());
 	
 	type_form->children.push_back(std::move(version_form));
 
