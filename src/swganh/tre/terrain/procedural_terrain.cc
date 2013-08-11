@@ -266,6 +266,7 @@ struct terrain_iff_reader
 
 		if (parent)
 		{
+			parent->children.push_back(std::make_pair(layer.get(), swganh::tre::detail_terrain::e_layer_type::construction));
 			parent->containers.push_back(std::move(layer));
 			layer = nullptr;
 		}
@@ -291,6 +292,7 @@ struct terrain_iff_reader
 
 		T* result = layer.get();
 
+		parent->children.push_back(std::make_pair(layer.get(), swganh::tre::detail_terrain::e_layer_type::affector));
 		parent->affectors.push_back(std::move(layer));
 
 		return result;
@@ -303,6 +305,7 @@ struct terrain_iff_reader
 
 		T* result = layer.get();
 
+		parent->children.push_back(std::make_pair(layer.get(), swganh::tre::detail_terrain::e_layer_type::boundary));
 		parent->boundaries.push_back(std::move(layer));
 
 		return result;
@@ -315,6 +318,7 @@ struct terrain_iff_reader
 
 		T* result = layer.get();
 
+		parent->children.push_back(std::make_pair(layer.get(), swganh::tre::detail_terrain::e_layer_type::filter));
 		parent->filters.push_back(std::move(layer));
 
 		return result;
@@ -356,7 +360,7 @@ struct terrain_iff_writer
 		store_group(terrain.environment_group, "EGRP", "0002", "EFAM", tgen0000);
 		store_group(terrain.fractal_group, "MGRP", "0000", "MFAM", tgen0000);
 
-		//load_layers(terrain.layers, tgen0000->form("LYRS"));
+		store_layers(terrain.layers, tgen0000);
 
 		parent->children.push_back(std::move(tgen));
 	}
@@ -443,6 +447,295 @@ struct terrain_iff_writer
 		}
 
 		parent->children.push_back(std::move(group_form));
+	}
+
+	static void store_layers(std::vector<std::unique_ptr<construction_layer>>& layers, iff_node* parent)
+	{
+		auto lyrs_form = swganh::tre::make_form("LYRS", parent);
+
+		for (const auto& layer : layers)
+		{
+			store_construction_layer(layer.get(), lyrs_form.get());
+		}
+
+		parent->children.push_back(std::move(lyrs_form));
+	}
+	
+	static void store_construction_layer(construction_layer* layer, iff_node* parent)
+	{
+		auto layr = swganh::tre::make_version_form("LAYR", "0003");
+		auto layr0003 = layr->form("0003");
+		auto data_record = swganh::tre::make_record("ADTA", layr0003);
+
+		store_layer_header(layer, layr0003);
+		layer->serialize(data_record->data);
+
+		layr0003->children.push_back(std::move(data_record));
+
+		for (auto child : layer->children)
+		{
+			switch (child.second)
+			{
+			case swganh::tre::detail_terrain::e_layer_type::affector:
+				{
+					store_affector(static_cast<base_affector_layer*>(child.first), layr0003);
+				}
+				break;
+			case swganh::tre::detail_terrain::e_layer_type::boundary:
+				{
+					store_boundary(static_cast<base_boundary_layer*>(child.first), layr0003);
+				}
+				break;
+			case swganh::tre::detail_terrain::e_layer_type::construction:
+				{
+					store_construction_layer(static_cast<construction_layer*>(child.first), layr0003);
+				}
+				break;
+			case swganh::tre::detail_terrain::e_layer_type::filter:
+				{
+					store_filter(static_cast<base_filter_layer*>(child.first), layr0003);
+				}
+				break;
+			default:
+				{
+					throw std::runtime_error("Invalid layer type detected");
+				}
+			}
+		}
+
+		parent->children.push_back(std::move(layr));
+	}
+
+	static void store_affector(base_affector_layer* affector, iff_node* parent)
+	{
+		switch (affector->get_type())
+		{
+		case swganh::tre::detail_terrain::e_affector_type::color_constant:
+			{
+				store_layer(static_cast<affector_color_constant*>(affector), "ACCN", "0000", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::color_ramp_fractal:
+			{
+				store_parm_layer(static_cast<affector_color_ramp_fractal*>(affector), "ACRF", "0001", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::color_ramp_height:
+			{
+				store_layer(static_cast<affector_color_ramp_height*>(affector), "ACRH", "0000", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::environment:
+			{
+				store_layer(static_cast<affector_environment*>(affector), "AENV", "0000", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::exclude:
+			{
+				store_layer(static_cast<affector_exclude*>(affector), "AEXC", "0000", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::flora_dynamic_near_constant:
+			{
+				store_layer(static_cast<affector_radial_near_constant*>(affector), "AFDN", "0002", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::flora_dynamic_far_constant:
+			{
+				store_layer(static_cast<affector_radial_far_constant*>(affector), "AFDF", "0002", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::flora_static_collidable_constant:
+			{
+				store_layer(static_cast<affector_flora_collidable_constant*>(affector), "AFSC", "0004", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::flora_static_non_collidable_constant:
+			{
+				store_layer(static_cast<affector_flora_non_collidable_constant*>(affector), "AFSN", "0004", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::height_constant:
+			{
+				store_layer(static_cast<affector_height_constant*>(affector), "AHCN", "0000", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::height_fractal:
+			{
+				store_parm_layer(static_cast<affector_height_fractal*>(affector), "AHFR", "0003", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::height_terrace:
+			{
+				store_layer(static_cast<affector_height_terrace*>(affector), "AHTR", "0004", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::river:
+			{
+				store_segment_layer(static_cast<affector_river*>(affector), "ARIV", "0005", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::road:
+			{
+				store_segment_layer(static_cast<affector_road*>(affector), "AROA", "0005", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::shader_constant:
+			{
+				store_layer(static_cast<affector_shader_constant*>(affector), "ASCN", "0001", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_affector_type::shader_replace:
+			{
+				store_layer(static_cast<affector_shader_replace*>(affector), "ASRP", "0001", parent);
+			}
+			break;
+		default:
+			{
+				throw std::runtime_error("Invalid affector type detected");
+			}
+		}
+	}
+
+	static void store_boundary(base_boundary_layer* boundary, iff_node* parent)
+	{
+		switch (boundary->get_type())
+		{
+		case swganh::tre::detail_terrain::e_boundary_type::circle:
+			{
+				store_layer(static_cast<boundary_circle*>(boundary), "BCIR", "0002", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_boundary_type::polyline:
+			{
+				store_layer(static_cast<boundary_polyline*>(boundary), "BPLN", "0001", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_boundary_type::polygon:
+			{
+				store_layer(static_cast<boundary_polygon*>(boundary), "BPOL", "0005", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_boundary_type::rectangle:
+			{
+				store_layer(static_cast<boundary_rectangle*>(boundary), "BREC", "0003", parent);
+			}
+			break;
+		default:
+			{
+				throw std::runtime_error("Invalid boundary type detected");
+			}
+		}
+	}
+
+	static void store_filter(base_filter_layer* filter, iff_node* parent)
+	{
+		switch (filter->get_type())
+		{
+		case swganh::tre::detail_terrain::e_filter_type::direction:
+			{
+				store_layer(static_cast<filter_direction*>(filter), "FDIR", "0000", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_filter_type::fractal:
+			{
+				store_parm_layer(static_cast<filter_fractal*>(filter), "FFRA", "0005", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_filter_type::height:
+			{
+				store_layer(static_cast<filter_height*>(filter), "FHGT", "0002", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_filter_type::shader:
+			{
+				store_layer(static_cast<filter_shader*>(filter), "FSHD", "0000", parent);
+			}
+			break;
+		case swganh::tre::detail_terrain::e_filter_type::slope:
+			{
+				store_layer(static_cast<filter_slope*>(filter), "FSLP", "0002", parent);
+			}
+			break;
+		default:
+			{
+				throw std::runtime_error("Invalid filter type detected");
+			}
+		}
+	}
+
+	template<typename T>
+	static void store_segment_layer(T* layer, char form_type[4], char form_version[4], iff_node* parent)
+	{
+		auto layer_form = swganh::tre::make_version_form(form_type, form_version);
+		auto version_form = layer_form->form(form_version);
+		auto data_form = swganh::tre::make_form("DATA", version_form);
+		auto data_record = swganh::tre::make_record("DATA", data_form.get());
+
+		auto height_form = swganh::tre::make_version_form("HDTA", "0001");
+
+		store_layer_header(layer, version_form);
+		layer->serialize(data_record->data);
+
+		for (const auto& segment : layer->segments)
+		{
+			auto segment_record = swganh::tre::make_record("SGMT", height_form->form("0001"));
+			segment->serialize(segment_record->data);
+
+			height_form->form("0001")->children.push_back(std::move(segment_record));
+		}
+
+		data_form->children.push_back(std::move(height_form));
+		data_form->children.push_back(std::move(data_record));
+
+		version_form->children.push_back(std::move(data_form));
+
+		parent->children.push_back(std::move(layer_form));
+	}
+
+	template<typename T>
+	static void store_layer(T* layer, char form_type[4], char form_version[4], iff_node* parent)
+	{
+		auto layer_form = swganh::tre::make_version_form(form_type, form_version);
+		auto version_form = layer_form->form(form_version);
+		auto data_record = swganh::tre::make_record("DATA", version_form);
+		
+		store_layer_header(layer, version_form);
+		layer->serialize(data_record->data);
+
+		version_form->children.push_back(std::move(data_record));
+
+		parent->children.push_back(std::move(layer_form));
+	}
+
+	template<typename T>
+	static void store_parm_layer(T* layer, char form_type[4], char form_version[4], iff_node* parent)
+	{
+		auto layer_form = swganh::tre::make_version_form(form_type, form_version);
+		auto version_form = layer_form->form(form_version);
+		auto data_form = swganh::tre::make_form("DATA", version_form);
+		auto data_record = swganh::tre::make_record("PARM", data_form.get());
+
+		store_layer_header(layer, version_form);
+		layer->serialize(data_record->data);
+
+		data_form->children.push_back(std::move(data_record));
+		version_form->children.push_back(std::move(data_form));
+
+		parent->children.push_back(std::move(layer_form));
+	}
+
+	static void store_layer_header(base_terrain_layer* layer, iff_node* parent)
+	{
+		auto ihdr = swganh::tre::make_version_form("IHDR", "0001", parent);
+		auto ihdr0001 = ihdr->form("0001");
+		auto data = swganh::tre::make_record("DATA", ihdr0001);
+
+		layer->serialize(data->data);
+
+		ihdr0001->children.push_back(std::move(data));
+
+		parent->children.push_back(std::move(ihdr));
 	}
 };
 

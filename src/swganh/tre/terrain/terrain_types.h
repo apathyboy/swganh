@@ -107,6 +107,15 @@ namespace detail_terrain {
 		COUNT
 	};
 
+	enum class e_layer_type : uint32_t
+	{
+		construction = 0,
+		affector,
+		boundary,
+		filter,
+		COUNT
+	};
+
 	template<typename T>
 	class terrain_group
 	{
@@ -397,13 +406,19 @@ namespace detail_terrain {
 	};
 
 	struct base_affector_layer : public base_terrain_layer
-	{};
+	{
+		virtual e_affector_type get_type() const = 0;
+	};
 
 	struct base_boundary_layer : public base_terrain_layer
-	{};
+	{
+		virtual e_boundary_type get_type() const = 0;
+	};
 
 	struct base_filter_layer : public base_terrain_layer
-	{};
+	{
+		virtual e_filter_type get_type() const = 0;
+	};
 
 	struct construction_layer : public base_terrain_layer
 	{
@@ -417,6 +432,8 @@ namespace detail_terrain {
 		std::vector<std::unique_ptr<base_filter_layer>> filters;
 		std::vector<std::unique_ptr<construction_layer>> containers;
 
+		std::vector<std::pair<base_terrain_layer*, e_layer_type>> children;
+
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
 	};
@@ -424,6 +441,7 @@ namespace detail_terrain {
 	struct affector_color_constant : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::color_constant;
+		e_affector_type get_type() const { return affector_type; }
 
 		operations operation;
 		uint8_t r;
@@ -437,6 +455,7 @@ namespace detail_terrain {
 	struct affector_color_ramp_fractal : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::color_ramp_fractal;
+		e_affector_type get_type() const { return affector_type; }
 
 		uint32_t family_id;
 		operations operation;
@@ -449,6 +468,7 @@ namespace detail_terrain {
 	struct affector_color_ramp_height : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::color_ramp_height;
+		e_affector_type get_type() const { return affector_type; }
 
 		operations operation;
 		float low_height;
@@ -462,6 +482,7 @@ namespace detail_terrain {
 	struct affector_environment : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::environment;
+		e_affector_type get_type() const { return affector_type; }
 
 		uint32_t family_id;
 		bool feather_clamp_override;
@@ -474,6 +495,7 @@ namespace detail_terrain {
 	struct affector_exclude : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::exclude;
+		e_affector_type get_type() const { return affector_type; }
 
 		void deserialize(ByteBuffer& buffer) {}
 		void serialize(ByteBuffer& buffer) {}
@@ -482,6 +504,7 @@ namespace detail_terrain {
 	struct affector_flora_collidable_constant : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::flora_static_collidable_constant;
+		e_affector_type get_type() const { return affector_type; }
 
 		uint32_t adjust;
 		e_flora_operation operation;
@@ -497,6 +520,7 @@ namespace detail_terrain {
 	struct affector_flora_non_collidable_constant : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::flora_static_non_collidable_constant;
+		e_affector_type get_type() const { return affector_type; }
 
 		uint32_t adjust;
 		e_flora_operation operation;
@@ -511,6 +535,7 @@ namespace detail_terrain {
 	struct affector_height_constant : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::height_constant;
+		e_affector_type get_type() const { return affector_type; }
 
 		operations operation;
 		float value;
@@ -522,6 +547,7 @@ namespace detail_terrain {
 	struct affector_height_fractal : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::height_fractal;
+		e_affector_type get_type() const { return affector_type; }
 
 		uint32_t family_id;
 		operations operation;
@@ -535,6 +561,7 @@ namespace detail_terrain {
 	struct affector_height_terrace : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::height_terrace;
+		e_affector_type get_type() const { return affector_type; }
 
 		float terrace_height;
 		float flat_ratio;
@@ -547,6 +574,7 @@ namespace detail_terrain {
 	struct affector_radial_far_constant : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::flora_dynamic_far_constant;
+		e_affector_type get_type() const { return affector_type; }
 
 		uint32_t adjust;
 		e_flora_operation operation;
@@ -561,6 +589,7 @@ namespace detail_terrain {
 	struct affector_radial_near_constant : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::flora_dynamic_near_constant;
+		e_affector_type get_type() const { return affector_type; }
 
 		uint32_t adjust;
 		e_flora_operation operation;
@@ -575,6 +604,7 @@ namespace detail_terrain {
 	struct affector_river : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::river;
+		e_affector_type get_type() const { return affector_type; }
 
 		struct segment
 		{
@@ -613,6 +643,7 @@ namespace detail_terrain {
 	struct affector_road : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::road;
+		e_affector_type get_type() const { return affector_type; }
 
 		struct segment
 		{
@@ -647,6 +678,7 @@ namespace detail_terrain {
 	struct affector_shader_constant : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::shader_constant;
+		e_affector_type get_type() const { return affector_type; }
 
 		uint32_t family_id;
 		bool feather_clamp_override;
@@ -659,6 +691,7 @@ namespace detail_terrain {
 	struct affector_shader_replace : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::shader_replace;
+		e_affector_type get_type() const { return affector_type; }
 
 		uint32_t source_family;
 		uint32_t destination_family;
@@ -672,6 +705,7 @@ namespace detail_terrain {
 	struct boundary_circle : public base_boundary_layer
 	{
 		static const e_boundary_type boundary_type = e_boundary_type::circle;
+		e_boundary_type get_type() const { return boundary_type; }
 
 		float center_x;
 		float center_z;
@@ -686,6 +720,7 @@ namespace detail_terrain {
 	struct boundary_polygon : public base_boundary_layer
 	{
 		static const e_boundary_type boundary_type = e_boundary_type::polygon;
+		e_boundary_type get_type() const { return boundary_type; }
 
 		std::vector<glm::vec2> control_points;
 		e_feathering_function function;
@@ -702,6 +737,7 @@ namespace detail_terrain {
 	struct boundary_polyline : public base_boundary_layer
 	{
 		static const e_boundary_type boundary_type = e_boundary_type::polyline;
+		e_boundary_type get_type() const { return boundary_type; }
 
 		std::vector<glm::vec2> control_points;
 		e_feathering_function function;
@@ -715,6 +751,7 @@ namespace detail_terrain {
 	struct boundary_rectangle : public base_boundary_layer
 	{
 		static const e_boundary_type boundary_type = e_boundary_type::rectangle;
+		e_boundary_type get_type() const { return boundary_type; }
 
 		float x1;
 		float z1;
@@ -735,6 +772,7 @@ namespace detail_terrain {
 	struct filter_direction : public base_filter_layer
 	{
 		static const e_filter_type filter_type = e_filter_type::direction;
+		e_filter_type get_type() const { return filter_type; }
 
 		float min_angle;
 		float max_angle;
@@ -748,6 +786,7 @@ namespace detail_terrain {
 	struct filter_fractal : public base_filter_layer
 	{
 		static const e_filter_type filter_type = e_filter_type::fractal;
+		e_filter_type get_type() const { return filter_type; }
 
 		uint32_t family_id;
 		e_feathering_function feathering;
@@ -763,6 +802,7 @@ namespace detail_terrain {
 	struct filter_height : public base_filter_layer
 	{
 		static const e_filter_type filter_type = e_filter_type::height;
+		e_filter_type get_type() const { return filter_type; }
 
 		float low_height;
 		float high_height;
@@ -776,6 +816,7 @@ namespace detail_terrain {
 	struct filter_shader : public base_filter_layer
 	{
 		static const e_filter_type filter_type = e_filter_type::shader;
+		e_filter_type get_type() const { return filter_type; }
 
 		uint32_t family_id;
 
@@ -786,6 +827,7 @@ namespace detail_terrain {
 	struct filter_slope : public base_filter_layer
 	{
 		static const e_filter_type filter_type = e_filter_type::slope;
+		e_filter_type get_type() const { return filter_type; }
 
 		float min_angle;
 		float max_angle;
