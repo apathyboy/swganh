@@ -344,6 +344,23 @@ struct terrain_iff_writer
 		parent->children.push_back(std::move(data_record));
 	}
 
+	static void store_terrain_data(procedural_terrain& terrain, iff_node* parent)
+	{
+		auto tgen = swganh::tre::make_version_form("TGEN", "0000", parent);
+
+		auto tgen0000 = tgen->form("0000");
+
+		store_group(terrain.shader_group, "SGRP", "0006", "SFAM", tgen0000);
+		store_group(terrain.flora_group, "FGRP", "0008", "FFAM", tgen0000);
+		store_group(terrain.radial_group, "RGRP", "0003", "RFAM", tgen0000);
+
+		//load_group(terrain.environment_group, tgen0000->form("EGRP")->form("0002"));
+		//load_group(terrain.fractal_group, tgen0000->form("MGRP")->form("0000"));
+		//load_layers(terrain.layers, tgen0000->form("LYRS"));
+
+		parent->children.push_back(std::move(tgen));
+	}
+
 	static void store_footer(procedural_terrain& terrain, iff_node* parent)
 	{
 		auto form0001 = swganh::tre::make_form("0001", parent);
@@ -361,6 +378,23 @@ struct terrain_iff_writer
 		form0001->children.push_back(std::move(smap_record));
 
 		parent->children.push_back(std::move(form0001));
+	}
+
+	template<typename T>
+	static void store_group(T& group, char form_type[4], char form_version[4], char record_type[4], iff_node* parent)
+	{
+		auto group_form = swganh::tre::make_version_form(form_type, form_version, parent);
+		auto group_version_form = group_form->form(form_version);
+
+		for (const auto& family : group.get_families())
+		{
+			auto family_form = swganh::tre::make_record(record_type, group_version_form);
+			family->serialize(family_form->data);
+
+			group_version_form->children.push_back(std::move(family_form));
+		}
+
+		parent->children.push_back(std::move(group_form));
 	}
 };
 
@@ -388,6 +422,7 @@ ByteBuffer swganh::tre::write_procedural_terrain(procedural_terrain& terrain)
 	auto form0014 = iff_doc->form("0014");
 
 	terrain_iff_writer::store_header(terrain, form0014);
+	terrain_iff_writer::store_terrain_data(terrain, form0014);
 	terrain_iff_writer::store_footer(terrain, form0014);
 
 	swganh::ByteBuffer out_buffer;

@@ -174,6 +174,8 @@ namespace detail_terrain {
 			return nullptr;
 		}
 
+		const std::vector<std::unique_ptr<family_type>>& get_families() const { return families_; }
+
 	private:
 		uint32_t next_family_id() const
 		{
