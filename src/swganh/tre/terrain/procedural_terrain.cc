@@ -353,8 +353,7 @@ struct terrain_iff_writer
 		store_group(terrain.shader_group, "SGRP", "0006", "SFAM", tgen0000);
 		store_group(terrain.flora_group, "FGRP", "0008", "FFAM", tgen0000);
 		store_group(terrain.radial_group, "RGRP", "0003", "RFAM", tgen0000);
-
-		//load_group(terrain.environment_group, tgen0000->form("EGRP")->form("0002"));
+		store_group(terrain.environment_group,"EGRP", "0002", "EFAM", tgen0000);
 		//load_group(terrain.fractal_group, tgen0000->form("MGRP")->form("0000"));
 		//load_layers(terrain.layers, tgen0000->form("LYRS"));
 
@@ -391,6 +390,26 @@ struct terrain_iff_writer
 			auto family_form = swganh::tre::make_record(record_type, group_version_form);
 			family->serialize(family_form->data);
 
+			group_version_form->children.push_back(std::move(family_form));
+		}
+
+		parent->children.push_back(std::move(group_form));
+	}
+
+	template<>
+	static void store_group(terrain_group<environment_family>& group, char form_type[4], char form_version[4], char record_type[4], iff_node* parent)
+	{
+		auto group_form = swganh::tre::make_version_form(form_type, form_version, parent);
+		auto group_version_form = group_form->form(form_version);
+
+		for (const auto& family : group.get_families())
+		{
+			auto family_form = swganh::tre::make_form(record_type, group_version_form);
+			auto family_data = swganh::tre::make_record("DATA", family_form.get());
+
+			family->serialize(family_data->data);
+
+			family_form->children.push_back(std::move(family_data));
 			group_version_form->children.push_back(std::move(family_form));
 		}
 
