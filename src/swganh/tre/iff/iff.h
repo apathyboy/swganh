@@ -36,6 +36,10 @@ namespace tre {
 		std::string str_form_type() { return std::string(reinterpret_cast<char*>(&form_type), sizeof(form_type)); }
 	};
 
+	std::unique_ptr<iff_node> make_form(char name[4], char form_type[4], iff_node* parent = nullptr);
+	std::unique_ptr<iff_node> make_version_form(char form_type[4], char form_version[4], iff_node* parent = nullptr);
+	std::unique_ptr<iff_node> make_record(char name[4], iff_node* parent = nullptr);
+
 	std::unique_ptr<iff_node> parse_iff(ByteBuffer& resource, iff_node* parent = nullptr);
 	void write_iff(ByteBuffer& resource, iff_node* node);
 
