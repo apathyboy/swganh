@@ -7,12 +7,21 @@
 
 #include <glm/glm.hpp>
 
+#include "swganh/utilities.h"
 #include "swganh/byte_buffer.h"
 
 namespace swganh {
 namespace tre {
 namespace detail_terrain {
-	
+
+	namespace detail {
+#ifdef WIN32
+		using std::make_unique;
+#else
+		using swganh::make_unique;
+#endif
+	}
+
 	enum class combination_rules : uint32_t
 	{
 		add = 0,
@@ -126,7 +135,7 @@ namespace detail_terrain {
 		{
 			family_type* family = nullptr;
 
-			auto new_family = std::make_unique<family_type>();
+			auto new_family = detail::make_unique<family_type>();
 			new_family->family_name = name;
 			new_family->family_id = next_family_id();
 
@@ -141,7 +150,7 @@ namespace detail_terrain {
 			family_type* existing_family = find_family_by_id(family->family_id);
 			if (existing_family)
 			{
-				throw std::runtime_error("family id already exists (" + existing_family->family_id + std::string(") ") + existing_family->family_name);
+				throw std::runtime_error("family id already exists (" + std::to_string(existing_family->family_id) + std::string(") ") + existing_family->family_name);
 			}
 
 			families_.push_back(std::move(family));
@@ -203,7 +212,7 @@ namespace detail_terrain {
 
 		std::vector<std::unique_ptr<family_type>> families_;
 	};
-	
+
 	struct header
 	{
 		std::string filename;
@@ -491,7 +500,7 @@ namespace detail_terrain {
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
 	};
-	
+
 	struct affector_exclude : public base_affector_layer
 	{
 		static const e_affector_type affector_type = e_affector_type::exclude;
@@ -701,7 +710,7 @@ namespace detail_terrain {
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
 	};
-	
+
 	struct boundary_circle : public base_boundary_layer
 	{
 		static const e_boundary_type boundary_type = e_boundary_type::circle;

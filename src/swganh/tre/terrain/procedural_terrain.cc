@@ -10,6 +10,12 @@ using swganh::ByteBuffer;
 using swganh::tre::iff_node;
 using swganh::tre::procedural_terrain;
 
+#ifdef WIN32
+using std::make_unique;
+#else
+using swganh::make_unique;
+#endif
+
 struct terrain_iff_reader
 {
 	static void load_header(procedural_terrain& terrain, iff_node* data)
@@ -41,26 +47,24 @@ struct terrain_iff_reader
 	{
 		for (const auto& child : group_node->children)
 		{
-			auto family = std::make_unique<T>();
+			auto family = make_unique<T>();
 			family->deserialize(child->data);
 
 			group.add_family(std::move(family));
 		}
 	}
 
-	template<>
 	static void load_group(terrain_group<environment_family>& group, iff_node* group_node)
 	{
 		for (const auto& child : group_node->children)
 		{
-			auto family = std::make_unique<environment_family>();
+			auto family = make_unique<environment_family>();
 			family->deserialize(child->record("DATA")->data);
 
 			group.add_family(std::move(family));
 		}
 	}
 
-	template<>
 	static void load_group(terrain_group<fractal_family>& group, iff_node* group_node)
 	{
 		for (const auto& child : group_node->children)
@@ -68,16 +72,16 @@ struct terrain_iff_reader
 			auto data = child->record("DATA");
 			auto fractal = child->form("MFRC")->form("0001")->record("DATA");
 
-			auto fractal_fam = std::make_unique<fractal_family>();
+			auto fractal_fam = make_unique<fractal_family>();
 			fractal_fam->deserialize(data->data);
-			fractal_fam->fractal_data = std::make_unique<fractal_family::fractal>();
+			fractal_fam->fractal_data = make_unique<fractal_family::fractal>();
 			fractal_fam->fractal_data->deserialize(fractal->data);
 
 			group.add_family(std::move(fractal_fam));
 		}
 	}
 
-	static void load_layers(std::vector < std::unique_ptr < construction_layer >> &layers, iff_node* lyrs)
+	static void load_layers(std::vector<std::unique_ptr<construction_layer>> &layers, iff_node* lyrs)
 	{
 		for (const auto& child : lyrs->children)
 		{
@@ -277,7 +281,7 @@ struct terrain_iff_reader
 	template<typename T>
 	static std::unique_ptr<T> load_layer(iff_node* layer_node, iff_node* data_node)
 	{
-		auto layer = std::make_unique<T>();
+		auto layer = make_unique<T>();
 
 		static_cast<base_terrain_layer*>(layer.get())->deserialize(layer_node->form("IHDR")->form("0001")->record("DATA")->data);
 		layer->deserialize(data_node->data);
@@ -329,7 +333,7 @@ struct terrain_iff_reader
 	{
 		for (const auto& child : height_data_node->children)
 		{
-			auto segment = std::make_unique<T::segment>();
+			auto segment = make_unique<typename T::segment>();
 			segment->deserialize(child->data);
 
 			layer->segments.push_back(std::move(segment));
@@ -401,7 +405,6 @@ struct terrain_iff_writer
 		parent->children.push_back(std::move(group_form));
 	}
 
-	template<>
 	static void store_group(terrain_group<environment_family>& group, char form_type[4], char form_version[4], char record_type[4], iff_node* parent)
 	{
 		auto group_form = swganh::tre::make_version_form(form_type, form_version, parent);
@@ -421,7 +424,6 @@ struct terrain_iff_writer
 		parent->children.push_back(std::move(group_form));
 	}
 
-	template<>
 	static void store_group(terrain_group<fractal_family>& group, char form_type[4], char form_version[4], char record_type[4], iff_node* parent)
 	{
 		auto group_form = swganh::tre::make_version_form(form_type, form_version, parent);
@@ -460,7 +462,7 @@ struct terrain_iff_writer
 
 		parent->children.push_back(std::move(lyrs_form));
 	}
-	
+
 	static void store_construction_layer(construction_layer* layer, iff_node* parent)
 	{
 		auto layr = swganh::tre::make_version_form("LAYR", "0003");
@@ -699,7 +701,7 @@ struct terrain_iff_writer
 		auto layer_form = swganh::tre::make_version_form(form_type, form_version);
 		auto version_form = layer_form->form(form_version);
 		auto data_record = swganh::tre::make_record("DATA", version_form);
-		
+
 		store_layer_header(layer, version_form);
 		layer->serialize(data_record->data);
 
@@ -743,7 +745,7 @@ std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuf
 {
 	auto iff_doc = parse_iff(buffer);
 
-	auto pt = std::make_unique<procedural_terrain>();
+	auto pt = make_unique<procedural_terrain>();
 
 	auto form0014 = iff_doc->form("0014");
 

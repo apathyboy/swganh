@@ -135,7 +135,7 @@ void shader_family::deserialize(ByteBuffer& buffer)
 	uint32_t child_count = buffer.read<uint32_t>();
 	for (uint32_t i = 0; i < child_count; ++i)
 	{
-		auto child = std::make_unique<shader_child>();
+		auto child = detail::make_unique<shader_child>();
 		child->name = buffer.read<std::string>(false, true);
 		child->weight = buffer.read<float>();
 
@@ -178,7 +178,7 @@ void flora_family::deserialize(ByteBuffer& buffer)
 	uint32_t child_count = buffer.read<uint32_t>();
 	for (uint32_t i = 0; i < child_count; ++i)
 	{
-		auto child = std::make_unique<flora_child>();
+		auto child = detail::make_unique<flora_child>();
 		child->name = buffer.read<std::string>(false, true);
 		child->weight = buffer.read<float>();
 		child->align_to_terrain = buffer.read<uint32_t>() == 1 ? true : false;
@@ -204,7 +204,7 @@ void flora_family::serialize(ByteBuffer& buffer)
 	buffer.write(density);
 	buffer.write(uint32_t(floats_on_water ? 1 : 0));
 	buffer.write(uint32_t(children.size()));
-	
+
 	for (const auto& child : children)
 	{
 		buffer.write(reinterpret_cast<const unsigned char*>(child->name.c_str()), child->name.size());
@@ -232,7 +232,7 @@ void radial_family::deserialize(ByteBuffer& buffer)
 	uint32_t child_count = buffer.read<uint32_t>();
 	for (uint32_t i = 0; i < child_count; ++i)
 	{
-		auto child = std::make_unique<radial_child>();
+		auto child = detail::make_unique<radial_child>();
 		child->name = buffer.read<std::string>(false, true);
 		child->weight = buffer.read<float>();
 		child->distance = buffer.read<float>();

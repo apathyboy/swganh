@@ -9,13 +9,18 @@
 
 using namespace swganh::tre;
 
+#ifdef WIN32
+using std::make_unique;
+#else
+using swganh::make_unique;
+#endif
 
 std::unique_ptr<iff_node> swganh::tre::make_form(char form_type[4], iff_node* parent)
 {
-	auto new_form = std::make_unique<iff_node>();
+	auto new_form = make_unique<iff_node>();
 
-	new_form->name = *reinterpret_cast<uint32_t*>("FORM");
-	new_form->form_type = *reinterpret_cast<uint32_t*>(form_type);
+	new_form->name = *reinterpret_cast<const uint32_t*>("FORM");
+	new_form->form_type = *reinterpret_cast<const uint32_t*>(form_type);
 	new_form->parent = parent;
 
 	return new_form;
@@ -25,7 +30,7 @@ std::unique_ptr<iff_node> swganh::tre::make_version_form(char form_type[4], char
 {
 	auto type_form = make_form(form_type, parent);
 	auto version_form = make_form(form_version, type_form.get());
-	
+
 	type_form->children.push_back(std::move(version_form));
 
 	return type_form;
@@ -33,7 +38,7 @@ std::unique_ptr<iff_node> swganh::tre::make_version_form(char form_type[4], char
 
 std::unique_ptr<iff_node> swganh::tre::make_record(char name[4], iff_node* parent)
 {
-	auto new_record = std::make_unique<iff_node>();
+	auto new_record = make_unique<iff_node>();
 
 	new_record->name = *reinterpret_cast<uint32_t*>(name);
 	new_record->parent = parent;
@@ -73,11 +78,7 @@ iff_node* iff_node::record(char name[4])
 
 std::unique_ptr<swganh::tre::iff_node> swganh::tre::parse_iff(ByteBuffer& resource, iff_node* parent)
 {
-#ifdef WIN32
-	auto node = std::make_unique<iff_node>();
-#else
-	std::unique_ptr<iff_node> node(new iff_node);
-#endif
+	auto node = make_unique<iff_node>();
 
 	node->parent = parent;
 
