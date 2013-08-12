@@ -129,7 +129,7 @@ void swganh::tre::write_iff(ByteBuffer& resource, swganh::tre::iff_node* node)
 		}
 	}
 
-	resource.writeAt(size_offset, swganh::hostToBig(resource.write_position() - data_start_offset));
+	resource.writeAt(size_offset, swganh::hostToBig<uint32_t>(resource.write_position() - data_start_offset));
 }
 
 
