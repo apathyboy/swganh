@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <type_traits>
 
 namespace swganh {
@@ -30,7 +31,7 @@ namespace swganh {
 			return value;
 		}
     }
-	
+
     /*! Swaps the endianness of integral values and returns the results.
     *
     * @param value An integral value for which to swap the endianness.
@@ -52,7 +53,7 @@ namespace swganh {
 		static_assert(std::is_arithmetic<T>::value, "host_to_little<T> requires T to be an integral type.");
 		return detail::isBigEndian() ? swapEndian(value) : value;
     }
-    
+
     /*! Converts an integral value from host-byte order to big endian.
     *
     * @param value The value to convert to big endian
@@ -63,7 +64,7 @@ namespace swganh {
 		static_assert(std::is_arithmetic<T>::value, "host_to_big<T> requires T to be an integral type.");
 		return detail::isBigEndian() ? value : swapEndian(value);
     }
-    
+
     /*! Converts an integral value from big endian to host-byte order.
     *
     * @param value The value to convert to host-byte order.
@@ -74,7 +75,7 @@ namespace swganh {
 		static_assert(std::is_arithmetic<T>::value, "big_to_host<T> requires T to be an integral type.");
 		return detail::isBigEndian() ? value : swapEndian(value);
     }
-    
+
     /*! Converts an integral value from little endian to host-byte order.
     *
     * @param value The value to convert to host-byte order.
@@ -85,9 +86,15 @@ namespace swganh {
 		static_assert(std::is_arithmetic<T>::value, "little_to_host<T> requires T to be an integral type.");
 		return detail::isBigEndian() ? swapEndian(value) : value;
     }
-        
+
     int KeyboardHit();
 
     char GetHitKey();
+
+    template<typename T, typename ...ArgsT>
+    std::unique_ptr<T> make_unique(ArgsT&& ...args)
+    {
+        return std::unique_ptr<T>(new T(std::forward<ArgsT>(args)...));
+    }
 
 }  // namespace swganh
