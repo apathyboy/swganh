@@ -76,7 +76,7 @@ iff_node* iff_node::record(const char name[4])
 	return nullptr;
 }
 
-std::unique_ptr<swganh::tre::iff_node> swganh::tre::parse_iff(ByteBuffer& resource, iff_node* parent)
+std::unique_ptr<swganh::tre::iff_node> swganh::tre::parse_iff(ByteBuffer resource, iff_node* parent)
 {
 	auto node = make_unique<iff_node>();
 

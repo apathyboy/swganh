@@ -10,14 +10,19 @@
 
 #include <QMessageBox>
 #include <QTreeWidget>
+#include <QTreeView>
 
 #include <boost/filesystem.hpp>
 
+#include "swganh/utilities.h"
 #include "swganh/tre/tre_archive.h"
+#include "swganh/tre/iff/iff.h"
 
 #include "widgets/main_window.h"
 #include "widgets/project_tree.h"
+#include "widgets/iff_tree_model.h"
 #include "terrain/terrain_editor.h"
+
 
 namespace bf = boost::filesystem;
 
@@ -46,11 +51,9 @@ namespace swganh {
             closeProject();
 
             project_directory_ = project_directory;
-#ifdef WIN32
-            archive_ = std::make_unique<tre::TreArchive>(project_directory.toStdString() + "/live.cfg");
-#else
-            archive_.reset(new tre::TreArchive(project_directory.toStdString() + "/live.cfg"));
-#endif
+
+            archive_ = make_unique<tre::TreArchive>(project_directory.toStdString() + "/live.cfg");
+
             tree_files_->load(project_directory);
 
             return true;
@@ -74,19 +77,21 @@ namespace swganh {
 		if (extension.compare(".trn") == 0)
 		{
 			// open terrain editor
-#ifdef WIN32
-			terrain_editor_ = std::make_unique<TerrainEditor>(project_file, this);
-#else
-            terrain_editor_.reset(new TerrainEditor(project_file, this));
-#endif
+			terrain_editor_ = make_unique<TerrainEditor>(project_file, this);
 			terrain_editor_->show();
 		}
 		else
 		{
-			// open as hex view
-			QMessageBox msgBox;
-			msgBox.setText("open as hex view.");
-			msgBox.exec();
+            auto iff_doc = swganh::tre::parse_iff(archive_->GetResource(project_file.toStdString()));
+
+            auto tab_doc = new QTreeView(parent_->documentsTabWidget);
+            auto tab_model = new IffTreeModel();
+            tab_model->setHeadNode(iff_doc.get());
+            tab_doc->setModel(tab_model);
+
+            parent_->documentsTabWidget->addTab(tab_doc, project_file);
+
+            tab_doc->show();
 		}
 	}
 
