@@ -355,7 +355,6 @@ struct terrain_iff_writer
 	static void store_terrain_data(procedural_terrain& terrain, iff_node* parent)
 	{
 		auto tgen = swganh::tre::make_version_form("TGEN", "0000", parent);
-
 		auto tgen0000 = tgen->form("0000");
 
 		store_group(terrain.shader_group, "SGRP", "0006", "SFAM", tgen0000);
@@ -673,7 +672,6 @@ struct terrain_iff_writer
 		auto version_form = layer_form->form(form_version);
 		auto data_form = swganh::tre::make_form("DATA", version_form);
 		auto data_record = swganh::tre::make_record("DATA", data_form.get());
-
 		auto height_form = swganh::tre::make_version_form("HDTA", "0001");
 
 		store_layer_header(layer, version_form);
@@ -744,9 +742,7 @@ struct terrain_iff_writer
 std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuffer& buffer)
 {
 	auto iff_doc = parse_iff(buffer);
-
 	auto pt = make_unique<procedural_terrain>();
-
 	auto form0014 = iff_doc->form("0014");
 
 	if (form0014)
