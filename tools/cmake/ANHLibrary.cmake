@@ -199,7 +199,7 @@ FUNCTION(AddANHLibrary name)
 
 
         add_custom_target(
-            ${name}_test_runner ALL
+            ${name}_test_runner
             COMMAND ${name}_test --catch_system_error=yes
             DEPENDS ${name}_test
             WORKING_DIRECTORY ${RUNNER_WD}
