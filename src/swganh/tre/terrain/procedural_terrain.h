@@ -10,7 +10,7 @@ namespace swganh {
 namespace tre {
 
 	// Make procedural_terrain's interface focused 100% on working with procedural terrain data.
-	// 
+	//
 	// Iff format should be an implementation detail, imagine how multiple storage formats would be utilized(ie., json, xml, etc)
 	struct procedural_terrain
 	{

@@ -29,16 +29,16 @@ namespace tre {
 			, parent(nullptr)
 		{}
 
-		iff_node* form(char name[4]);
-		iff_node* record(char name[4]);
+		iff_node* form(const char name[4]);
+		iff_node* record(const char name[4]);
 
-		std::string str_name() { return std::string(reinterpret_cast<char*>(&name), sizeof(name)); }
-		std::string str_form_type() { return std::string(reinterpret_cast<char*>(&form_type), sizeof(form_type)); }
+		std::string str_name() { return std::string(reinterpret_cast<const char*>(&name), sizeof(name)); }
+		std::string str_form_type() { return std::string(reinterpret_cast<const char*>(&form_type), sizeof(form_type)); }
 	};
 
-	std::unique_ptr<iff_node> make_form(char form_type[4], iff_node* parent = nullptr);
-	std::unique_ptr<iff_node> make_version_form(char form_type[4], char form_version[4], iff_node* parent = nullptr);
-	std::unique_ptr<iff_node> make_record(char name[4], iff_node* parent = nullptr);
+	std::unique_ptr<iff_node> make_form(const char form_type[4], iff_node* parent = nullptr);
+	std::unique_ptr<iff_node> make_version_form(const char form_type[4], const char form_version[4], iff_node* parent = nullptr);
+	std::unique_ptr<iff_node> make_record(const char name[4], iff_node* parent = nullptr);
 
 	std::unique_ptr<iff_node> parse_iff(ByteBuffer& resource, iff_node* parent = nullptr);
 	void write_iff(ByteBuffer& resource, iff_node* node);
@@ -50,7 +50,7 @@ namespace tre {
 		virtual ~base_iff_document() {}
 
 
-	
+
 	private:
 		std::unique_ptr<iff_node> root_;
 	};

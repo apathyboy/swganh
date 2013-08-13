@@ -389,7 +389,7 @@ struct terrain_iff_writer
 	}
 
 	template<typename T>
-	static void store_group(T& group, char form_type[4], char form_version[4], char record_type[4], iff_node* parent)
+	static void store_group(T& group, const char form_type[4], const char form_version[4], const char record_type[4], iff_node* parent)
 	{
 		auto group_form = swganh::tre::make_version_form(form_type, form_version, parent);
 		auto group_version_form = group_form->form(form_version);
@@ -405,7 +405,7 @@ struct terrain_iff_writer
 		parent->children.push_back(std::move(group_form));
 	}
 
-	static void store_group(terrain_group<environment_family>& group, char form_type[4], char form_version[4], char record_type[4], iff_node* parent)
+	static void store_group(terrain_group<environment_family>& group, const char form_type[4], const char form_version[4], const char record_type[4], iff_node* parent)
 	{
 		auto group_form = swganh::tre::make_version_form(form_type, form_version, parent);
 		auto group_version_form = group_form->form(form_version);
@@ -424,7 +424,7 @@ struct terrain_iff_writer
 		parent->children.push_back(std::move(group_form));
 	}
 
-	static void store_group(terrain_group<fractal_family>& group, char form_type[4], char form_version[4], char record_type[4], iff_node* parent)
+	static void store_group(terrain_group<fractal_family>& group, const char form_type[4], const char form_version[4], const char record_type[4], iff_node* parent)
 	{
 		auto group_form = swganh::tre::make_version_form(form_type, form_version, parent);
 		auto group_version_form = group_form->form(form_version);
@@ -667,7 +667,7 @@ struct terrain_iff_writer
 	}
 
 	template<typename T>
-	static void store_segment_layer(T* layer, char form_type[4], char form_version[4], iff_node* parent)
+	static void store_segment_layer(T* layer, const char form_type[4], const char form_version[4], iff_node* parent)
 	{
 		auto layer_form = swganh::tre::make_version_form(form_type, form_version);
 		auto version_form = layer_form->form(form_version);
@@ -696,7 +696,7 @@ struct terrain_iff_writer
 	}
 
 	template<typename T>
-	static void store_layer(T* layer, char form_type[4], char form_version[4], iff_node* parent)
+	static void store_layer(T* layer, const char form_type[4], const char form_version[4], iff_node* parent)
 	{
 		auto layer_form = swganh::tre::make_version_form(form_type, form_version);
 		auto version_form = layer_form->form(form_version);
@@ -711,7 +711,7 @@ struct terrain_iff_writer
 	}
 
 	template<typename T>
-	static void store_parm_layer(T* layer, char form_type[4], char form_version[4], iff_node* parent)
+	static void store_parm_layer(T* layer, const char form_type[4], const char form_version[4], iff_node* parent)
 	{
 		auto layer_form = swganh::tre::make_version_form(form_type, form_version);
 		auto version_form = layer_form->form(form_version);

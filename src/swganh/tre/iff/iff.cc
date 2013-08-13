@@ -15,7 +15,7 @@ using std::make_unique;
 using swganh::make_unique;
 #endif
 
-std::unique_ptr<iff_node> swganh::tre::make_form(char form_type[4], iff_node* parent)
+std::unique_ptr<iff_node> swganh::tre::make_form(const char form_type[4], iff_node* parent)
 {
 	auto new_form = make_unique<iff_node>();
 
@@ -26,7 +26,7 @@ std::unique_ptr<iff_node> swganh::tre::make_form(char form_type[4], iff_node* pa
 	return new_form;
 }
 
-std::unique_ptr<iff_node> swganh::tre::make_version_form(char form_type[4], char form_version[4], iff_node* parent)
+std::unique_ptr<iff_node> swganh::tre::make_version_form(const char form_type[4], const char form_version[4], iff_node* parent)
 {
 	auto type_form = make_form(form_type, parent);
 	auto version_form = make_form(form_version, type_form.get());
@@ -36,19 +36,19 @@ std::unique_ptr<iff_node> swganh::tre::make_version_form(char form_type[4], char
 	return type_form;
 }
 
-std::unique_ptr<iff_node> swganh::tre::make_record(char name[4], iff_node* parent)
+std::unique_ptr<iff_node> swganh::tre::make_record(const char name[4], iff_node* parent)
 {
 	auto new_record = make_unique<iff_node>();
 
-	new_record->name = *reinterpret_cast<uint32_t*>(name);
+	new_record->name = *reinterpret_cast<const uint32_t*>(name);
 	new_record->parent = parent;
 
 	return new_record;
 }
 
-iff_node* iff_node::form(char name[4])
+iff_node* iff_node::form(const char name[4])
 {
-	uint32_t name_int = *reinterpret_cast<uint32_t*>(name);
+	uint32_t name_int = *reinterpret_cast<const uint32_t*>(name);
 
 	for (const auto& child : children)
 	{
@@ -61,9 +61,9 @@ iff_node* iff_node::form(char name[4])
 	return nullptr;
 }
 
-iff_node* iff_node::record(char name[4])
+iff_node* iff_node::record(const char name[4])
 {
-	uint32_t name_int = *reinterpret_cast<uint32_t*>(name);
+	uint32_t name_int = *reinterpret_cast<const uint32_t*>(name);
 
 	for (const auto& child : children)
 	{
