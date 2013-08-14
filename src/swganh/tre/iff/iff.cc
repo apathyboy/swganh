@@ -76,7 +76,21 @@ iff_node* iff_node::record(const char name[4])
 	return nullptr;
 }
 
-std::unique_ptr<swganh::tre::iff_node> swganh::tre::parse_iff(ByteBuffer& resource, iff_node* parent)
+std::unique_ptr<swganh::tre::iff_node> swganh::tre::parse_iff(ByteBuffer& resource)
+{
+	auto root_node = make_unique<iff_node>();
+
+	auto resource_size = resource.size();
+	while (resource.read_position() < resource_size)
+	{
+		auto top_level_node = detail::parse_iff(resource, root_node.get());
+		root_node->children.push_back(std::move(top_level_node));
+	}
+
+	return root_node;
+}
+
+std::unique_ptr<swganh::tre::iff_node> swganh::tre::detail::parse_iff(ByteBuffer& resource, iff_node* parent)
 {
 	auto node = make_unique<iff_node>();
 
