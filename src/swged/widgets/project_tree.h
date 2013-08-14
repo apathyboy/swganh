@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <set>
+#include <string>
 #include <QTreeWidget>
 
 class QPoint;
@@ -28,6 +30,7 @@ namespace swganh {
 
     private:
         ProjectManager* project_manager_;
+		std::set<std::string> cache_;
 
         bool isFile(QTreeWidgetItem* item) const;
         bool isDir(QTreeWidgetItem* item) const;

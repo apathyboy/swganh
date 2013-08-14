@@ -46,20 +46,19 @@ namespace swganh {
     {
         setRootIsDecorated(true);
         setUpdatesEnabled(false);
-        std::set<std::string> cache;
 
         project_manager_->getArchive()->VisitAvailableResources(
-            [this, &cache](std::string resource_name)
+            [this](std::string resource_name)
         {
             std::vector<std::string> path_data;
             boost::split(path_data, resource_name, boost::is_any_of("/"));
 
-            if (cache.find(path_data[0]) == cache.end())
+            if (cache_.find(path_data[0]) == cache_.end())
             {
-                emit newTreeItem(QString().fromStdString(path_data[0]),
-					QString().fromStdString(resource_name));
+				slotAddTreeItem(QString().fromStdString(path_data[0]),
+					QString().fromStdString(path_data[0]));
 
-                cache.insert(path_data[0]);
+                cache_.insert(path_data[0]);
             }
         });
         setUpdatesEnabled(true);
@@ -102,13 +101,13 @@ namespace swganh {
     }
 
     void ProjectTree::slotItemExpanded(QTreeWidgetItem* expanded_item)
-    {
-        auto item_data = expanded_item->text(0).toStdString();
-
-        std::set<std::string> cache;
+	{
+		setUpdatesEnabled(false);
+        auto item_data = expanded_item->data(0, Qt::UserRole).toString().toStdString();
+		auto item_text = expanded_item->text(0).toStdString();
 
         project_manager_->getArchive()->VisitAvailableResources(
-            [this, &item_data, expanded_item, &cache] (std::string resource_name)
+			[this, &item_data, &item_text, expanded_item] (std::string resource_name)
         {
             if (resource_name.compare(0, item_data.size(), item_data) == 0)
             {
@@ -116,15 +115,19 @@ namespace swganh {
                 std::vector<std::string> path_data;
                 boost::split(path_data, substr, boost::is_any_of("/"));
 
-                if (cache.find(path_data[0]) == cache.end())
-                {
-                    emit newTreeItem(QString().fromStdString(path_data[0]),
-                        QString().fromStdString(item_data + "/" + path_data[0]), expanded_item);
+				auto new_item_text = path_data[0];
+				auto new_item_data = item_data + "/" + path_data[0];
 
-                    cache.insert(path_data[0]);
+				if (cache_.find(new_item_data) == cache_.end())
+                {
+					slotAddTreeItem(QString().fromStdString(new_item_text),
+						QString().fromStdString(new_item_data), expanded_item);
+
+					cache_.insert(new_item_data);
                 }
             }
-        });
+		});
+		setUpdatesEnabled(true);
     }
 
     void ProjectTree::slotItemDoubleClicked(QTreeWidgetItem* expanded_item, int column)
