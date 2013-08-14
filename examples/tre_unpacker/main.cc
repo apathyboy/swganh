@@ -11,21 +11,20 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "anh/utilities.h"
+#include "swganh/utilities.h"
 #include "swganh/tre/tre_archive.h"
 
 namespace bfs = boost::filesystem;
 using boost::this_thread::sleep;
-using Concurrency::make_task;
-using Concurrency::task;
 using swganh::tre::TreArchive;
+using swganh::ByteBuffer;
 
 std::tuple<std::string, std::string> ProcessInput(int argc, char *argv[]);
 
 void ValidateSwgLiveConfig(const std::string& path_to_config);
 void ValidateTargetOutputDirectory(const std::string& target_output_directory);
 
-void SaveFile(std::string filename, const std::vector<unsigned char>& filedata);
+void SaveFile(std::string filename, ByteBuffer filedata);
 
 void UpdateProgressBar(double total, double completed);
 
@@ -39,8 +38,8 @@ int main(int argc, char *argv[])
 #endif
 
     std::cout << "Tre Unpacker v1.0\n\n" << std::endl;
-    
-    try 
+
+    try
     {
         std::string swg_live_file;
         std::string output_path;
@@ -50,17 +49,17 @@ int main(int argc, char *argv[])
         TreArchive archive(swg_live_file);
 
         std::cout << "\nGetting the list of available resources\r" << std::endl;
-        auto resources = archive.GetAvailableResources();        
+        auto resources = archive.GetAvailableResources();
         auto total = resources.size();
         std::cout << "Found (" << total << ") resources\n" << std::endl;
-        
+
         int i = 0;
         for (auto& resource_name : resources)
         {
             auto target_filename = output_path + "/" + resource_name;
             auto resource = archive.GetResource(resource_name);
 
-            SaveFile(target_filename, archive.GetResource(resource_name)); 
+            SaveFile(target_filename, archive.GetResource(resource_name));
 
             if (i % 100)
             {
@@ -82,7 +81,7 @@ int main(int argc, char *argv[])
 #endif
 
     std::cout << "Press any key to exit..." << std::endl;
-    while (anh::KeyboardHit() == 0) sleep(boost::posix_time::milliseconds(1));
+    while (swganh::KeyboardHit() == 0) sleep(boost::posix_time::milliseconds(1));
 
     return 0;
 }
@@ -114,7 +113,7 @@ std::tuple<std::string, std::string> ProcessInput(int argc, char *argv[])
         ValidateTargetOutputDirectory(output_path);
     }
     else
-    {        
+    {
         throw std::runtime_error("Invalid number of parameters specified");
     }
 
@@ -152,7 +151,7 @@ void ValidateTargetOutputDirectory(const std::string& target_output_directory)
     }
 }
 
-void SaveFile(std::string filename, const std::vector<unsigned char>& filedata)
+void SaveFile(std::string filename, ByteBuffer filedata)
 {
     auto path = bfs::path(filename);
 
@@ -165,12 +164,12 @@ void SaveFile(std::string filename, const std::vector<unsigned char>& filedata)
     {
         bfs::create_directories(path.parent_path());
     }
-    
-    std::basic_ofstream<unsigned char> ofs(filename, std::ios::out | std::ios::binary);
+
+    std::ofstream ofs(filename, std::ios::out | std::ios::binary);
 
     if (filedata.size() > 0)
     {
-        ofs.write(&filedata[0], filedata.size());
+        ofs.write(reinterpret_cast<char*>(filedata.data()), filedata.size());
     }
 
     ofs.close();
@@ -209,7 +208,7 @@ void StopTimer(std::chrono::high_resolution_clock::time_point& start_time)
 {
     auto stop_time = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Duration: " << 
-        std::chrono::duration_cast<std::chrono::milliseconds>(stop_time - start_time).count() 
+    std::cout << "Duration: " <<
+        std::chrono::duration_cast<std::chrono::milliseconds>(stop_time - start_time).count()
         << "ms" << std::endl;
 }
