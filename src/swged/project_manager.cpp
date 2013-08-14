@@ -52,7 +52,7 @@ namespace swganh {
 
             project_directory_ = project_directory;
 
-            archive_ = make_unique<tre::TreArchive>(project_directory.toStdString() + "/live.cfg");
+            archive_ = swganh::make_unique<tre::TreArchive>(project_directory.toStdString() + "/live.cfg");
 
             tree_files_->load(project_directory);
 
