@@ -5,14 +5,13 @@
 
 using swganh::tre::iff_node;
 
-IffTreeModel::IffTreeModel(QObject* parent)
+IffTreeModel::IffTreeModel(std::unique_ptr<swganh::tre::iff_node> head, QObject* parent)
     : QAbstractItemModel(parent)
+    , head_(std::move(head))
 {}
 
-void IffTreeModel::setHeadNode(iff_node* head)
-{
-    head_ = head;
-}
+IffTreeModel::~IffTreeModel()
+{}
 
 QModelIndex IffTreeModel::index(int row, int column, const QModelIndex& parent) const
 {
@@ -42,8 +41,6 @@ QModelIndex IffTreeModel::parent(const QModelIndex& index) const
         return QModelIndex();
     }
 
-    int row = 0;
-
     if (auto grandparent_node = parent_node->parent)
     {
         auto find_iter = std::find_if(grandparent_node->children.begin(),
@@ -53,10 +50,11 @@ QModelIndex IffTreeModel::parent(const QModelIndex& index) const
             return child.get() == parent_node;
         });
 
-        row = find_iter - grandparent_node->children.begin();
+        int row = find_iter - grandparent_node->children.begin();
+        return createIndex(row, index.column(), parent_node);
     }
 
-    return createIndex(row, index.column(), parent_node);
+    return QModelIndex();
 }
 
 int IffTreeModel::rowCount(const QModelIndex& parent) const
@@ -111,5 +109,5 @@ iff_node* IffTreeModel::nodeFromIndex(const QModelIndex& index) const
         return static_cast<iff_node*>(index.internalPointer());
     }
 
-    return head_;
+    return head_.get();
 }

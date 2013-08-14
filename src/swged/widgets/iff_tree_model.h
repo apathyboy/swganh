@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <memory>
 #include <QAbstractItemModel>
 
 #include "swganh/byte_buffer.h"
@@ -16,9 +17,8 @@ class IffTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit IffTreeModel(QObject* parent = nullptr);
-
-    void setHeadNode(swganh::tre::iff_node* head);
+    explicit IffTreeModel(std::unique_ptr<swganh::tre::iff_node> head, QObject* parent = nullptr);
+    ~IffTreeModel();
 
     // READ ONLY
 
@@ -31,5 +31,5 @@ public:
 private:
     swganh::tre::iff_node* nodeFromIndex(const QModelIndex& index) const;
 
-    swganh::tre::iff_node* head_;
+    std::unique_ptr<swganh::tre::iff_node> head_;
 };

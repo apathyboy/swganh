@@ -86,8 +86,7 @@ namespace swganh {
             auto iff_doc = swganh::tre::parse_iff(resource);
 
             auto tab_doc = new QTreeView(parent_->documentsTabWidget);
-            auto tab_model = new IffTreeModel();
-            tab_model->setHeadNode(iff_doc.get());
+            auto tab_model = new IffTreeModel(std::move(iff_doc));
             tab_doc->setModel(tab_model);
 
             parent_->documentsTabWidget->addTab(tab_doc, project_file);
