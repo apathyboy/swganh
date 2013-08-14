@@ -29,6 +29,7 @@ namespace swganh {
         connect(actionOptions, SIGNAL(triggered()), this, SLOT(slotOptions()));
         connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
         connect(this, SIGNAL(options()), this, SLOT(slotOptions()));
+        connect(documentsTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeDocumentTab(int)));
 
         status_progress_bar_ = new QProgressBar(this);
         status_progress_bar_->setVisible(false);
@@ -93,7 +94,7 @@ namespace swganh {
     {
         QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ANH Studios", "SWGEd");
 
-        settings.beginGroup("main");        
+        settings.beginGroup("main");
         project_directory_ = settings.value("project_directory", QString("")).toString();
         settings.endGroup();
     }
@@ -111,5 +112,17 @@ namespace swganh {
     {
         statusbar->clearMessage();
         showStatusProgress(false);
+    }
+
+    void MainWindow::closeDocumentTab(int index)
+    {
+        if (index == -1)
+        {
+            return;
+        }
+
+        QWidget* tabItem = documentsTabWidget->widget(index);
+        documentsTabWidget->removeTab(index);
+        delete tabItem;
     }
 }

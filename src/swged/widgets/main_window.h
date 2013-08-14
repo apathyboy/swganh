@@ -41,6 +41,7 @@ namespace swganh {
         void slotAbout();
         void slotOptions();
         void slotProjectLoadFinished();
+        void closeDocumentTab(int index);
     };
 
 }
