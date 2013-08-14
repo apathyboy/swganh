@@ -40,7 +40,7 @@ namespace tre {
 	std::unique_ptr<iff_node> make_version_form(const char form_type[4], const char form_version[4], iff_node* parent = nullptr);
 	std::unique_ptr<iff_node> make_record(const char name[4], iff_node* parent = nullptr);
 
-	std::unique_ptr<iff_node> parse_iff(ByteBuffer resource, iff_node* parent = nullptr);
+	std::unique_ptr<iff_node> parse_iff(ByteBuffer& resource, iff_node* parent = nullptr);
 	void write_iff(ByteBuffer& resource, iff_node* node);
 
 	class base_iff_document

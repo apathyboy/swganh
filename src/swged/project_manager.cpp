@@ -77,12 +77,13 @@ namespace swganh {
 		if (extension.compare(".trn") == 0)
 		{
 			// open terrain editor
-			terrain_editor_ = make_unique<TerrainEditor>(project_file, this);
+			terrain_editor_ = swganh::make_unique<TerrainEditor>(project_file, this);
 			terrain_editor_->show();
 		}
 		else
 		{
-            auto iff_doc = swganh::tre::parse_iff(archive_->GetResource(project_file.toStdString()));
+            auto resource = archive_->GetResource(project_file.toStdString());
+            auto iff_doc = swganh::tre::parse_iff(resource);
 
             auto tab_doc = new QTreeView(parent_->documentsTabWidget);
             auto tab_model = new IffTreeModel();
