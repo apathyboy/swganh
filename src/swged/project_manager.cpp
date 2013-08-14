@@ -90,7 +90,7 @@ namespace swganh {
             tab_doc->setModel(tab_model);
 
             parent_->documentsTabWidget->addTab(tab_doc, project_file);
-
+            parent_->documentsTabWidget->setCurrentWidget(tab_doc);
             tab_doc->show();
 		}
 	}
