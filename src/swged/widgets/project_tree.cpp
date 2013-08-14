@@ -27,7 +27,6 @@ namespace swganh {
     ProjectTree::ProjectTree(QWidget* parent)
         : QTreeWidget(parent)
     {
-        connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(slotItemCollapsed(QTreeWidgetItem*)));
         connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(slotItemExpanded(QTreeWidgetItem*)));
 
         // launch editor with src file loaded
@@ -90,14 +89,6 @@ namespace swganh {
     bool ProjectTree::isDir(QTreeWidgetItem* item) const
     {
         return !isFile(item);
-    }
-
-    void ProjectTree::slotItemCollapsed(QTreeWidgetItem* expanded_item)
-    {
-        for (int i = expanded_item->childCount() - 1; i >= 0; --i)
-        {
-            expanded_item->removeChild(expanded_item->child(i));
-        }
     }
 
     void ProjectTree::slotItemExpanded(QTreeWidgetItem* expanded_item)

@@ -36,7 +36,6 @@ namespace swganh {
         bool isDir(QTreeWidgetItem* item) const;
 
     private slots:
-        void slotItemCollapsed(QTreeWidgetItem* expanded_item);
         void slotItemExpanded(QTreeWidgetItem* expanded_item);
         void slotItemDoubleClicked(QTreeWidgetItem* expanded_item, int column);
         void slotExtractFile();
