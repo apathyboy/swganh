@@ -39,7 +39,7 @@ namespace swganh {
 
     private:
         bool isDocumentOpen(const QString& document) const;
-
+        int documentIndex(const QString& document) const;
         MainWindow* parent_;
         ProjectTree* tree_files_;
 		std::unique_ptr<TerrainEditor> terrain_editor_;

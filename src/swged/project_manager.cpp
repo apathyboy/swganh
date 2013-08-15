@@ -74,25 +74,32 @@ namespace swganh {
 	void ProjectManager::openFile(QString project_file)
 	{
 		std::string extension = bf::extension(project_file.toStdString());
-		if (extension.compare(".trn") == 0)
+        if (!isDocumentOpen(project_file))
 		{
-			// open terrain editor
-			terrain_editor_ = swganh::make_unique<TerrainEditor>(project_file, this);
-			terrain_editor_->show();
-		}
-		else if (!isDocumentOpen(project_file))
-		{
-            auto resource = archive_->GetResource(project_file.toStdString());
-            auto iff_doc = swganh::tre::parse_iff(resource);
+            if (extension.compare(".trn") == 0)
+            {
+                // open terrain editor
+                terrain_editor_ = swganh::make_unique<TerrainEditor>(project_file, this);
+                terrain_editor_->show();
+            }
+            else
+            {
+                auto resource = archive_->GetResource(project_file.toStdString());
+                auto iff_doc = swganh::tre::parse_iff(resource);
 
-            auto tab_doc = new QTreeView(parent_->documentsTabWidget);
-            auto tab_model = new IffTreeModel(std::move(iff_doc));
-            tab_doc->setModel(tab_model);
+                auto tab_doc = new QTreeView(parent_->documentsTabWidget);
+                auto tab_model = new IffTreeModel(std::move(iff_doc));
+                tab_doc->setModel(tab_model);
 
-            parent_->documentsTabWidget->addTab(tab_doc, project_file);
-            parent_->documentsTabWidget->setCurrentWidget(tab_doc);
-            tab_doc->show();
+                parent_->documentsTabWidget->addTab(tab_doc, project_file);
+                parent_->documentsTabWidget->setCurrentWidget(tab_doc);
+                tab_doc->show();
+            }
 		}
+        else
+        {
+            parent_->documentsTabWidget->setCurrentIndex(documentIndex(project_file));
+        }
 	}
 
     tre::TreArchive* ProjectManager::getArchive()
@@ -102,16 +109,21 @@ namespace swganh {
 
     bool ProjectManager::isDocumentOpen(const QString& document) const
     {
+        return documentIndex(document) >= 0;
+    }
+
+    int ProjectManager::documentIndex(const QString& document) const
+    {
         auto count = parent_->documentsTabWidget->count();
 
         for (int i = 0; i < count; ++i)
         {
             if (parent_->documentsTabWidget->tabText(i).compare(document) == 0)
             {
-                return true;
+                return i;
             }
         }
 
-        return false;
+        return -1;
     }
 }
