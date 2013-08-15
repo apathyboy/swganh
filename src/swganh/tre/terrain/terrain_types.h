@@ -410,27 +410,37 @@ namespace detail_terrain {
 		bool enabled;
 		std::string name;
 
+		virtual e_layer_type get_layer_type() const = 0;
+
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
 	};
 
 	struct base_affector_layer : public base_terrain_layer
 	{
+		e_layer_type get_layer_type() const override { return e_layer_type::affector; }
+
 		virtual e_affector_type get_type() const = 0;
 	};
 
 	struct base_boundary_layer : public base_terrain_layer
 	{
+		e_layer_type get_layer_type() const override { return e_layer_type::boundary; }
+
 		virtual e_boundary_type get_type() const = 0;
 	};
 
 	struct base_filter_layer : public base_terrain_layer
 	{
+		e_layer_type get_layer_type() const override { return e_layer_type::filter; }
+
 		virtual e_filter_type get_type() const = 0;
 	};
 
 	struct construction_layer : public base_terrain_layer
 	{
+		e_layer_type get_layer_type() const override { return e_layer_type::construction; }
+
 		bool invert_boundaries;
 		bool invert_filters;
 		uint32_t unknown1;
@@ -441,7 +451,7 @@ namespace detail_terrain {
 		std::vector<std::unique_ptr<base_filter_layer>> filters;
 		std::vector<std::unique_ptr<construction_layer>> containers;
 
-		std::vector<std::pair<base_terrain_layer*, e_layer_type>> children;
+		std::vector<base_terrain_layer*> children;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
