@@ -410,6 +410,8 @@ namespace detail_terrain {
 		bool enabled;
 		std::string name;
 
+		base_terrain_layer* parent;
+
 		virtual e_layer_type get_layer_type() const = 0;
 
 		void deserialize(ByteBuffer& buffer);

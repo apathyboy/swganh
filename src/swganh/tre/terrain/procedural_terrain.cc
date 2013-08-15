@@ -270,6 +270,7 @@ struct terrain_iff_reader
 
 		if (parent)
 		{
+			layer->parent = parent;
 			parent->children.push_back(layer.get());
 			parent->containers.push_back(std::move(layer));
 			layer = nullptr;
@@ -296,6 +297,8 @@ struct terrain_iff_reader
 
 		T* result = layer.get();
 
+		layer->parent = parent;
+
 		parent->children.push_back(layer.get());
 		parent->affectors.push_back(std::move(layer));
 
@@ -309,6 +312,8 @@ struct terrain_iff_reader
 
 		T* result = layer.get();
 
+		layer->parent = parent;
+
 		parent->children.push_back(layer.get());
 		parent->boundaries.push_back(std::move(layer));
 
@@ -321,6 +326,8 @@ struct terrain_iff_reader
 		auto layer = load_layer<T>(layer_node, data_node);
 
 		T* result = layer.get();
+
+		layer->parent = parent;
 
 		parent->children.push_back(layer.get());
 		parent->filters.push_back(std::move(layer));
