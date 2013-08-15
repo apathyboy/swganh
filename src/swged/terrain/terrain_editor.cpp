@@ -3,9 +3,6 @@
 
 #include <QMessageBox>
 
-#include "ui_map_options.h"
-#include "ui_flora_options.h"
-#include "layer_properties_widget.h"
 #include "swganh/tre/terrain/procedural_terrain.h"
 
 using swganh::tre::procedural_terrain;
