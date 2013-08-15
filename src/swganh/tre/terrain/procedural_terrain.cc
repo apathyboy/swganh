@@ -750,7 +750,7 @@ std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuf
 {
 	auto iff_doc = parse_iff(buffer);
 	auto pt = make_unique<procedural_terrain>();
-	auto form0014 = iff_doc->form("0014");
+	auto form0014 = iff_doc->form("PTAT")->form("0014");
 
 	if (form0014)
 	{
