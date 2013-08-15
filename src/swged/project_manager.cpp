@@ -17,6 +17,7 @@
 #include "swganh/utilities.h"
 #include "swganh/tre/tre_archive.h"
 #include "swganh/tre/iff/iff.h"
+#include "swganh/tre/terrain/procedural_terrain.h"
 
 #include "widgets/main_window.h"
 #include "widgets/project_tree.h"
@@ -76,20 +77,18 @@ namespace swganh {
 		std::string extension = bf::extension(project_file.toStdString());
         if (!isDocumentOpen(project_file))
 		{
+            auto resource = archive_->GetResource(project_file.toStdString());
+
             if (extension.compare(".trn") == 0)
             {
-                // open terrain editor
-                terrain_editor_ = swganh::make_unique<TerrainEditor>(project_file, this);
+                terrain_editor_ = swganh::make_unique<TerrainEditor>(
+                    swganh::tre::read_procedural_terrain(resource));
                 terrain_editor_->show();
             }
             else
             {
-                auto resource = archive_->GetResource(project_file.toStdString());
-                auto iff_doc = swganh::tre::parse_iff(resource);
-
                 auto tab_doc = new QTreeView(parent_->documentsTabWidget);
-                auto tab_model = new IffTreeModel(std::move(iff_doc));
-                tab_doc->setModel(tab_model);
+                tab_doc->setModel(new IffTreeModel(swganh::tre::parse_iff(resource)));
 
                 parent_->documentsTabWidget->addTab(tab_doc, project_file);
                 parent_->documentsTabWidget->setCurrentWidget(tab_doc);
