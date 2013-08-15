@@ -80,7 +80,7 @@ namespace swganh {
 			terrain_editor_ = swganh::make_unique<TerrainEditor>(project_file, this);
 			terrain_editor_->show();
 		}
-		else
+		else if (!isDocumentOpen(project_file))
 		{
             auto resource = archive_->GetResource(project_file.toStdString());
             auto iff_doc = swganh::tre::parse_iff(resource);
@@ -100,4 +100,18 @@ namespace swganh {
         return archive_.get();
     }
 
+    bool ProjectManager::isDocumentOpen(const QString& document) const
+    {
+        auto count = parent_->documentsTabWidget->count();
+
+        for (int i = 0; i < count; ++i)
+        {
+            if (parent_->documentsTabWidget->tabText(i).compare(document) == 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

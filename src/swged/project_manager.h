@@ -20,7 +20,7 @@ namespace swganh {
     class ProjectManager : public QObject
     {
         Q_OBJECT
-    
+
     public:
         ProjectManager(MainWindow* parent, ProjectTree* tree_files);
         ~ProjectManager();
@@ -38,6 +38,8 @@ namespace swganh {
         void closingProject();
 
     private:
+        bool isDocumentOpen(const QString& document) const;
+
         MainWindow* parent_;
         ProjectTree* tree_files_;
 		std::unique_ptr<TerrainEditor> terrain_editor_;
