@@ -764,12 +764,16 @@ std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuf
 
 ByteBuffer swganh::tre::write_procedural_terrain(procedural_terrain& terrain)
 {
-	auto iff_doc = swganh::tre::make_version_form("PTAT", "0014");
-	auto form0014 = iff_doc->form("0014");
+	auto iff_doc = std::make_unique<iff_node>();
 
-	terrain_iff_writer::store_header(terrain, form0014);
-	terrain_iff_writer::store_terrain_data(terrain, form0014);
-	terrain_iff_writer::store_footer(terrain, form0014);
+	auto ptat = swganh::tre::make_version_form("PTAT", "0014");
+	auto ptat0014 = ptat->form("0014");
+
+	iff_doc->children.push_back(std::move(ptat));
+
+	terrain_iff_writer::store_header(terrain, ptat0014);
+	terrain_iff_writer::store_terrain_data(terrain, ptat0014);
+	terrain_iff_writer::store_footer(terrain, ptat0014);
 
 	swganh::ByteBuffer out_buffer;
 

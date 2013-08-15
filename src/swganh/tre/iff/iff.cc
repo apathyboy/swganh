@@ -119,7 +119,15 @@ std::unique_ptr<swganh::tre::iff_node> swganh::tre::detail::parse_iff(ByteBuffer
 	return node;
 }
 
-void swganh::tre::write_iff(ByteBuffer& resource, swganh::tre::iff_node* node)
+void swganh::tre::write_iff(ByteBuffer& resource, swganh::tre::iff_node* root)
+{
+	for (const auto& child : root->children)
+	{
+		detail::write_iff(resource, child.get());
+	}
+}
+
+void swganh::tre::detail::write_iff(ByteBuffer& resource, swganh::tre::iff_node* node)
 {
 	resource.write(node->name);
 
@@ -132,7 +140,7 @@ void swganh::tre::write_iff(ByteBuffer& resource, swganh::tre::iff_node* node)
 		resource.write(node->form_type);
 		for (const auto& child : node->children)
 		{
-			write_iff(resource, child.get());
+			detail::write_iff(resource, child.get());
 		}
 	}
 	else

@@ -42,10 +42,11 @@ namespace tre {
 
 	namespace detail {
 		std::unique_ptr<iff_node> parse_iff(ByteBuffer& resource, iff_node* parent = nullptr);
+		void write_iff(ByteBuffer& resource, iff_node* node);
 	}
 
 	std::unique_ptr<iff_node> parse_iff(ByteBuffer& resource);
-	void write_iff(ByteBuffer& resource, iff_node* node);
+	void write_iff(ByteBuffer& resource, iff_node* root);
 
 	class base_iff_document
 	{
