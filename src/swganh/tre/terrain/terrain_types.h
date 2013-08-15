@@ -411,6 +411,7 @@ namespace detail_terrain {
 		std::string name;
 
 		base_terrain_layer* parent;
+		std::vector<std::unique_ptr<base_terrain_layer>> children;
 
 		virtual e_layer_type get_layer_type() const = 0;
 
@@ -448,12 +449,10 @@ namespace detail_terrain {
 		uint32_t unknown1;
 		std::string notes;
 
-		std::vector<std::unique_ptr<base_affector_layer>> affectors;
-		std::vector<std::unique_ptr<base_boundary_layer>> boundaries;
-		std::vector<std::unique_ptr<base_filter_layer>> filters;
-		std::vector<std::unique_ptr<construction_layer>> containers;
-
-		std::vector<base_terrain_layer*> children;
+		std::vector<base_affector_layer*> affectors;
+		std::vector<base_boundary_layer*> boundaries;
+		std::vector<base_filter_layer*> filters;
+		std::vector<construction_layer*> containers;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);

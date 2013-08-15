@@ -271,8 +271,8 @@ struct terrain_iff_reader
 		if (parent)
 		{
 			layer->parent = parent;
-			parent->children.push_back(layer.get());
-			parent->containers.push_back(std::move(layer));
+			parent->containers.push_back(layer.get());
+			parent->children.push_back(std::move(layer));
 			layer = nullptr;
 		}
 
@@ -299,8 +299,8 @@ struct terrain_iff_reader
 
 		layer->parent = parent;
 
-		parent->children.push_back(layer.get());
-		parent->affectors.push_back(std::move(layer));
+		parent->affectors.push_back(layer.get());
+		parent->children.push_back(std::move(layer));
 
 		return result;
 	}
@@ -314,8 +314,8 @@ struct terrain_iff_reader
 
 		layer->parent = parent;
 
-		parent->children.push_back(layer.get());
-		parent->boundaries.push_back(std::move(layer));
+		parent->boundaries.push_back(layer.get());
+		parent->children.push_back(std::move(layer));
 
 		return result;
 	}
@@ -329,8 +329,8 @@ struct terrain_iff_reader
 
 		layer->parent = parent;
 
-		parent->children.push_back(layer.get());
-		parent->filters.push_back(std::move(layer));
+		parent->filters.push_back(layer.get());
+		parent->children.push_back(std::move(layer));
 
 		return result;
 	}
@@ -480,28 +480,28 @@ struct terrain_iff_writer
 
 		layr0003->children.push_back(std::move(data_record));
 
-		for (auto child : layer->children)
+		for (const auto& child : layer->children)
 		{
 			switch (child->get_layer_type())
 			{
 			case swganh::tre::detail_terrain::e_layer_type::affector:
 				{
-					store_affector(static_cast<base_affector_layer*>(child), layr0003);
+					store_affector(static_cast<base_affector_layer*>(child.get()), layr0003);
 				}
 				break;
 			case swganh::tre::detail_terrain::e_layer_type::boundary:
 				{
-					store_boundary(static_cast<base_boundary_layer*>(child), layr0003);
+					store_boundary(static_cast<base_boundary_layer*>(child.get()), layr0003);
 				}
 				break;
 			case swganh::tre::detail_terrain::e_layer_type::construction:
 				{
-					store_construction_layer(static_cast<construction_layer*>(child), layr0003);
+					store_construction_layer(static_cast<construction_layer*>(child.get()), layr0003);
 				}
 				break;
 			case swganh::tre::detail_terrain::e_layer_type::filter:
 				{
-					store_filter(static_cast<base_filter_layer*>(child), layr0003);
+					store_filter(static_cast<base_filter_layer*>(child.get()), layr0003);
 				}
 				break;
 			default:
