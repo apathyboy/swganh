@@ -7,7 +7,7 @@
 
 namespace swganh {
 namespace terrain {
-    struct procedural_terrain;
+    struct construction_layer;
     struct base_terrain_layer;
 }}
 
@@ -17,7 +17,7 @@ namespace swganh {
 class LayerModel : public QAbstractItemModel
 {
 public:
-    LayerModel(swganh::terrain::procedural_terrain& terrain, QObject* parent = nullptr);
+    LayerModel(std::vector<std::unique_ptr<swganh::terrain::construction_layer>>& layers, QObject* parent = nullptr);
     ~LayerModel();
 
     QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
@@ -29,7 +29,7 @@ public:
 private:
     swganh::terrain::base_terrain_layer* layerFromIndex(const QModelIndex& index) const;
 
-    swganh::terrain::procedural_terrain& terrain_;
+    std::vector<std::unique_ptr<swganh::terrain::construction_layer>>& layers_;
 };
 
 }

@@ -1,17 +1,16 @@
 
 #include "layer_model.h"
 
-#include "swganh/terrain/procedural_terrain.h"
 #include "swganh/terrain/terrain_types.h"
 
 using swganh::LayerModel;
-using swganh::terrain::procedural_terrain;
 using swganh::terrain::base_terrain_layer;
+using swganh::terrain::construction_layer;
 
 
-LayerModel::LayerModel(procedural_terrain& terrain, QObject* parent)
+LayerModel::LayerModel(std::vector<std::unique_ptr<construction_layer>>& layers, QObject* parent)
     : QAbstractItemModel(parent)
-    , terrain_(terrain)
+    , layers_(layers)
 {}
 
 LayerModel::~LayerModel()
@@ -44,6 +43,6 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
 
 base_terrain_layer* LayerModel::layerFromIndex(const QModelIndex& index) const
 {
-    auto i = terrain_.header.chunk_width;
+    layers_.size();
     return nullptr;
 }
