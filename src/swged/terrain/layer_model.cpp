@@ -36,21 +36,33 @@ QModelIndex LayerModel::parent(const QModelIndex& index) const
 
     auto parent_layer = layer->parent;
 
-    if (!parent_layer)
+    if (parent_layer)
     {
-        return QModelIndex();
-    }
+        int row = 0;
 
-    if (auto grandparent_layer = parent_layer->parent)
-    {
-        auto find_iter = std::find_if(grandparent_layer->children.begin(),
-            grandparent_layer->children.end(),
-            [parent_layer] (const std::unique_ptr<base_terrain_layer>& child)
+        if (auto grandparent_layer = parent_layer->parent)
         {
-            return child.get() == parent_layer;
-        });
+            auto find_iter = std::find_if(grandparent_layer->children.begin(),
+                grandparent_layer->children.end(),
+                [parent_layer] (const std::unique_ptr<base_terrain_layer>& child)
+            {
+                return child.get() == parent_layer;
+            });
 
-        int row = find_iter - grandparent_layer->children.begin();
+            row = find_iter - grandparent_layer->children.begin();
+        }
+        else
+        {
+            auto find_iter = std::find_if(layers_.begin(),
+                layers_.end(),
+                [parent_layer] (const std::unique_ptr<construction_layer>& child)
+            {
+                return child.get() == parent_layer;
+            });
+
+            row = find_iter - layers_.begin();
+        }
+
         return createIndex(row, index.column(), parent_layer);
     }
 

@@ -343,6 +343,11 @@ void fractal_family::fractal::serialize(ByteBuffer& buffer)
 	buffer.write(uint32_t(rule));
 }
 
+e_layer_type base_terrain_layer::get_layer_type() const
+{
+	return e_layer_type::root;
+}
+
 std::string base_terrain_layer::type_str() const
 {
 	std::string type;
@@ -369,10 +374,19 @@ std::string base_terrain_layer::type_str() const
 			type = "filter";
 		}
 		break;
+	case e_layer_type::root:
+		{
+			type = "root";
+		}
 	case e_layer_type::COUNT: {} break;
 	}
 
 	return type;
+}
+
+std::string base_terrain_layer::subtype_str() const
+{
+	return "root";
 }
 
 void base_terrain_layer::deserialize(ByteBuffer& buffer)

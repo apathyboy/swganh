@@ -113,6 +113,7 @@ namespace terrain {
 		affector,
 		boundary,
 		filter,
+		root,
 		COUNT
 	};
 
@@ -400,10 +401,10 @@ namespace terrain {
 		base_terrain_layer* parent;
 		std::vector<std::unique_ptr<base_terrain_layer>> children;
 
-		virtual e_layer_type get_layer_type() const = 0;
+		virtual e_layer_type get_layer_type() const;
 
 		virtual std::string type_str() const;
-		virtual std::string subtype_str() const = 0;
+		virtual std::string subtype_str() const;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
