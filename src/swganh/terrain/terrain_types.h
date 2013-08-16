@@ -398,6 +398,10 @@ namespace terrain {
 		bool enabled;
 		std::string name;
 
+		base_terrain_layer()
+			: parent(nullptr)
+		{}
+
 		base_terrain_layer* parent;
 		std::vector<std::unique_ptr<base_terrain_layer>> children;
 

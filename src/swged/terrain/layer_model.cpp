@@ -22,7 +22,14 @@ QModelIndex LayerModel::index(int row, int column, const QModelIndex& parent) co
 {
     auto parent_layer = layerFromIndex(parent);
 
-    return createIndex(row, column, parent_layer->children[row].get());
+	if (parent_layer)
+	{
+		return createIndex(row, column, parent_layer->children[row].get());
+	}
+	else
+	{
+		return createIndex(row, column, layers_[row].get());
+	}
 }
 
 QModelIndex LayerModel::parent(const QModelIndex& index) const
@@ -75,6 +82,10 @@ int LayerModel::rowCount(const QModelIndex& parent) const
     {
         return parent_layer->children.size();
     }
+	else
+	{
+		return layers_.size();
+	}
 
     return 0;
 }
