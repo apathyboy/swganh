@@ -11,16 +11,7 @@
 #include "swganh/byte_buffer.h"
 
 namespace swganh {
-namespace tre {
-namespace detail_terrain {
-
-	namespace detail {
-#ifdef WIN32
-		using std::make_unique;
-#else
-		using swganh::make_unique;
-#endif
-	}
+namespace terrain {
 
 	enum class combination_rules : uint32_t
 	{
@@ -131,18 +122,14 @@ namespace detail_terrain {
 	public:
 		typedef T family_type;
 
-		family_type* add_family(std::string name)
+		std::unique_ptr<family_type> create_family(std::string name)
 		{
-			family_type* family = nullptr;
+			auto new_family = swganh::make_unique<family_type>();
 
-			auto new_family = detail::make_unique<family_type>();
-			new_family->family_name = name;
+			new_family->family_name = std::move(name);
 			new_family->family_id = next_family_id();
 
-			family = new_family.get();
-			families_.push_back(std::move(new_family));
-
-			return family;
+			return new_family;
 		}
 
 		void add_family(std::unique_ptr<family_type> family)
@@ -857,4 +844,4 @@ namespace detail_terrain {
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
 	};
-}}}
+}}

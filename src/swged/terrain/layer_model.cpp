@@ -1,12 +1,12 @@
 
 #include "layer_model.h"
 
-#include "swganh/tre/terrain/procedural_terrain.h"
-#include "swganh/tre/terrain/terrain_types.h"
+#include "swganh/terrain/procedural_terrain.h"
+#include "swganh/terrain/terrain_types.h"
 
 using swganh::LayerModel;
-using swganh::tre::procedural_terrain;
-using swganh::tre::detail_terrain::base_terrain_layer;
+using swganh::terrain::procedural_terrain;
+using swganh::terrain::base_terrain_layer;
 
 
 LayerModel::LayerModel(procedural_terrain& terrain, QObject* parent)

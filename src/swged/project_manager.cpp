@@ -17,7 +17,7 @@
 #include "swganh/utilities.h"
 #include "swganh/tre/tre_archive.h"
 #include "swganh/tre/iff.h"
-#include "swganh/tre/terrain/procedural_terrain.h"
+#include "swganh/terrain/procedural_terrain.h"
 
 #include "widgets/main_window.h"
 #include "widgets/project_tree.h"
@@ -82,7 +82,7 @@ namespace swganh {
             if (extension.compare(".trn") == 0)
             {
                 terrain_editor_ = swganh::make_unique<TerrainEditor>(
-                    swganh::tre::read_procedural_terrain(resource));
+                    swganh::terrain::read_procedural_terrain(resource));
                 terrain_editor_->show();
             }
             else

@@ -6,22 +6,22 @@
 #include "ui_terrain_editor.h"
 
 namespace swganh {
-
-	namespace tre {
+namespace terrain {
 		struct procedural_terrain;
-	}
+}}
 
 
+namespace swganh {
 	class TerrainEditor : public QMainWindow, private Ui::TerrainEditor
 	{
 		Q_OBJECT
 
 	public:
-		explicit TerrainEditor(std::unique_ptr<swganh::tre::procedural_terrain> terrain, QWidget* parent = nullptr);
+		explicit TerrainEditor(std::unique_ptr<swganh::terrain::procedural_terrain> terrain, QWidget* parent = nullptr);
 		~TerrainEditor();
 
 	private:
-		std::unique_ptr<swganh::tre::procedural_terrain> terrain_;
+		std::unique_ptr<swganh::terrain::procedural_terrain> terrain_;
 	};
 
 

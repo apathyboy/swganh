@@ -6,13 +6,10 @@
 #include <QAbstractItemModel>
 
 namespace swganh {
-namespace tre {
+namespace terrain {
     struct procedural_terrain;
-
-namespace detail_terrain
-{
     struct base_terrain_layer;
-}}}
+}}
 
 
 namespace swganh {
@@ -20,7 +17,7 @@ namespace swganh {
 class LayerModel : public QAbstractItemModel
 {
 public:
-    LayerModel(swganh::tre::procedural_terrain& terrain, QObject* parent = nullptr);
+    LayerModel(swganh::terrain::procedural_terrain& terrain, QObject* parent = nullptr);
     ~LayerModel();
 
     QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
@@ -30,9 +27,9 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
 private:
-    swganh::tre::detail_terrain::base_terrain_layer* layerFromIndex(const QModelIndex& index) const;
+    swganh::terrain::base_terrain_layer* layerFromIndex(const QModelIndex& index) const;
 
-    swganh::tre::procedural_terrain& terrain_;
+    swganh::terrain::procedural_terrain& terrain_;
 };
 
 }

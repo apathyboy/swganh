@@ -8,9 +8,11 @@
 #include <string>
 
 #include "swganh/tre/iff/iff.h"
-#include "swganh/tre/terrain/procedural_terrain.h"
+#include "swganh/terrain/procedural_terrain.h"
 
-std::unique_ptr<swganh::tre::procedural_terrain> read_terrain(std::string terrain_filename);
+using swganh::terrain::procedural_terrain;
+
+std::unique_ptr<procedural_terrain> read_terrain(std::string terrain_filename);
 void write_to_file(std::string filename, swganh::ByteBuffer data);
 
 int main(int argc, char *argv[])
@@ -35,7 +37,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-std::unique_ptr<swganh::tre::procedural_terrain> read_terrain(std::string terrain_filename)
+std::unique_ptr<procedural_terrain> read_terrain(std::string terrain_filename)
 {
 	std::ifstream in(terrain_filename, std::ios::binary);
 
@@ -50,7 +52,7 @@ std::unique_ptr<swganh::tre::procedural_terrain> read_terrain(std::string terrai
 
 	swganh::ByteBuffer data(reinterpret_cast<unsigned char*>(tmp.data()), tmp.size());
 
-	return swganh::tre::read_procedural_terrain(data);
+	return swganh::terrain::read_procedural_terrain(data);
 }
 
 void write_to_file(std::string filename, swganh::ByteBuffer data)

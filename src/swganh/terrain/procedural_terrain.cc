@@ -5,10 +5,9 @@
 
 #include "swganh/tre/iff.h"
 
-using namespace swganh::tre::detail_terrain;
+using namespace swganh::terrain;
 using swganh::ByteBuffer;
 using swganh::tre::iff_node;
-using swganh::tre::procedural_terrain;
 
 #ifdef WIN32
 using std::make_unique;
@@ -484,22 +483,22 @@ struct terrain_iff_writer
 		{
 			switch (child->get_layer_type())
 			{
-			case swganh::tre::detail_terrain::e_layer_type::affector:
+			case swganh::terrain::e_layer_type::affector:
 				{
 					store_affector(static_cast<base_affector_layer*>(child.get()), layr0003);
 				}
 				break;
-			case swganh::tre::detail_terrain::e_layer_type::boundary:
+			case swganh::terrain::e_layer_type::boundary:
 				{
 					store_boundary(static_cast<base_boundary_layer*>(child.get()), layr0003);
 				}
 				break;
-			case swganh::tre::detail_terrain::e_layer_type::construction:
+			case swganh::terrain::e_layer_type::construction:
 				{
 					store_construction_layer(static_cast<construction_layer*>(child.get()), layr0003);
 				}
 				break;
-			case swganh::tre::detail_terrain::e_layer_type::filter:
+			case swganh::terrain::e_layer_type::filter:
 				{
 					store_filter(static_cast<base_filter_layer*>(child.get()), layr0003);
 				}
@@ -518,82 +517,82 @@ struct terrain_iff_writer
 	{
 		switch (affector->get_type())
 		{
-		case swganh::tre::detail_terrain::e_affector_type::color_constant:
+		case swganh::terrain::e_affector_type::color_constant:
 			{
 				store_layer(static_cast<affector_color_constant*>(affector), "ACCN", "0000", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::color_ramp_fractal:
+		case swganh::terrain::e_affector_type::color_ramp_fractal:
 			{
 				store_parm_layer(static_cast<affector_color_ramp_fractal*>(affector), "ACRF", "0001", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::color_ramp_height:
+		case swganh::terrain::e_affector_type::color_ramp_height:
 			{
 				store_layer(static_cast<affector_color_ramp_height*>(affector), "ACRH", "0000", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::environment:
+		case swganh::terrain::e_affector_type::environment:
 			{
 				store_layer(static_cast<affector_environment*>(affector), "AENV", "0000", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::exclude:
+		case swganh::terrain::e_affector_type::exclude:
 			{
 				store_layer(static_cast<affector_exclude*>(affector), "AEXC", "0000", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::flora_dynamic_near_constant:
+		case swganh::terrain::e_affector_type::flora_dynamic_near_constant:
 			{
 				store_layer(static_cast<affector_radial_near_constant*>(affector), "AFDN", "0002", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::flora_dynamic_far_constant:
+		case swganh::terrain::e_affector_type::flora_dynamic_far_constant:
 			{
 				store_layer(static_cast<affector_radial_far_constant*>(affector), "AFDF", "0002", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::flora_static_collidable_constant:
+		case swganh::terrain::e_affector_type::flora_static_collidable_constant:
 			{
 				store_layer(static_cast<affector_flora_collidable_constant*>(affector), "AFSC", "0004", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::flora_static_non_collidable_constant:
+		case swganh::terrain::e_affector_type::flora_static_non_collidable_constant:
 			{
 				store_layer(static_cast<affector_flora_non_collidable_constant*>(affector), "AFSN", "0004", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::height_constant:
+		case swganh::terrain::e_affector_type::height_constant:
 			{
 				store_layer(static_cast<affector_height_constant*>(affector), "AHCN", "0000", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::height_fractal:
+		case swganh::terrain::e_affector_type::height_fractal:
 			{
 				store_parm_layer(static_cast<affector_height_fractal*>(affector), "AHFR", "0003", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::height_terrace:
+		case swganh::terrain::e_affector_type::height_terrace:
 			{
 				store_layer(static_cast<affector_height_terrace*>(affector), "AHTR", "0004", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::river:
+		case swganh::terrain::e_affector_type::river:
 			{
 				store_segment_layer(static_cast<affector_river*>(affector), "ARIV", "0005", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::road:
+		case swganh::terrain::e_affector_type::road:
 			{
 				store_segment_layer(static_cast<affector_road*>(affector), "AROA", "0005", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::shader_constant:
+		case swganh::terrain::e_affector_type::shader_constant:
 			{
 				store_layer(static_cast<affector_shader_constant*>(affector), "ASCN", "0001", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_affector_type::shader_replace:
+		case swganh::terrain::e_affector_type::shader_replace:
 			{
 				store_layer(static_cast<affector_shader_replace*>(affector), "ASRP", "0001", parent);
 			}
@@ -609,22 +608,22 @@ struct terrain_iff_writer
 	{
 		switch (boundary->get_type())
 		{
-		case swganh::tre::detail_terrain::e_boundary_type::circle:
+		case swganh::terrain::e_boundary_type::circle:
 			{
 				store_layer(static_cast<boundary_circle*>(boundary), "BCIR", "0002", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_boundary_type::polyline:
+		case swganh::terrain::e_boundary_type::polyline:
 			{
 				store_layer(static_cast<boundary_polyline*>(boundary), "BPLN", "0001", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_boundary_type::polygon:
+		case swganh::terrain::e_boundary_type::polygon:
 			{
 				store_layer(static_cast<boundary_polygon*>(boundary), "BPOL", "0005", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_boundary_type::rectangle:
+		case swganh::terrain::e_boundary_type::rectangle:
 			{
 				store_layer(static_cast<boundary_rectangle*>(boundary), "BREC", "0003", parent);
 			}
@@ -640,27 +639,27 @@ struct terrain_iff_writer
 	{
 		switch (filter->get_type())
 		{
-		case swganh::tre::detail_terrain::e_filter_type::direction:
+		case swganh::terrain::e_filter_type::direction:
 			{
 				store_layer(static_cast<filter_direction*>(filter), "FDIR", "0000", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_filter_type::fractal:
+		case swganh::terrain::e_filter_type::fractal:
 			{
 				store_parm_layer(static_cast<filter_fractal*>(filter), "FFRA", "0005", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_filter_type::height:
+		case swganh::terrain::e_filter_type::height:
 			{
 				store_layer(static_cast<filter_height*>(filter), "FHGT", "0002", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_filter_type::shader:
+		case swganh::terrain::e_filter_type::shader:
 			{
 				store_layer(static_cast<filter_shader*>(filter), "FSHD", "0000", parent);
 			}
 			break;
-		case swganh::tre::detail_terrain::e_filter_type::slope:
+		case swganh::terrain::e_filter_type::slope:
 			{
 				store_layer(static_cast<filter_slope*>(filter), "FSLP", "0002", parent);
 			}
@@ -746,10 +745,10 @@ struct terrain_iff_writer
 	}
 };
 
-std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuffer& buffer)
+std::unique_ptr<procedural_terrain> swganh::terrain::read_procedural_terrain(ByteBuffer& buffer)
 {
-	auto iff_doc = parse_iff(buffer);
-	auto pt = make_unique<procedural_terrain>();
+	auto iff_doc = swganh::tre::parse_iff(buffer);
+	auto pt = swganh::make_unique<procedural_terrain>();
 	auto form0014 = iff_doc->form("PTAT")->form("0014");
 
 	if (form0014)
@@ -762,9 +761,9 @@ std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuf
 	return pt;
 }
 
-ByteBuffer swganh::tre::write_procedural_terrain(procedural_terrain& terrain)
+ByteBuffer swganh::terrain::write_procedural_terrain(procedural_terrain& terrain)
 {
-	auto iff_doc = make_unique<iff_node>();
+	auto iff_doc = swganh::make_unique<iff_node>();
 
 	auto ptat = swganh::tre::make_version_form("PTAT", "0014");
 	auto ptat0014 = ptat->form("0014");
@@ -777,7 +776,7 @@ ByteBuffer swganh::tre::write_procedural_terrain(procedural_terrain& terrain)
 
 	swganh::ByteBuffer out_buffer;
 
-	write_iff(out_buffer, iff_doc.get());
+	swganh::tre::write_iff(out_buffer, iff_doc.get());
 
 	return out_buffer;
 }

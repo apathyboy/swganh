@@ -3,9 +3,9 @@
 
 #include <QMessageBox>
 
-#include "swganh/tre/terrain/procedural_terrain.h"
+#include "swganh/terrain/procedural_terrain.h"
 
-using swganh::tre::procedural_terrain;
+using swganh::terrain::procedural_terrain;
 using swganh::TerrainEditor;
 
 

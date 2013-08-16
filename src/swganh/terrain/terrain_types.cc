@@ -1,7 +1,7 @@
 
 #include "terrain_types.h"
 
-using namespace swganh::tre::detail_terrain;
+using namespace swganh::terrain;
 using swganh::ByteBuffer;
 
 void header::deserialize(ByteBuffer& buffer)
@@ -135,7 +135,7 @@ void shader_family::deserialize(ByteBuffer& buffer)
 	uint32_t child_count = buffer.read<uint32_t>();
 	for (uint32_t i = 0; i < child_count; ++i)
 	{
-		auto child = detail::make_unique<shader_child>();
+		auto child = swganh::make_unique<shader_child>();
 		child->name = buffer.read<std::string>(false, true);
 		child->weight = buffer.read<float>();
 
@@ -178,7 +178,7 @@ void flora_family::deserialize(ByteBuffer& buffer)
 	uint32_t child_count = buffer.read<uint32_t>();
 	for (uint32_t i = 0; i < child_count; ++i)
 	{
-		auto child = detail::make_unique<flora_child>();
+		auto child = swganh::make_unique<flora_child>();
 		child->name = buffer.read<std::string>(false, true);
 		child->weight = buffer.read<float>();
 		child->align_to_terrain = buffer.read<uint32_t>() == 1 ? true : false;
@@ -232,7 +232,7 @@ void radial_family::deserialize(ByteBuffer& buffer)
 	uint32_t child_count = buffer.read<uint32_t>();
 	for (uint32_t i = 0; i < child_count; ++i)
 	{
-		auto child = detail::make_unique<radial_child>();
+		auto child = swganh::make_unique<radial_child>();
 		child->name = buffer.read<std::string>(false, true);
 		child->weight = buffer.read<float>();
 		child->distance = buffer.read<float>();
