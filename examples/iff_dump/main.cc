@@ -7,11 +7,12 @@
 #include <memory>
 #include <string>
 
-#include "swganh/tre/iff/iff.h"
-#include "swganh/tre/terrain/procedural_terrain.h"
+#include "swganh/tre/iff.h"
+
+using swganh::tre::iff_node;
 
 void read_terrain(std::string terrain_filename);
-void print_iff_nodes(swganh::tre::iff_node* head, int depth = 0);
+void print_iff_nodes(std::ostream& output, iff_node* head, int depth = 0);
 
 int main(int argc, char *argv[])
 {
@@ -54,36 +55,36 @@ void read_terrain(std::string terrain_filename)
 
 	if (iff_head)
 	{
-		print_iff_nodes(iff_head.get());
+		print_iff_nodes(std::cout, iff_head.get());
 	}
 }
 
-void print_iff_nodes(swganh::tre::iff_node* head, int depth)
+void print_iff_nodes(std::ostream& output, iff_node* head, int depth)
 {
 	for (int i = 0; i < depth; ++i)
 	{
-		std::cout << " ";
+		output << " ";
 	}
 
-	std::cout << head->str_name();
+	output << head->str_name();
 
 	if (head->form_type)
 	{
-		std::cout << " - " << head->str_form_type();
+		output << " - " << head->str_form_type();
 	}
 
-	std::cout << " - (" << head->children.size() << ") ";
+	output << " - (" << head->children.size() << ") ";
 
 	if (!head->form_type)
 	{
-		std::cout << head->data.size() << "\n";
-		std::cout << head->data;
+		output << head->data.size() << "\n";
+		output << head->data;
 	}
 
-	std::cout << "\n";
+	output << "\n";
 
 	for (const auto& child : head->children)
 	{
-		print_iff_nodes(child.get(), depth + 1);
+		print_iff_nodes(output, child.get(), depth + 1);
 	}
 }

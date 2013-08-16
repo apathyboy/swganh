@@ -16,7 +16,7 @@
 
 #include "swganh/utilities.h"
 #include "swganh/tre/tre_archive.h"
-#include "swganh/tre/iff/iff.h"
+#include "swganh/tre/iff.h"
 #include "swganh/tre/terrain/procedural_terrain.h"
 
 #include "widgets/main_window.h"

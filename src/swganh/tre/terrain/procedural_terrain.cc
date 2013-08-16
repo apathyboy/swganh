@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "swganh/tre/iff/iff.h"
+#include "swganh/tre/iff.h"
 
 using namespace swganh::tre::detail_terrain;
 using swganh::ByteBuffer;
@@ -764,7 +764,7 @@ std::unique_ptr<procedural_terrain> swganh::tre::read_procedural_terrain(ByteBuf
 
 ByteBuffer swganh::tre::write_procedural_terrain(procedural_terrain& terrain)
 {
-	auto iff_doc = std::make_unique<iff_node>();
+	auto iff_doc = make_unique<iff_node>();
 
 	auto ptat = swganh::tre::make_version_form("PTAT", "0014");
 	auto ptat0014 = ptat->form("0014");

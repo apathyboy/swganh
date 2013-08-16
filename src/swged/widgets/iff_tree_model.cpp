@@ -1,11 +1,11 @@
 
 #include "iff_tree_model.h"
 
-#include "swganh/tre/iff/iff.h"
+#include "swganh/tre/iff.h"
 
 using swganh::tre::iff_node;
 
-IffTreeModel::IffTreeModel(std::unique_ptr<swganh::tre::iff_node> head, QObject* parent)
+IffTreeModel::IffTreeModel(std::unique_ptr<iff_node> head, QObject* parent)
     : QAbstractItemModel(parent)
     , head_(std::move(head))
 {}

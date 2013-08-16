@@ -11,7 +11,7 @@ Q_DECLARE_METATYPE(swganh::ByteBuffer*);
 namespace swganh {
 namespace tre {
     struct iff_node;
-}}
+}}  // namespace swganh::tre
 
 class IffTreeModel : public QAbstractItemModel
 {
