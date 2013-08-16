@@ -5,6 +5,8 @@
 
 #include "swganh/terrain/procedural_terrain.h"
 
+#include "layer_model.h"
+
 using swganh::terrain::procedural_terrain;
 using swganh::TerrainEditor;
 
@@ -14,6 +16,9 @@ TerrainEditor::TerrainEditor(std::unique_ptr<procedural_terrain> terrain, QWidge
 	, terrain_(std::move(terrain))
 {
 	setupUi(this);
+
+    auto layer_model = new LayerModel(terrain_->layers, layerTree);
+    layerTree->setModel(layer_model);
 }
 
 TerrainEditor::~TerrainEditor()
