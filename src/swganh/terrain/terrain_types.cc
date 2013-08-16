@@ -343,6 +343,38 @@ void fractal_family::fractal::serialize(ByteBuffer& buffer)
 	buffer.write(uint32_t(rule));
 }
 
+std::string base_terrain_layer::type_str() const
+{
+	std::string type;
+
+	switch (get_layer_type())
+	{
+	case e_layer_type::construction:
+		{
+			type = "construction";
+		}
+		break;
+	case e_layer_type::affector:
+		{
+			type = "affector";
+		}
+		break;
+	case e_layer_type::boundary:
+		{
+			type = "boundary";
+		}
+		break;
+	case e_layer_type::filter:
+		{
+			type = "filter";
+		}
+		break;
+	case e_layer_type::COUNT: {} break;
+	}
+
+	return type;
+}
+
 void base_terrain_layer::deserialize(ByteBuffer& buffer)
 {
 	enabled = buffer.read<uint32_t>() == 1 ? true : false;
@@ -354,6 +386,126 @@ void base_terrain_layer::serialize(ByteBuffer& buffer)
 	buffer.write<uint32_t>(enabled ? 1 : 0);
 	buffer.write(reinterpret_cast<const unsigned char*>(name.c_str()), name.size());
 	buffer.write(uint8_t(0));
+}
+
+std::string base_affector_layer::subtype_str() const
+{
+	std::string type;
+
+	switch (get_type())
+	{
+	case e_affector_type::height_terrace:
+		{ type = "height_terrace"; }
+		break;
+	case e_affector_type::height_constant:
+		{ type = "height_constant"; }
+		break;
+	case e_affector_type::height_fractal:
+		{ type = "height_fractal"; }
+		break;
+	case e_affector_type::color_constant:
+		{ type = "color_constant"; }
+		break;
+	case e_affector_type::color_ramp_height:
+		{ type = "color_ramp_height"; }
+		break;
+	case e_affector_type::color_ramp_fractal:
+		{ type = "color_ramp_fractal"; }
+		break;
+	case e_affector_type::shader_constant:
+		{ type = "shader_constant"; }
+		break;
+	case e_affector_type::shader_replace:
+		{ type = "shader_replace"; }
+		break;
+	case e_affector_type::flora_static_collidable_constant:
+		{ type = "flora_static_collidable_constant"; }
+		break;
+	case e_affector_type::flora_static_non_collidable_constant:
+		{ type = "flora_static_non_collidable_constant"; }
+		break;
+	case e_affector_type::flora_dynamic_near_constant:
+		{ type = "flora_dynamic_near_constant"; }
+		break;
+	case e_affector_type::flora_dynamic_far_constant:
+		{ type = "flora_dynamic_far_constant"; }
+		break;
+	case e_affector_type::exclude:
+		{ type = "exclude"; }
+		break;
+	case e_affector_type::passable:
+		{ type = "passable"; }
+		break;
+	case e_affector_type::road:
+		{ type = "road"; }
+		break;
+	case e_affector_type::river:
+		{ type = "river"; }
+		break;
+	case e_affector_type::environment:
+		{ type = "environment"; }
+		break;
+	case e_affector_type::ribbon:
+		{ type = "ribbon"; }
+		break;
+	case e_affector_type::COUNT: {} break;
+	}
+
+	return type;
+}
+
+std::string base_boundary_layer::subtype_str() const
+{
+	std::string type;
+
+	switch (get_type())
+	{
+	case e_boundary_type::circle:
+		{ type = "circle"; }
+		break;
+	case e_boundary_type::rectangle:
+		{ type = "height_constant"; }
+		break;
+	case e_boundary_type::polygon:
+		{ type = "height_fractal"; }
+		break;
+	case e_boundary_type::polyline:
+		{ type = "color_constant"; }
+		break;
+	case e_boundary_type::COUNT: {} break;
+	}
+
+	return type;
+}
+
+std::string base_filter_layer::subtype_str() const
+{
+	std::string type;
+
+	switch (get_type())
+	{
+	case e_filter_type::height:
+		{ type = "height"; }
+		break;
+	case e_filter_type::fractal:
+		{ type = "fractal"; }
+		break;
+	case e_filter_type::slope:
+		{ type = "slope"; }
+		break;
+	case e_filter_type::direction:
+		{ type = "direction"; }
+		break;
+	case e_filter_type::shader:
+		{ type = "shader"; }
+		break;
+	case e_filter_type::bitmap:
+		{ type = "bitmap"; }
+		break;
+	case e_filter_type::COUNT: {} break;
+	}
+
+	return type;
 }
 
 void affector_color_constant::deserialize(ByteBuffer& buffer)

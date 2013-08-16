@@ -402,6 +402,9 @@ namespace terrain {
 
 		virtual e_layer_type get_layer_type() const = 0;
 
+		virtual std::string type_str() const;
+		virtual std::string subtype_str() const = 0;
+
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
 	};
@@ -411,6 +414,7 @@ namespace terrain {
 		e_layer_type get_layer_type() const override { return e_layer_type::affector; }
 
 		virtual e_affector_type get_type() const = 0;
+		std::string subtype_str() const override;
 	};
 
 	struct base_boundary_layer : public base_terrain_layer
@@ -418,6 +422,7 @@ namespace terrain {
 		e_layer_type get_layer_type() const override { return e_layer_type::boundary; }
 
 		virtual e_boundary_type get_type() const = 0;
+		std::string subtype_str() const override;
 	};
 
 	struct base_filter_layer : public base_terrain_layer
@@ -425,11 +430,13 @@ namespace terrain {
 		e_layer_type get_layer_type() const override { return e_layer_type::filter; }
 
 		virtual e_filter_type get_type() const = 0;
+		std::string subtype_str() const override;
 	};
 
 	struct construction_layer : public base_terrain_layer
 	{
 		e_layer_type get_layer_type() const override { return e_layer_type::construction; }
+		std::string subtype_str() const override { return type_str(); };
 
 		bool invert_boundaries;
 		bool invert_filters;
