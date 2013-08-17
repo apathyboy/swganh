@@ -97,12 +97,22 @@ int LayerModel::columnCount(const QModelIndex& parent) const
 
 QVariant LayerModel::data(const QModelIndex& index, int role) const
 {
-    if (role != Qt::DisplayRole)
+    auto layer = layerFromIndex(index);
+
+    if (!layer)
     {
         return QVariant();
     }
 
-    auto layer = layerFromIndex(index);
+    if (role == Qt::CheckStateRole && index.column() == 0)
+    {
+        return static_cast<int>(layer->enabled ? Qt::Checked : Qt::Unchecked);
+    }
+
+    if (role != Qt::DisplayRole)
+    {
+        return QVariant();
+    }
 
     switch (index.column())
     {
@@ -124,6 +134,18 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
     }
 
     return QVariant();
+}
+
+Qt::ItemFlags LayerModel::flags(const QModelIndex& index) const
+{
+    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+
+    if (index.column() == 0)
+    {
+        flags |= Qt::ItemIsUserCheckable;
+    }
+
+    return flags;
 }
 
 base_terrain_layer* LayerModel::layerFromIndex(const QModelIndex& index) const
