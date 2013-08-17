@@ -15,6 +15,35 @@ namespace terrain {
 
 namespace swganh {
 
+enum class LayerModelIconType : uint32_t
+{
+    unknown = 0,
+    layer,
+    boundary_rectangle,
+    boundary_circle,
+    boundary_polygon,
+    boundary_polyline,
+    filter_slope,
+    filter_direction,
+    filter_height,
+    filter_fractal,
+    filter_shader,
+    affector_height,
+    affector_color,
+    affector_shader,
+    affector_flora_static,
+    affector_flora_dynamic,
+    affector_exclude,
+    affector_road,
+    affector_river,
+    affector_environment,
+    layer_invert_boundaries,
+    layer_invert_filters,
+    layer_invert_boundaries_filters,
+    boundary_polygon_water_table,
+    boundary_rectangle_water_table
+};
+
 class LayerModel : public QAbstractItemModel
 {
 public:
@@ -34,10 +63,10 @@ public:
 private:
     swganh::terrain::base_terrain_layer* layerFromIndex(const QModelIndex& index) const;
     QPixmap getLayerIconPixmap(swganh::terrain::base_terrain_layer* layer) const;
-    uint32_t getAffectorOffset(swganh::terrain::base_terrain_layer* layer) const;
-    uint32_t getBoundaryOffset(swganh::terrain::base_terrain_layer* layer) const;
-    uint32_t getFilterOffset(swganh::terrain::base_terrain_layer* layer) const;
-    uint32_t getFolderOffset(swganh::terrain::base_terrain_layer* layer) const;
+    LayerModelIconType getAffectorOffset(swganh::terrain::base_terrain_layer* layer) const;
+    LayerModelIconType getBoundaryOffset(swganh::terrain::base_terrain_layer* layer) const;
+    LayerModelIconType getFilterOffset(swganh::terrain::base_terrain_layer* layer) const;
+    LayerModelIconType getFolderOffset(swganh::terrain::base_terrain_layer* layer) const;
 
     std::vector<std::unique_ptr<swganh::terrain::construction_layer>>& layers_;
     QImage layer_icons_;

@@ -5,11 +5,14 @@
 
 #include "swganh/terrain/terrain_types.h"
 
+using swganh::LayerModelIconType;
 using swganh::LayerModel;
 using swganh::terrain::base_affector_layer;
 using swganh::terrain::base_boundary_layer;
 using swganh::terrain::base_filter_layer;
 using swganh::terrain::base_terrain_layer;
+using swganh::terrain::boundary_rectangle;
+using swganh::terrain::boundary_polygon;
 using swganh::terrain::construction_layer;
 using swganh::terrain::e_layer_type;
 
@@ -152,7 +155,7 @@ base_terrain_layer* LayerModel::layerFromIndex(const QModelIndex& index) const
 
 QPixmap LayerModel::getLayerIconPixmap(swganh::terrain::base_terrain_layer* layer) const
 {
-    uint32_t offset = 0;
+    LayerModelIconType offset = LayerModelIconType::unknown;
     uint32_t width = 16;
     uint32_t height = 16;
 
@@ -174,49 +177,49 @@ QPixmap LayerModel::getLayerIconPixmap(swganh::terrain::base_terrain_layer* laye
         {}
     }
 
-    return QPixmap::fromImage(layer_icons_.copy(width * offset, 0, width, height));
+    return QPixmap::fromImage(layer_icons_.copy(width * static_cast<uint32_t>(offset), 0, width, height));
 }
 
-uint32_t LayerModel::getAffectorOffset(swganh::terrain::base_terrain_layer* layer) const
+LayerModelIconType LayerModel::getAffectorOffset(swganh::terrain::base_terrain_layer* layer) const
 {
     auto affector = static_cast<base_affector_layer*>(layer);
-    uint32_t offset = 0;
+    LayerModelIconType offset = LayerModelIconType::unknown;
 
     switch (affector->get_type())
     {
     case swganh::terrain::e_affector_type::height_constant:
     case swganh::terrain::e_affector_type::height_fractal:
     case swganh::terrain::e_affector_type::height_terrace:
-        { offset = 11; }
+        { offset = LayerModelIconType::affector_height; }
         break;
     case swganh::terrain::e_affector_type::color_constant:
     case swganh::terrain::e_affector_type::color_ramp_fractal:
     case swganh::terrain::e_affector_type::color_ramp_height:
-        { offset = 12; }
+        { offset = LayerModelIconType::affector_color; }
         break;
     case swganh::terrain::e_affector_type::shader_constant:
     case swganh::terrain::e_affector_type::shader_replace:
-        { offset = 13;}
+        { offset = LayerModelIconType::affector_shader;}
         break;
     case swganh::terrain::e_affector_type::flora_static_collidable_constant:
     case swganh::terrain::e_affector_type::flora_static_non_collidable_constant:
-        { offset = 14;}
+        { offset = LayerModelIconType::affector_flora_static;}
         break;
     case swganh::terrain::e_affector_type::flora_dynamic_near_constant:
     case swganh::terrain::e_affector_type::flora_dynamic_far_constant:
-        { offset = 15; }
+        { offset = LayerModelIconType::affector_flora_dynamic; }
         break;
     case swganh::terrain::e_affector_type::exclude:
-        { offset = 16; }
+        { offset = LayerModelIconType::affector_exclude; }
         break;
     case swganh::terrain::e_affector_type::road:
-        { offset = 17; }
+        { offset = LayerModelIconType::affector_road; }
         break;
     case swganh::terrain::e_affector_type::river:
-        { offset = 18; }
+        { offset = LayerModelIconType::affector_river; }
         break;
     case swganh::terrain::e_affector_type::environment:
-        { offset = 19; }
+        { offset = LayerModelIconType::affector_environment; }
         break;
     default:
         {}
@@ -225,29 +228,72 @@ uint32_t LayerModel::getAffectorOffset(swganh::terrain::base_terrain_layer* laye
     return offset;
 }
 
-uint32_t LayerModel::getFolderOffset(swganh::terrain::base_terrain_layer* layer) const
+LayerModelIconType LayerModel::getFolderOffset(swganh::terrain::base_terrain_layer* layer) const
 {
-    return 1;
+    auto folder = static_cast<construction_layer*>(layer);
+    LayerModelIconType offset = LayerModelIconType::unknown;
+
+    if (folder)
+    {
+        if (folder->invert_boundaries && folder->invert_filters)
+        {
+            offset = LayerModelIconType::layer_invert_boundaries_filters;
+        }
+        else if (folder->invert_boundaries)
+        {
+            offset = LayerModelIconType::layer_invert_boundaries;
+        }
+        else if (folder->invert_filters)
+        {
+            offset = LayerModelIconType::layer_invert_filters;
+        }
+        else
+        {
+            offset = LayerModelIconType::layer;
+        }
+    }
+
+    return offset;
 }
 
-uint32_t LayerModel::getBoundaryOffset(swganh::terrain::base_terrain_layer* layer) const
+LayerModelIconType LayerModel::getBoundaryOffset(swganh::terrain::base_terrain_layer* layer) const
 {
     auto boundary = static_cast<base_boundary_layer*>(layer);
-    uint32_t offset = 0;
+    LayerModelIconType offset = LayerModelIconType::unknown;
 
     switch (boundary->get_type())
     {
     case swganh::terrain::e_boundary_type::rectangle:
-        { offset = 2; }
+        {
+            auto rectangle = static_cast<boundary_rectangle*>(layer);
+            if (rectangle && rectangle->is_local_water_table)
+            {
+                offset = LayerModelIconType::boundary_rectangle_water_table;
+            }
+            else
+            {
+                offset = LayerModelIconType::boundary_rectangle;
+            }
+        }
         break;
     case swganh::terrain::e_boundary_type::circle:
-        { offset = 3; }
+        { offset = LayerModelIconType::boundary_circle; }
         break;
     case swganh::terrain::e_boundary_type::polygon:
-        { offset = 4; }
+        {
+            auto polygon = static_cast<boundary_polygon*>(layer);
+            if (polygon && polygon->is_local_water_table)
+            {
+                offset = LayerModelIconType::boundary_polygon_water_table;
+            }
+            else
+            {
+                offset = LayerModelIconType::boundary_polygon;
+            }
+        }
         break;
     case swganh::terrain::e_boundary_type::polyline:
-        { offset = 5; }
+        { offset = LayerModelIconType::boundary_polyline; }
         break;
     default:
         {}
@@ -256,27 +302,27 @@ uint32_t LayerModel::getBoundaryOffset(swganh::terrain::base_terrain_layer* laye
     return offset;
 }
 
-uint32_t LayerModel::getFilterOffset(swganh::terrain::base_terrain_layer* layer) const
+LayerModelIconType LayerModel::getFilterOffset(swganh::terrain::base_terrain_layer* layer) const
 {
     auto filter = static_cast<base_filter_layer*>(layer);
-    uint32_t offset = 0;
+    LayerModelIconType offset = LayerModelIconType::unknown;
 
     switch (filter->get_type())
     {
     case swganh::terrain::e_filter_type::slope:
-        { offset = 6; }
+        { offset = LayerModelIconType::filter_slope; }
         break;
     case swganh::terrain::e_filter_type::direction:
-        { offset = 7; }
+        { offset = LayerModelIconType::filter_direction; }
         break;
     case swganh::terrain::e_filter_type::height:
-        { offset = 8; }
+        { offset = LayerModelIconType::filter_height; }
         break;
     case swganh::terrain::e_filter_type::fractal:
-        { offset = 9; }
+        { offset = LayerModelIconType::filter_fractal; }
         break;
     case swganh::terrain::e_filter_type::shader:
-        { offset = 10; }
+        { offset = LayerModelIconType::filter_shader; }
         break;
     default:
         {}
