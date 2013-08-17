@@ -92,7 +92,7 @@ int LayerModel::rowCount(const QModelIndex& parent) const
 
 int LayerModel::columnCount(const QModelIndex& parent) const
 {
-    return 3;
+    return 1;
 }
 
 QVariant LayerModel::data(const QModelIndex& index, int role) const
@@ -114,26 +114,7 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
-    switch (index.column())
-    {
-    case 0:
-        {
-            return QString::fromStdString(layer->name);
-        }
-        break;
-    case 1:
-        {
-            return QString::fromStdString(layer->type_str());
-        }
-        break;
-    case 2:
-        {
-            return QString::fromStdString(layer->subtype_str());
-        }
-        break;
-    }
-
-    return QVariant();
+    return QString::fromStdString(layer->name);
 }
 
 Qt::ItemFlags LayerModel::flags(const QModelIndex& index) const
