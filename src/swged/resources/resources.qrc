@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="" >
         <file>images/splash_logo.jpg</file>
+        <file>icons/layer_icons.bmp</file>
    </qresource>
 </RCC>

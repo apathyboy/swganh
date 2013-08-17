@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <QAbstractItemModel>
+#include <QImage>
 
 namespace swganh {
 namespace terrain {
@@ -32,8 +33,14 @@ public:
 
 private:
     swganh::terrain::base_terrain_layer* layerFromIndex(const QModelIndex& index) const;
+    QPixmap getLayerIconPixmap(swganh::terrain::base_terrain_layer* layer) const;
+    uint32_t getAffectorOffset(swganh::terrain::base_terrain_layer* layer) const;
+    uint32_t getBoundaryOffset(swganh::terrain::base_terrain_layer* layer) const;
+    uint32_t getFilterOffset(swganh::terrain::base_terrain_layer* layer) const;
+    uint32_t getFolderOffset(swganh::terrain::base_terrain_layer* layer) const;
 
     std::vector<std::unique_ptr<swganh::terrain::construction_layer>>& layers_;
+    QImage layer_icons_;
 };
 
 }

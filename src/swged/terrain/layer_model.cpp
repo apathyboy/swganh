@@ -1,16 +1,22 @@
 
 #include "layer_model.h"
 
+#include <QPixmap>
+
 #include "swganh/terrain/terrain_types.h"
 
 using swganh::LayerModel;
+using swganh::terrain::base_affector_layer;
+using swganh::terrain::base_boundary_layer;
+using swganh::terrain::base_filter_layer;
 using swganh::terrain::base_terrain_layer;
 using swganh::terrain::construction_layer;
-
+using swganh::terrain::e_layer_type;
 
 LayerModel::LayerModel(std::vector<std::unique_ptr<construction_layer>>& layers, QObject* parent)
     : QAbstractItemModel(parent)
     , layers_(layers)
+    , layer_icons_(":/icons/layer_icons.bmp")
 {
     layers_.size();
 }
@@ -109,6 +115,11 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
         return static_cast<int>(layer->enabled ? Qt::Checked : Qt::Unchecked);
     }
 
+    if (role == Qt::DecorationRole && index.column() == 0)
+    {
+        return getLayerIconPixmap(layer);
+    }
+
     if (role != Qt::DisplayRole)
     {
         return QVariant();
@@ -137,4 +148,147 @@ base_terrain_layer* LayerModel::layerFromIndex(const QModelIndex& index) const
     }
 
     return nullptr;
+}
+
+QPixmap LayerModel::getLayerIconPixmap(swganh::terrain::base_terrain_layer* layer) const
+{
+    uint32_t offset = 0;
+    uint32_t width = 16;
+    uint32_t height = 16;
+
+    switch (layer->get_layer_type())
+    {
+    case swganh::terrain::e_layer_type::affector:
+        { offset = getAffectorOffset(layer); }
+        break;
+    case swganh::terrain::e_layer_type::boundary:
+        { offset = getBoundaryOffset(layer); }
+        break;
+    case swganh::terrain::e_layer_type::construction:
+        { offset = getFolderOffset(layer); }
+        break;
+    case swganh::terrain::e_layer_type::filter:
+        { offset = getFilterOffset(layer); }
+        break;
+    default:
+        {
+            throw std::runtime_error("Invalid layer type detected");
+        }
+    }
+
+    return QPixmap::fromImage(layer_icons_.copy(width * offset, 0, width, height));
+}
+
+uint32_t LayerModel::getAffectorOffset(swganh::terrain::base_terrain_layer* layer) const
+{
+    auto affector = static_cast<base_affector_layer*>(layer);
+    uint32_t offset = 0;
+
+    switch (affector->get_type())
+    {
+    case swganh::terrain::e_affector_type::height_constant:
+    case swganh::terrain::e_affector_type::height_fractal:
+    case swganh::terrain::e_affector_type::height_terrace:
+        { offset = 11; }
+        break;
+    case swganh::terrain::e_affector_type::color_constant:
+    case swganh::terrain::e_affector_type::color_ramp_fractal:
+    case swganh::terrain::e_affector_type::color_ramp_height:
+        { offset = 12; }
+        break;
+    case swganh::terrain::e_affector_type::shader_constant:
+    case swganh::terrain::e_affector_type::shader_replace:
+        { offset = 13;}
+        break;
+    case swganh::terrain::e_affector_type::flora_static_collidable_constant:
+    case swganh::terrain::e_affector_type::flora_static_non_collidable_constant:
+        { offset = 14;}
+        break;
+    case swganh::terrain::e_affector_type::flora_dynamic_near_constant:
+    case swganh::terrain::e_affector_type::flora_dynamic_far_constant:
+        { offset = 15; }
+        break;
+    case swganh::terrain::e_affector_type::exclude:
+        { offset = 16; }
+        break;
+    case swganh::terrain::e_affector_type::road:
+        { offset = 17; }
+        break;
+    case swganh::terrain::e_affector_type::river:
+        { offset = 18; }
+        break;
+    case swganh::terrain::e_affector_type::environment:
+        { offset = 19; }
+        break;
+    default:
+        {
+            throw std::runtime_error("Invalid affector type detected");
+        }
+    }
+
+    return offset;
+}
+
+uint32_t LayerModel::getFolderOffset(swganh::terrain::base_terrain_layer* layer) const
+{
+    return 1;
+}
+
+uint32_t LayerModel::getBoundaryOffset(swganh::terrain::base_terrain_layer* layer) const
+{
+    auto boundary = static_cast<base_boundary_layer*>(layer);
+    uint32_t offset = 0;
+
+    switch (boundary->get_type())
+    {
+    case swganh::terrain::e_boundary_type::rectangle:
+        { offset = 2; }
+        break;
+    case swganh::terrain::e_boundary_type::circle:
+        { offset = 3; }
+        break;
+    case swganh::terrain::e_boundary_type::polygon:
+        { offset = 4; }
+        break;
+    case swganh::terrain::e_boundary_type::polyline:
+        { offset = 5; }
+        break;
+    default:
+        {
+            throw std::runtime_error("Invalid boundary type detected");
+        }
+    }
+
+    return offset;
+}
+
+uint32_t LayerModel::getFilterOffset(swganh::terrain::base_terrain_layer* layer) const
+{
+    auto filter = static_cast<base_filter_layer*>(layer);
+    uint32_t offset = 0;
+
+    switch (filter->get_type())
+    {
+    case swganh::terrain::e_filter_type::slope:
+        { offset = 6; }
+        break;
+    case swganh::terrain::e_filter_type::direction:
+        { offset = 7; }
+        break;
+    case swganh::terrain::e_filter_type::height:
+        { offset = 8; }
+        break;
+    case swganh::terrain::e_filter_type::fractal:
+        { offset = 9; }
+        break;
+    case swganh::terrain::e_filter_type::shader:
+        { offset = 10; }
+        break;
+    default:
+        {
+            throw std::runtime_error("Invalid filter type detected");
+        }
+    }
+
+    return offset;
 }
