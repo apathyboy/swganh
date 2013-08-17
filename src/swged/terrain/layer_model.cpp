@@ -171,9 +171,7 @@ QPixmap LayerModel::getLayerIconPixmap(swganh::terrain::base_terrain_layer* laye
         { offset = getFilterOffset(layer); }
         break;
     default:
-        {
-            throw std::runtime_error("Invalid layer type detected");
-        }
+        {}
     }
 
     return QPixmap::fromImage(layer_icons_.copy(width * offset, 0, width, height));
@@ -221,9 +219,7 @@ uint32_t LayerModel::getAffectorOffset(swganh::terrain::base_terrain_layer* laye
         { offset = 19; }
         break;
     default:
-        {
-            throw std::runtime_error("Invalid affector type detected");
-        }
+        {}
     }
 
     return offset;
@@ -254,9 +250,7 @@ uint32_t LayerModel::getBoundaryOffset(swganh::terrain::base_terrain_layer* laye
         { offset = 5; }
         break;
     default:
-        {
-            throw std::runtime_error("Invalid boundary type detected");
-        }
+        {}
     }
 
     return offset;
@@ -285,9 +279,7 @@ uint32_t LayerModel::getFilterOffset(swganh::terrain::base_terrain_layer* layer)
         { offset = 10; }
         break;
     default:
-        {
-            throw std::runtime_error("Invalid filter type detected");
-        }
+        {}
     }
 
     return offset;
