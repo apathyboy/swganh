@@ -2,5 +2,6 @@
     <qresource prefix="" >
         <file>images/splash_logo.jpg</file>
         <file>icons/layer_icons.bmp</file>
+        <file>style.qss</file>
    </qresource>
 </RCC>
