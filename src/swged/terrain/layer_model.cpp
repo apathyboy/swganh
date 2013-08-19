@@ -19,7 +19,7 @@ using swganh::terrain::e_layer_type;
 LayerModel::LayerModel(std::vector<std::unique_ptr<construction_layer>>& layers, QObject* parent)
     : QAbstractItemModel(parent)
     , layers_(layers)
-    , layer_icons_(":/icons/layer_icons.bmp")
+    , layer_icons_(":/icons/layer_icons.png")
 {
     layers_.size();
 }
