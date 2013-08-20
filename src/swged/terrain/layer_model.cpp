@@ -133,7 +133,7 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags LayerModel::flags(const QModelIndex& index) const
 {
-    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	Qt::ItemFlags flags { Qt::ItemIsEnabled | Qt::ItemIsSelectable };
 
     if (index.column() == 0)
     {

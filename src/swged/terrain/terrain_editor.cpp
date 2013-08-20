@@ -19,6 +19,8 @@ TerrainEditor::TerrainEditor(std::unique_ptr<procedural_terrain> terrain, QWidge
 
     auto layer_model = new LayerModel(terrain_->layers, layerTree);
     layerTree->setModel(layer_model);
+
+	tabShaderGroup->setShaderGroup(&terrain_->shader_group);
 }
 
 TerrainEditor::~TerrainEditor()

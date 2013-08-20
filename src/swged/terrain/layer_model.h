@@ -47,7 +47,7 @@ enum class LayerModelIconType : uint32_t
 class LayerModel : public QAbstractItemModel
 {
 public:
-    LayerModel(std::vector<std::unique_ptr<swganh::terrain::construction_layer>>& layers, QObject* parent = nullptr);
+    explicit LayerModel(std::vector<std::unique_ptr<swganh::terrain::construction_layer>>& layers, QObject* parent = nullptr);
     ~LayerModel();
 
     QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
