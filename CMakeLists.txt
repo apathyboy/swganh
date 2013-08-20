@@ -214,9 +214,11 @@ find_package(MysqlConnectorCpp REQUIRED)
 find_package(PythonLibs REQUIRED)
 find_package(Turtle REQUIRED)
 find_package(ZLib REQUIRED)
+find_package(OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
 find_package(Qt5Widgets REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
 
 # make sure the source directory and the binary directory (where any generated
 # files will be found) are automatically searched for includes

@@ -3,13 +3,15 @@
 
 #include <memory>
 
+#include <QImage>
+#include <QString>
 #include <QWidget>
 
 #include "swganh/terrain/procedural_terrain.h"
 
 class QToolBar;
 class QTreeView;
-class QLabel;
+class QGLWidget;
 
 namespace swged {
 
@@ -31,9 +33,11 @@ namespace swged {
 
 	private:
 
+		QImage readDDSFile(const QString& filename);
+
 		std::unique_ptr<QToolBar> toolbar_;
 		std::unique_ptr<QTreeView> family_tree_;
-		std::unique_ptr<QLabel> shader_preview_;
+		std::unique_ptr<QGLWidget> shader_preview_;
 		std::unique_ptr<ShaderGroupModel> model_;
 	};
 

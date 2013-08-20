@@ -25,11 +25,13 @@ target_link_libraries(swged
     swganh_lib
     ${Boost_LIBRARIES}
     ${Qt5Core_QTMAIN_LIBRARIES}
+    ${OPENGL_LIBRARIES}
 )
 
 # Use the Widgets module from Qt 5
 qt5_use_modules(swged Concurrent)
 qt5_use_modules(swged Widgets)
+qt5_use_modules(swged OpenGL)
 
 if(ZLIB_LIBRARY_DEBUG)
     target_link_libraries(swged debug ${ZLIB_LIBRARY_DEBUG})
