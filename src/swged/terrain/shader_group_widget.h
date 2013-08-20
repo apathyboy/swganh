@@ -9,7 +9,7 @@
 
 class QToolBar;
 class QTreeView;
-class QGraphicsView;
+class QLabel;
 
 namespace swged {
 
@@ -26,11 +26,14 @@ namespace swged {
 
 		void setShaderGroup(swganh::terrain::shader_group_t* shader_group);
 
+	private slots:
+		void itemClicked(const QModelIndex&);
+
 	private:
 
 		std::unique_ptr<QToolBar> toolbar_;
 		std::unique_ptr<QTreeView> family_tree_;
-		std::unique_ptr<QGraphicsView> shader_preview_;
+		std::unique_ptr<QLabel> shader_preview_;
 		std::unique_ptr<ShaderGroupModel> model_;
 	};
 

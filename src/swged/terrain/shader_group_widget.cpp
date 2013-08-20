@@ -1,7 +1,7 @@
 
 #include "shader_group_widget.h"
 
-#include <QGraphicsView>
+#include <QLabel>
 #include <QSplitter>
 #include <QToolBar>
 #include <QTreeView>
@@ -18,8 +18,10 @@ ShaderGroupWidget::ShaderGroupWidget(QWidget* parent)
 	: QWidget(parent)
 	, toolbar_(swganh::make_unique<QToolBar>())
 	, family_tree_(swganh::make_unique<QTreeView>())
-	, shader_preview_(swganh::make_unique<QGraphicsView>())
+	, shader_preview_(swganh::make_unique<QLabel>())
 {
+	connect(family_tree_.get(), SIGNAL(clicked(const QModelIndex&)), this, SLOT(itemClicked(const QModelIndex&)));
+
 	family_tree_->setHeaderHidden(true);
 
 	toolbar_ = swganh::make_unique<QToolBar>();
@@ -31,6 +33,8 @@ ShaderGroupWidget::ShaderGroupWidget(QWidget* parent)
 	toolbar_->addAction("verify");
 	toolbar_->addAction("delete");
 	toolbar_->addAction("delete unused");
+
+	shader_preview_->setText("No shader selected");
 
 	QSplitter* contents = new QSplitter(this);
 	contents->addWidget(family_tree_.get());
@@ -52,4 +56,11 @@ void ShaderGroupWidget::setShaderGroup(swganh::terrain::shader_group_t* shader_g
 
 	family_tree_->setModel(model_.get());
 	family_tree_->expandAll();
+}
+
+void ShaderGroupWidget::itemClicked(const QModelIndex& index)
+{
+	auto data = index.data(Qt::DisplayRole);
+
+	shader_preview_->setText(data.toString());
 }
