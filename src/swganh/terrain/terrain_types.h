@@ -268,12 +268,19 @@ namespace terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct shader_family
+	struct base_family
 	{
-		struct shader_child
+		virtual ~base_family() {}
+	};
+
+	struct shader_family : base_family
+	{
+		struct shader_child : base_family
 		{
 			std::string name;
 			float weight;
+
+			shader_family* parent;
 		};
 
 		uint32_t family_id;
@@ -291,9 +298,9 @@ namespace terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct flora_family
+	struct flora_family : base_family
 	{
-		struct flora_child
+		struct flora_child : base_family
 		{
 			std::string name;
 			float weight;
@@ -304,6 +311,8 @@ namespace terrain {
 			bool scale_flora;
 			float min_scale;
 			float max_scale;
+
+			flora_family* parent;
 		};
 
 		uint32_t family_id;
@@ -320,9 +329,9 @@ namespace terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct radial_family
+	struct radial_family : base_family
 	{
-		struct radial_child
+		struct radial_child : base_family
 		{
 			std::string name;
 			float weight;
@@ -334,6 +343,8 @@ namespace terrain {
 			float period;
 			bool sway_flora;
 			int unk9;
+
+			radial_family* parent;
 		};
 
 		uint32_t family_id;
@@ -349,7 +360,7 @@ namespace terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct environment_family
+	struct environment_family : base_family
 	{
 		uint32_t family_id;
 		std::string family_name;
@@ -362,7 +373,7 @@ namespace terrain {
 		void serialize(ByteBuffer& buffer);
 	};
 
-	struct fractal_family
+	struct fractal_family : base_family
 	{
 		struct fractal
 		{

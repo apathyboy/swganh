@@ -138,6 +138,7 @@ void shader_family::deserialize(ByteBuffer& buffer)
 		auto child = swganh::make_unique<shader_child>();
 		child->name = buffer.read<std::string>(false, true);
 		child->weight = buffer.read<float>();
+		child->parent = this;
 
 		children.push_back(std::move(child));
 	}
@@ -188,6 +189,7 @@ void flora_family::deserialize(ByteBuffer& buffer)
 		child->scale_flora = buffer.read<uint32_t>() == 1 ? true : false;
 		child->min_scale = buffer.read<float>();
 		child->max_scale = buffer.read<float>();
+		child->parent = this;
 
 		children.push_back(std::move(child));
 	}
@@ -243,6 +245,7 @@ void radial_family::deserialize(ByteBuffer& buffer)
 		child->period = buffer.read<float>();
 		child->sway_flora = buffer.read<uint32_t>() == 1 ? true : false;
 		child->unk9 = buffer.read<uint32_t>();
+		child->parent = this;
 
 		children.push_back(std::move(child));
 	}
