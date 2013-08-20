@@ -1,7 +1,11 @@
 
 #pragma once
 
+#include <QtOpenGL>
+#include <QtOpenGLExtensions>
 #include <QGLWidget>
+
+class QPlainTextEdit;
 
 namespace swged {
 
@@ -12,7 +16,12 @@ namespace swged {
 	public:
 		ShaderPreview(QWidget* parent = nullptr);
 
-		void paintEvent(QPaintEvent*);
+        void setConsole(QPlainTextEdit* console);
+
+        void setShader(const QString& shader_name);
+
+    private:
+        QPlainTextEdit* console_;
 	};
 
 }

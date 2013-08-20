@@ -1,6 +1,9 @@
 
 #include "terrain_editor.h"
 
+#include <iostream>
+
+#include <QDebug>
 #include <QMessageBox>
 
 #include "swganh/terrain/procedural_terrain.h"
@@ -20,7 +23,9 @@ TerrainEditor::TerrainEditor(std::unique_ptr<procedural_terrain> terrain, QWidge
     auto layer_model = new LayerModel(terrain_->layers, layerTree);
     layerTree->setModel(layer_model);
 
+    tabShaderGroup->setConsole(consoleEdit);
 	tabShaderGroup->setShaderGroup(&terrain_->shader_group);
+
 }
 
 TerrainEditor::~TerrainEditor()

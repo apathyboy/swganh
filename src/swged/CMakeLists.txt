@@ -32,6 +32,7 @@ target_link_libraries(swged
 qt5_use_modules(swged Concurrent)
 qt5_use_modules(swged Widgets)
 qt5_use_modules(swged OpenGL)
+qt5_use_modules(swged OpenGLExtensions)
 
 if(ZLIB_LIBRARY_DEBUG)
     target_link_libraries(swged debug ${ZLIB_LIBRARY_DEBUG})

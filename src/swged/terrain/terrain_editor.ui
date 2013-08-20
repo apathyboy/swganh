@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>1267</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -80,7 +80,7 @@
   <widget class="QDockWidget" name="constructionLayersTree">
    <property name="minimumSize">
     <size>
-     <width>89</width>
+     <width>103</width>
      <height>350</height>
     </size>
    </property>
@@ -200,8 +200,6 @@
       </widget>
      </item>
     </layout>
-    <zorder>groupTabWidget</zorder>
-    <zorder>groupTabWidget</zorder>
    </widget>
   </widget>
   <widget class="QDockWidget" name="console">
@@ -213,8 +211,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>89</width>
-     <height>75</height>
+     <width>103</width>
+     <height>100</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -232,7 +230,7 @@
    <widget class="QWidget" name="dockWidgetContents_6">
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
-      <widget class="QTextBrowser" name="textBrowser"/>
+      <widget class="QPlainTextEdit" name="consoleEdit"/>
      </item>
     </layout>
    </widget>

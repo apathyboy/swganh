@@ -37,7 +37,7 @@ QModelIndex ShaderGroupModel::parent(const QModelIndex& index) const
 
 	const auto& families = shader_group_->get_families();
 
-	auto find_iter = std::find_if(std::begin(families), std::end(families), 
+	auto find_iter = std::find_if(std::begin(families), std::end(families),
 		[child] (const std::unique_ptr<shader_family>& family)
 	{
 		return family.get() == child->parent;

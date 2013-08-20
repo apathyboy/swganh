@@ -6,23 +6,22 @@
 #include <QToolBar>
 #include <QTreeView>
 #include <QBoxLayout>
-#include <QGLWidget>
-#include <QGLPixelBuffer>
-#include "qopenglfunctions_3_3_core.h"
-
+#include <QPlainTextEdit>
 
 #include "swganh/utilities.h"
 
 #include "shader_group_model.h"
+#include "shader_preview.h"
 
 using swged::ShaderGroupWidget;
 using swged::ShaderGroupModel;
+using swged::ShaderPreview;
 
 ShaderGroupWidget::ShaderGroupWidget(QWidget* parent)
 	: QWidget(parent)
 	, toolbar_(swganh::make_unique<QToolBar>())
 	, family_tree_(swganh::make_unique<QTreeView>())
-	, shader_preview_(swganh::make_unique<QGLWidget>())
+	, shader_preview_(swganh::make_unique<ShaderPreview>())
 {
 	connect(family_tree_.get(), SIGNAL(clicked(const QModelIndex&)), this, SLOT(itemClicked(const QModelIndex&)));
 
@@ -56,46 +55,29 @@ ShaderGroupWidget::~ShaderGroupWidget()
 
 void ShaderGroupWidget::setShaderGroup(swganh::terrain::shader_group_t* shader_group)
 {
-	model_ = std::make_unique<ShaderGroupModel>(shader_group);
+	model_ = swganh::make_unique<ShaderGroupModel>(shader_group);
 
 	family_tree_->setModel(model_.get());
 	family_tree_->expandAll();
+
+	console_->insertPlainText("Added shader group\n");
+}
+
+void ShaderGroupWidget::setConsole(QPlainTextEdit* console)
+{
+	console_ = console;
+	shader_preview_->setConsole(console_);
 }
 
 void ShaderGroupWidget::itemClicked(const QModelIndex& index)
 {
 	auto data = index.data(Qt::DisplayRole);
 
-	readDDSFile("grss_long_darkgreen.dds");
+	QString msg("Selected ");
+	msg.append(data.toString());
+	msg.append("\n");
 
-	//shader_preview_->setText(data.toString());
+	console_->insertPlainText(msg);
+	shader_preview_->setShader(data.toString());
 }
 
-
-QImage ShaderGroupWidget::readDDSFile(const QString& filename)
-{
-	shader_preview_->makeCurrent();
-	
-	GLuint texture = shader_preview_->bindTexture(filename);
-	if (!texture)
-		return QImage();
-
-	// Determine the size of the DDS image
-	//GLint width, height;
-	glBindTexture(GL_TEXTURE_2D, texture);
-	shader_preview_->drawTexture(QPoint(100.f, 100.f), texture, GL_TEXTURE_2D);
-
-	//glFuncs.glGetglGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-	//glFuncs.glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
-
-	//if (width == 0 || height == 0)
-	//	return QImage();
-
-	QGLPixelBuffer pbuffer(QSize(100, 100), shader_preview_->format(), shader_preview_.get());
-	if (!pbuffer.makeCurrent())
-		return QImage();
-
-	pbuffer.drawTexture(QRectF(-1, -1, 2, 2), texture);
-	return pbuffer.toImage();
-
-}
