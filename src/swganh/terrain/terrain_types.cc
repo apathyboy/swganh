@@ -6,14 +6,14 @@ using swganh::ByteBuffer;
 
 void header::deserialize(ByteBuffer& buffer)
 {
-	filename = buffer.read<std::string>(false, true);
+	filename = buffer.read<std::string>(true);
 	map_width = buffer.read<float>();
 	chunk_width = buffer.read<float>();
 	tiles_per_chunk = buffer.read<uint32_t>();
 	use_global_water_height = buffer.read<uint32_t>();
 	global_water_height = buffer.read<float>();
 	water_shader_size = buffer.read<float>();
-	water_shader_name = buffer.read<std::string>(false, true);
+	water_shader_name = buffer.read<std::string>(true);
 	seconds_per_world_cycle = buffer.read<float>();
 
 	collidable_min_distance = buffer.read<float>();
@@ -124,8 +124,8 @@ void wmap::serialize(ByteBuffer& buffer)
 void shader_family::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();
-	family_name = buffer.read<std::string>(false, true);
-	surface_properties_file = buffer.read<std::string>(false, true);
+	family_name = buffer.read<std::string>(true);
+	surface_properties_file = buffer.read<std::string>(true);
 	r = buffer.read<uint8_t>();
 	g = buffer.read<uint8_t>();
 	b = buffer.read<uint8_t>();
@@ -136,7 +136,7 @@ void shader_family::deserialize(ByteBuffer& buffer)
 	for (uint32_t i = 0; i < child_count; ++i)
 	{
 		auto child = swganh::make_unique<shader_child>();
-		child->name = buffer.read<std::string>(false, true);
+		child->name = buffer.read<std::string>(true);
 		child->weight = buffer.read<float>();
 		child->parent = this;
 
@@ -169,7 +169,7 @@ void shader_family::serialize(ByteBuffer& buffer)
 void flora_family::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();
-	family_name = buffer.read<std::string>(false, true);
+	family_name = buffer.read<std::string>(true);
 	r = buffer.read<uint8_t>();
 	g = buffer.read<uint8_t>();
 	b = buffer.read<uint8_t>();
@@ -180,7 +180,7 @@ void flora_family::deserialize(ByteBuffer& buffer)
 	for (uint32_t i = 0; i < child_count; ++i)
 	{
 		auto child = swganh::make_unique<flora_child>();
-		child->name = buffer.read<std::string>(false, true);
+		child->name = buffer.read<std::string>(true);
 		child->weight = buffer.read<float>();
 		child->align_to_terrain = buffer.read<uint32_t>() == 1 ? true : false;
 		child->displacement = buffer.read<float>();
@@ -225,7 +225,7 @@ void flora_family::serialize(ByteBuffer& buffer)
 void radial_family::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();
-	family_name = buffer.read<std::string>(false, true);
+	family_name = buffer.read<std::string>(true);
 	r = buffer.read<uint8_t>();
 	g = buffer.read<uint8_t>();
 	b = buffer.read<uint8_t>();
@@ -235,7 +235,7 @@ void radial_family::deserialize(ByteBuffer& buffer)
 	for (uint32_t i = 0; i < child_count; ++i)
 	{
 		auto child = swganh::make_unique<radial_child>();
-		child->name = buffer.read<std::string>(false, true);
+		child->name = buffer.read<std::string>(true);
 		child->weight = buffer.read<float>();
 		child->distance = buffer.read<float>();
 		child->width = buffer.read<float>();
@@ -281,7 +281,7 @@ void radial_family::serialize(ByteBuffer& buffer)
 void environment_family::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();
-	family_name = buffer.read<std::string>(false, true);
+	family_name = buffer.read<std::string>(true);
 	r = buffer.read<uint8_t>();
 	g = buffer.read<uint8_t>();
 	b = buffer.read<uint8_t>();
@@ -302,7 +302,7 @@ void environment_family::serialize(ByteBuffer& buffer)
 void fractal_family::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();
-	family_name = buffer.read<std::string>(false, true);
+	family_name = buffer.read<std::string>(true);
 }
 
 void fractal_family::serialize(ByteBuffer& buffer)
@@ -395,7 +395,7 @@ std::string base_terrain_layer::subtype_str() const
 void base_terrain_layer::deserialize(ByteBuffer& buffer)
 {
 	enabled = buffer.read<uint32_t>() == 1 ? true : false;
-	name = buffer.read<std::string>(false, true);
+	name = buffer.read<std::string>(true);
 }
 
 void base_terrain_layer::serialize(ByteBuffer& buffer)
@@ -545,7 +545,7 @@ void affector_color_ramp_fractal::deserialize(ByteBuffer& buffer)
 {
 	family_id = buffer.read<uint32_t>();
 	operation = static_cast<operations>(buffer.read<uint32_t>());
-	ramp = buffer.read<std::string>(false, true);
+	ramp = buffer.read<std::string>(true);
 }
 
 void affector_color_ramp_fractal::serialize(ByteBuffer& buffer)
@@ -561,7 +561,7 @@ void affector_color_ramp_height::deserialize(ByteBuffer& buffer)
 	operation = static_cast<operations>(buffer.read<uint32_t>());
 	low_height = buffer.read<float>();
 	high_height = buffer.read<float>();
-	ramp = buffer.read<std::string>(false, true);
+	ramp = buffer.read<std::string>(true);
 }
 
 void affector_color_ramp_height::serialize(ByteBuffer& buffer)
@@ -721,7 +721,7 @@ void affector_river::deserialize(ByteBuffer& buffer)
 	water_depth = buffer.read<float>();
 	water_width = buffer.read<float>();
 	water_shader_size = buffer.read<float>();
-	water_shader = buffer.read<std::string>(false, true);
+	water_shader = buffer.read<std::string>(true);
 }
 
 void affector_river::serialize(ByteBuffer& buffer)
@@ -905,7 +905,7 @@ void boundary_polygon::deserialize(ByteBuffer& buffer)
 	is_local_water_table = buffer.read<uint32_t>() == 1 ? true : false;
 	water_height = buffer.read<float>();
 	water_shader_size = buffer.read<float>();
-	water_shader = buffer.read<std::string>(false, true);
+	water_shader = buffer.read<std::string>(true);
 }
 
 void boundary_polygon::serialize(ByteBuffer& buffer)
@@ -969,7 +969,7 @@ void boundary_rectangle::deserialize(ByteBuffer& buffer)
 	local_global_water_table = buffer.read<uint32_t>() == 1 ? true : false;
 	water_height = buffer.read<float>();
 	water_shader_size = buffer.read<float>();
-	water_shader = buffer.read<std::string>(false, true);
+	water_shader = buffer.read<std::string>(true);
 }
 
 void boundary_rectangle::serialize(ByteBuffer& buffer)
@@ -993,7 +993,7 @@ void construction_layer::deserialize(ByteBuffer& buffer)
 	invert_boundaries = buffer.read<uint32_t>() == 1 ? true : false;
 	invert_filters = buffer.read<uint32_t>() == 1 ? true : false;
 	unknown1 = buffer.read<uint32_t>();
-	notes = buffer.read<std::string>(false, true);
+	notes = buffer.read<std::string>(true);
 }
 
 void construction_layer::serialize(ByteBuffer& buffer)

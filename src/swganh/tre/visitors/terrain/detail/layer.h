@@ -28,7 +28,7 @@ namespace tre
 		virtual void SetData(swganh::ByteBuffer& buffer)
 		{
 			enabled = buffer.read<uint32_t>() == 1;
-			name = buffer.read<std::string>(false, true);
+			name = buffer.read<std::string>(true);
 		}
 
 		virtual LayerType GetType() = 0;

@@ -34,7 +34,7 @@ void DatatableVisitor::_handle0001COLS(swganh::ByteBuffer& buf)
 	std::uint32_t count = buf.read<std::uint32_t>();
 	for(unsigned int i=0; i < count; ++i)
 	{
-		column_names_.push_back(buf.read<std::string>(false, true));
+		column_names_.push_back(buf.read<std::string>(true));
 	}
 }
 
@@ -43,7 +43,7 @@ void DatatableVisitor::_handleTYPE(swganh::ByteBuffer& buf)
 	std::string buffer;
 	for(unsigned int i=0; i < column_names_.size(); ++i)
 	{
-		buffer = buf.read<std::string>(false, true);
+		buffer = buf.read<std::string>(true);
 		if(buffer.size() > 0)
 		{
 			switch(buffer[0])
@@ -92,7 +92,7 @@ void DatatableVisitor::_handleROWS(swganh::ByteBuffer& buf)
 			}
 			else if(column_types_[j] == 's')
 			{
-				row.columns.push_back(buf.read<std::string>(false, true));
+				row.columns.push_back(buf.read<std::string>(true));
 			}
 			else if(column_types_[j] == 'b')
 			{

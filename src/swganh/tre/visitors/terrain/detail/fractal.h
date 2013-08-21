@@ -28,7 +28,7 @@ namespace tre
 		Fractal(swganh::ByteBuffer& buffer)
 		{
 			fractal_id = buffer.read<int32_t>();
-			fractal_label = buffer.read<std::string>(false, true);
+			fractal_label = buffer.read<std::string>(true);
 		}
 
 		//MFRCFORM

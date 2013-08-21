@@ -24,8 +24,10 @@
 
 #include <QPlainTextEdit>
 
+#include "swganh/byte_buffer.h"
 #include "swganh/utilities.h"
 
+using swganh::ByteBuffer;
 using swged::DDSPreview;
 
 // ARB_texture_compression
@@ -66,6 +68,7 @@ namespace swged {
 
 		void paint();
 		std::ifstream openDDSFile(std::string filename);
+		ByteBuffer readDDSToBuffer(std::string filename);
 		std::unique_ptr<DDS_IMAGE_DATA> readDDSImageData(std::string filename);
 		void initGl();
 		QImage buildDDSThumbnail(const QString& file);
@@ -204,17 +207,39 @@ std::ifstream DDSPreview::DDSPreviewImpl::openDDSFile(std::string filename)
 	return in;
 }
 
+
+ByteBuffer DDSPreview::DDSPreviewImpl::readDDSToBuffer(std::string filename)
+{
+	std::ifstream in(filename, std::ios::binary);
+
+	if (!in.is_open())
+	{
+		throw std::runtime_error("Invalid filename given: " + filename);
+	}
+
+	std::vector<char> tmp { std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>() };
+
+	in.close();
+
+	if (strncmp(tmp.data(), "DDS ", 4) != 0)
+	{
+		throw std::runtime_error("Requested resource is not a DDS file.");
+	}
+
+	return swganh::ByteBuffer(reinterpret_cast<unsigned char*>(tmp.data() + 4), tmp.size() - 4);
+}
+
 std::unique_ptr<DDS_IMAGE_DATA> DDSPreview::DDSPreviewImpl::readDDSImageData(std::string filename)
 {
 	auto image_data = swganh::make_unique<DDS_IMAGE_DATA>();
 	DDSURFACEDESC2 ddsd;
 	int factor;
 	int buffer_size;
-
-	auto dds_stream = openDDSFile(filename);
-
-	dds_stream.read(reinterpret_cast<char*>(&ddsd), sizeof(ddsd));
-
+	
+	auto texture_buffer = readDDSToBuffer(filename);
+	
+	ddsd = texture_buffer.read<DDSURFACEDESC2>();
+	
 	switch (ddsd.ddpfPixelFormat.dwFourCC)
 	{
 	case FOURCC_DXT1:
@@ -222,47 +247,47 @@ std::unique_ptr<DDS_IMAGE_DATA> DDSPreview::DDSPreviewImpl::readDDSImageData(std
 		image_data->format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 		factor = 2;
 		break;
-
+	
 	case FOURCC_DXT3:
 		// DXT3's compression ratio is 4:1
 		image_data->format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 		factor = 4;
 		break;
-
+	
 	case FOURCC_DXT5:
 		// DXT5's compression ratio is 4:1
 		image_data->format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 		factor = 4;
 		break;
-
+	
 	default:
 		throw std::runtime_error("DDS file is not compressed using one of the DXT1, DXT3, or DXT5 formats");
 	}
-
+	
 	if (ddsd.dwLinearSize == 0)
 	{
 		throw std::runtime_error("dwLinearSize is 0");
 	}
-
+	
 	if (ddsd.dwMipMapCount > 1)
 		buffer_size = ddsd.dwLinearSize * factor;
 	else
 		buffer_size = ddsd.dwLinearSize;
-
-	image_data->pixels.resize(buffer_size * sizeof(unsigned char) );
-
-	dds_stream.read(reinterpret_cast<char*>(image_data->pixels.data()), buffer_size);
-	dds_stream.close();
-
+	
+	image_data->pixels.resize(buffer_size * sizeof(unsigned char));
+	image_data->pixels.insert(image_data->pixels.begin(), 
+		texture_buffer.data() + texture_buffer.read_position(),
+		texture_buffer.data() + texture_buffer.size());
+	
 	image_data->width = ddsd.dwWidth;
 	image_data->height = ddsd.dwHeight;
 	image_data->numMipMaps = ddsd.dwMipMapCount;
-
+	
 	if (ddsd.ddpfPixelFormat.dwFourCC == FOURCC_DXT1)
 		image_data->components = 3;
 	else
 		image_data->components = 4;
-
+	
 	return image_data;
 }
 

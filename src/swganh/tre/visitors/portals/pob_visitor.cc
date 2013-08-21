@@ -69,10 +69,10 @@ void PobVisitor::_handle0005DATA(PobVisitor* pob, swganh::ByteBuffer& data)
 	Cell cell;
 	cell.links.reserve(data.read<std::uint32_t>());
 	cell.unkFlag2 = data.read<char>();
-	cell.name = data.read<std::string>(false,true);
-	cell.mesh = data.read<std::string>(false,true);
+	cell.name = data.read<std::string>(true);
+	cell.mesh = data.read<std::string>(true);
 	cell.unkFlag3 = data.read<char>();
-	cell.collision = data.read<std::string>(false,true);
+	cell.collision = data.read<std::string>(true);
 	pob->cells_.push_back(std::move(cell));
 }
 

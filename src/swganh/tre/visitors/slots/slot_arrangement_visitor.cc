@@ -20,7 +20,7 @@ void SlotArrangementVisitor::visit_data(uint32_t depth, std::string name, uint32
 		std::vector<string> combination;
 		while(data.read_position() < end_pos)
 		{
-			combination.push_back(data.read<string>(false, true));
+			combination.push_back(data.read<string>(true));
 		}
 		combinations_.push_back(std::move(combination));
 	}

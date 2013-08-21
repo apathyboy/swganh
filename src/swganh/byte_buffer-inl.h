@@ -32,35 +32,32 @@ ByteBuffer& ByteBuffer::writeAt(size_t offset, T data) {
 }
 
 template<typename T>
-const T ByteBuffer::read(bool doSwapEndian, bool null_terminated_string) {
-  T data = peek<T>(doSwapEndian);
+const T ByteBuffer::read(bool null_terminated_string) {
+  T data = peek<T>();
   read_position_ += sizeof(T);
   return data;
 }
 
 template<typename T>
-const T ByteBuffer::peek(bool doSwapEndian) const {
-  return peekAt<T>(read_position_, doSwapEndian);
+const T ByteBuffer::peek() const {
+  return peekAt<T>(read_position_);
 }
 
 template<typename T>
-const T ByteBuffer::peekAt(size_t offset, bool doSwapEndian) const {
+const T ByteBuffer::peekAt(size_t offset) const {
   if (data_.size() < offset + sizeof(T)) {
     throw std::out_of_range("Read past end of buffer");
   }
 
   T data = *reinterpret_cast<const T*>(&data_[offset]);
 
-  if (doSwapEndian)
-    swapEndian<T>(data);
-
   return data;
 }
 
 template<> ByteBuffer& ByteBuffer::write<std::string>(std::string data);
-template<> const std::string ByteBuffer::read<std::string>(bool doSwapEndian, bool null_terminated_string);
+template<> const std::string ByteBuffer::read<std::string>(bool null_terminated_string);
 template<> ByteBuffer& ByteBuffer::write<std::wstring>(std::wstring data);
-template<> const std::wstring ByteBuffer::read<std::wstring>(bool doSwapEndian, bool null_terminated_string);
+template<> const std::wstring ByteBuffer::read<std::wstring>(bool null_terminated_string);
 
 }  // namespace swganh
 

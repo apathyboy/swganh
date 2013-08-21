@@ -30,14 +30,14 @@ struct TrnHeader
 {
 	void Deserialize(swganh::ByteBuffer buffer)
 	{
-		filename = buffer.read<std::string>(false, true);
+		filename = buffer.read<std::string>(true);
 		map_width = buffer.read<float>();
 		chunk_width = buffer.read<float>();
 		tiles_per_chunk = buffer.read<uint32_t>();
 		use_global_water_height = buffer.read<uint32_t>();
 		global_water_height = buffer.read<float>();
 		water_shader_size = buffer.read<float>();
-		water_shader_name = buffer.read<std::string>(false, true);
+		water_shader_name = buffer.read<std::string>(true);
 		seconds_per_world_cycle = buffer.read<float>();
 
 		Collidable_MinDist = buffer.read<float>();

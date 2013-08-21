@@ -34,7 +34,7 @@ void WsVisitor::_handleOTNL(swganh::ByteBuffer& buffer)
 	uint32_t count = buffer.read<uint32_t>();
 	for(uint32_t i = 0; i < count; ++i)
 	{
-		names.push_back(std::move(buffer.read<std::string>(false,true)));
+		names.push_back(std::move(buffer.read<std::string>(true)));
 	}
 }
 

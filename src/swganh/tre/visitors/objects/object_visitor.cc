@@ -136,7 +136,7 @@ void ObjectVisitor::_handleXXXX(swganh::ByteBuffer& buf)
 	{
 		if(buf.peek<char>() != 1)
 		{
-			std::string attributeName = buf.read<std::string>(false,true);
+			std::string attributeName = buf.read<std::string>(true);
 			AttributeHandlerIndexIterator it = attributeHandler_.find(attributeName);
 
 			if(it != attributeHandler_.cend())
@@ -149,7 +149,7 @@ void ObjectVisitor::_handleXXXX(swganh::ByteBuffer& buf)
 
 void ObjectVisitor::_handleDERVXXXX(swganh::ByteBuffer& buf)
 {
-	parentFiles.insert(buf.read<std::string>(false,true));
+	parentFiles.insert(buf.read<std::string>(true));
 }
 
 void ObjectVisitor::_handleClientString(ObjectVisitor* dst, string& name, swganh::ByteBuffer& buf)
@@ -159,10 +159,10 @@ void ObjectVisitor::_handleClientString(ObjectVisitor* dst, string& name, swganh
 		shared_ptr<ClientString> cs = make_shared<ClientString>();
 		if(buf.read<char>())
 		{
-			cs->file = buf.read<std::string>(false,true);
+			cs->file = buf.read<std::string>(true);
 			if(buf.read<char>())
 			{
-				cs->entry = buf.read<std::string>(false,true);
+				cs->entry = buf.read<std::string>(true);
 			}
 		}
 		dst->attributes_.insert(AttributeMap::value_type(move(name), std::make_shared<boost::any>(cs)));
@@ -173,7 +173,7 @@ void ObjectVisitor::_handleString(ObjectVisitor* dst, string& name, swganh::Byte
 {
 	if(buf.read<char>())
 	{
-		dst->attributes_.insert(AttributeMap::value_type(move(name), std::make_shared<boost::any>(buf.read<std::string>(false,true))));
+		dst->attributes_.insert(AttributeMap::value_type(move(name), std::make_shared<boost::any>(buf.read<std::string>(true))));
 	}
 }
 

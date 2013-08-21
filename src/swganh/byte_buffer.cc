@@ -138,7 +138,7 @@ ByteBuffer& ByteBuffer::write<std::string>(std::string data) {
 }
 
 template<>
-const std::string ByteBuffer::read<std::string>(bool do_swap_endian, bool null_terminated_string) {
+const std::string ByteBuffer::read<std::string>(bool null_terminated_string) {
     
 	if(null_terminated_string)
 	{
@@ -149,7 +149,7 @@ const std::string ByteBuffer::read<std::string>(bool do_swap_endian, bool null_t
 	}
 	else
 	{
-		uint16_t length = read<uint16_t>(do_swap_endian);
+		uint16_t length = read<uint16_t>();
 		if (data_.size() < read_position_ + length) {
 			throw std::out_of_range("Read past end of buffer");
 		}
@@ -189,7 +189,7 @@ ByteBuffer& ByteBuffer::write<std::wstring>(std::wstring data) {
 }
 
 template<>
-const std::wstring ByteBuffer::read<std::wstring>(bool do_swap_endian, bool null_terminated_string) {
+const std::wstring ByteBuffer::read<std::wstring>(bool null_terminated_string) {
 	if(null_terminated_string)
 	{
         const wchar_t* tmp = reinterpret_cast<const wchar_t*>(data()+read_position_);
@@ -199,7 +199,7 @@ const std::wstring ByteBuffer::read<std::wstring>(bool do_swap_endian, bool null
 	}
 	else
 	{
-		uint32_t length = read<uint32_t>(do_swap_endian);
+		uint32_t length = read<uint32_t>();
 		if (data_.size() < read_position_ + (length * 2)) {
 			throw std::out_of_range("Read past end of buffer");
 		}

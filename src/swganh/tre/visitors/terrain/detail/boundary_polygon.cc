@@ -38,7 +38,7 @@ void BoundaryPolygon::Deserialize(swganh::ByteBuffer& buffer)
 	this->use_water_height = buffer.read<uint32_t>();
 	this->water_height = buffer.read<float>();
 	this->water_shader_size = buffer.read<float>();
-	this->water_shader = buffer.read<std::string>(false, true);
+	this->water_shader = buffer.read<std::string>(true);
 }
 
 bool BoundaryPolygon::IsContained(float x, float z)

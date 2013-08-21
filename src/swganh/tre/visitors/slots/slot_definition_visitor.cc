@@ -21,13 +21,13 @@ void SlotDefinitionVisitor::visit_data(uint32_t depth, std::string name, uint32_
 		{
 			slot_entry entry;
 
-			entry.name = data.read<std::string>(false, true);
+			entry.name = data.read<std::string>(true);
 		
 			entry.global = data.read<char>() != 0;
 			entry.canMod = data.read<char>() != 0;
 			entry.exclusive = data.read<char>() != 0;
 
-			entry.hardpoint_name = data.read<std::string>(false, true);
+			entry.hardpoint_name = data.read<std::string>(true);
 			entry.unkValue = data.read<std::uint32_t>();
 
 			slots_.push_back(std::move(entry));

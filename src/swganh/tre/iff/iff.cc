@@ -32,7 +32,7 @@ void iff_file::loadIFF(swganh::ByteBuffer inputstream, std::shared_ptr<VisitorIn
 			if(name.size() == 0 || name == "NULL") { continue; }
 
 			//It was, so we read in the size information
-			std::uint32_t size = inputstream.read<std::uint32_t>(true);
+			uint32_t size = swganh::bigToHost(inputstream.read<uint32_t>());
 
 			//Then we check to see if what it contains is a node or data based the first eight characters
 			if(size >= 4 && isFolderNode_(name))

@@ -30,7 +30,7 @@ namespace tre
 			invert_boundaries = buffer.read<uint32_t>() == 1;
 			invert_filters = buffer.read<uint32_t>() == 1;
 			buffer.read<uint32_t>();
-			notes = buffer.read<std::string>(false, true);
+			notes = buffer.read<std::string>(true);
 		}
 
 		virtual LayerType GetType() { return LAYER_TYPE_CONTAINER; }

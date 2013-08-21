@@ -19,7 +19,7 @@ void SlotDescriptorVisitor::visit_data(uint32_t depth, std::string name, uint32_
 		uint32_t end_pos = data.read_position() + size;
 		while(data.read_position() < end_pos)
 		{
-			slots_available.push_back(data.read<std::string>(false, true));
+			slots_available.push_back(data.read<std::string>(true));
 		}
 	}
 }

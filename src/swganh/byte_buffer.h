@@ -103,7 +103,7 @@ public:
     *
     * @return The next value in the ByteBuffer.
     */
-    template<typename T> const T peek(bool do_swap_endian = false) const;
+    template<typename T> const T peek() const;
 
     /*! Reads the value at the specified position.
     *
@@ -112,7 +112,7 @@ public:
     *
     * @return The value in the specied position.
     */
-    template<typename T> const T peekAt(size_t offset, bool do_swap_endian = false) const;
+    template<typename T> const T peekAt(size_t offset) const;
 
     /*! Reads the next value in the ByteBuffer.
     *
@@ -120,7 +120,7 @@ public:
     *
     * @return The next value in the ByteBuffer.
     */
-    template<typename T> const T read(bool do_swap_endian = false, bool null_terminated_string=false);
+    template<typename T> const T read(bool null_terminated_string=false);
 
     /*! Writes raw data to the ByteBuffer.
     *
