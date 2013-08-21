@@ -73,11 +73,12 @@ void ShaderGroupWidget::itemClicked(const QModelIndex& index)
 {
 	auto data = index.data(Qt::DisplayRole);
 
-	QString msg("Selected ");
-	msg.append(data.toString());
-	msg.append("\n");
+	console_->insertPlainText(QString::fromStdString("Selected ").append(data.toString()).append("\n"));
 
-	console_->insertPlainText(msg);
-	shader_preview_->loadDDSFromFile("grss_long_darkgreen.dds");
+	if (index.parent().isValid())
+	{
+		console_->insertPlainText(QString::fromStdString("Loading preview for ").append(data.toString()).append("\n"));
+		shader_preview_->loadDDSFromFile("grss_long_darkgreen.dds");
+	}
 }
 
