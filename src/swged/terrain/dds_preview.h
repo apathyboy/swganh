@@ -3,10 +3,12 @@
 
 #include <memory>
 
+#include <QImage>
 #include <QString>
 #include <QWidget>
 
 class QPlainTextEdit;
+class QPaintEngine;
 
 namespace swged {
 
@@ -20,6 +22,12 @@ namespace swged {
 
 		void setConsole(QPlainTextEdit* console);
 		void loadDDSFromFile(QString filename);
+		QImage getDDSPreview() const;
+
+		QPaintEngine* paintEngine() const { return 0; }
+
+	protected:
+		void paintEvent(QPaintEvent *event);
 
 	private:
 		struct DDSPreviewImpl;
