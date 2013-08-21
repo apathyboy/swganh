@@ -67,11 +67,12 @@ namespace swged {
 		~DDSPreviewImpl();
 
 		void paint();
-		std::ifstream openDDSFile(std::string filename);
+
 		ByteBuffer readDDSToBuffer(std::string filename);
-		std::unique_ptr<DDS_IMAGE_DATA> readDDSImageData(std::string filename);
+
+		std::unique_ptr<DDS_IMAGE_DATA> readDDSImageData(ByteBuffer texture_buffer);
 		void initGl();
-		QImage buildDDSThumbnail(const QString& file);
+		void loadDDSData(ByteBuffer texture_buffer);
 
 		QPlainTextEdit* console;
 		QImage thumbnail;
@@ -81,6 +82,7 @@ namespace swged {
 		float fSpinY;
 		Vertex quadVertices[4];
 
+		std::unique_ptr<DDS_IMAGE_DATA> current_image_data;
 		GLuint compressedTextureID;
 		HWND hWnd;
 		HDC hDC;
@@ -115,15 +117,26 @@ void DDSPreview::loadDDSFromFile(QString filename)
 {
 	try
 	{
-		impl_->thumbnail = impl_->buildDDSThumbnail("grss_long_darkgreen.dds");
+		loadDDSFromBuffer(impl_->readDDSToBuffer(filename.toStdString()));
 	}
 	catch (std::exception& e)
 	{
 		impl_->console->insertPlainText(QString::fromStdString(e.what()).append("\n"));
 		return;
 	}
+}
 
-	impl_->console->insertPlainText(QString::fromStdString("So far, so good\n"));
+void DDSPreview::loadDDSFromBuffer(ByteBuffer buffer)
+{
+	try
+	{
+		impl_->loadDDSData(std::move(buffer));
+	}
+	catch (std::exception& e)
+	{
+		impl_->console->insertPlainText(QString::fromStdString(e.what()).append("\n"));
+		return;
+	}
 
 	repaint();
 }
@@ -186,28 +199,6 @@ void DDSPreview::DDSPreviewImpl::paint()
 	SwapBuffers(hDC);
 }
 
-std::ifstream DDSPreview::DDSPreviewImpl::openDDSFile(std::string filename)
-{
-	char filecode[4];
-
-	std::ifstream in(filename.c_str(), std::ios::binary);
-
-	if (!in.is_open())
-	{
-		throw std::runtime_error("Unable to open requested DDS resource file");
-	}
-
-	in.read(filecode, sizeof(filecode));
-
-	if (strncmp(filecode, "DDS ", sizeof(filecode)) != 0)
-	{
-		throw std::runtime_error("Requested resource is not a DDS file.");
-	}
-
-	return in;
-}
-
-
 ByteBuffer DDSPreview::DDSPreviewImpl::readDDSToBuffer(std::string filename)
 {
 	std::ifstream in(filename, std::ios::binary);
@@ -221,22 +212,22 @@ ByteBuffer DDSPreview::DDSPreviewImpl::readDDSToBuffer(std::string filename)
 
 	in.close();
 
-	if (strncmp(tmp.data(), "DDS ", 4) != 0)
+	return swganh::ByteBuffer(reinterpret_cast<unsigned char*>(tmp.data()), tmp.size());
+}
+
+std::unique_ptr<DDS_IMAGE_DATA> DDSPreview::DDSPreviewImpl::readDDSImageData(ByteBuffer texture_buffer)
+{
+	if (strncmp(reinterpret_cast<char*>(texture_buffer.data()), "DDS ", 4) != 0)
 	{
 		throw std::runtime_error("Requested resource is not a DDS file.");
 	}
 
-	return swganh::ByteBuffer(reinterpret_cast<unsigned char*>(tmp.data() + 4), tmp.size() - 4);
-}
+	texture_buffer.read_position_delta(4);
 
-std::unique_ptr<DDS_IMAGE_DATA> DDSPreview::DDSPreviewImpl::readDDSImageData(std::string filename)
-{
 	auto image_data = swganh::make_unique<DDS_IMAGE_DATA>();
 	DDSURFACEDESC2 ddsd;
 	int factor;
 	int buffer_size;
-	
-	auto texture_buffer = readDDSToBuffer(filename);
 	
 	ddsd = texture_buffer.read<DDSURFACEDESC2>();
 	
@@ -336,9 +327,9 @@ void DDSPreview::DDSPreviewImpl::initGl()
 	}
 }
 
-QImage DDSPreview::DDSPreviewImpl::buildDDSThumbnail(const QString& file)
+void DDSPreview::DDSPreviewImpl::loadDDSData(ByteBuffer texture_buffer)
 {
-	auto dds_data = readDDSImageData(file.toStdString());
+	auto dds_data = readDDSImageData(std::move(texture_buffer));
 
 	if (!dds_data)
 	{
@@ -389,8 +380,6 @@ QImage DDSPreview::DDSPreviewImpl::buildDDSThumbnail(const QString& file)
 		nWidth = (nWidth / 2);
 		nHeight = (nHeight / 2);
 	}
-
-	return qt_gl_read_texture(QSize(nWidth, nHeight), false, false);
 }
 
 QImage qt_gl_read_texture(const QSize &size, bool alpha_format, bool include_alpha)

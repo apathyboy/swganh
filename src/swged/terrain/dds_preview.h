@@ -7,6 +7,8 @@
 #include <QString>
 #include <QWidget>
 
+#include "swganh/byte_buffer.h"
+
 class QPlainTextEdit;
 class QPaintEngine;
 
@@ -22,6 +24,7 @@ namespace swged {
 
 		void setConsole(QPlainTextEdit* console);
 		void loadDDSFromFile(QString filename);
+		void loadDDSFromBuffer(swganh::ByteBuffer buffer);
 		QImage getDDSPreview() const;
 
 		QPaintEngine* paintEngine() const { return 0; }

@@ -78,6 +78,6 @@ void ShaderGroupWidget::itemClicked(const QModelIndex& index)
 	msg.append("\n");
 
 	console_->insertPlainText(msg);
-	shader_preview_->loadDDSFromFile(data.toString());
+	shader_preview_->loadDDSFromFile("grss_long_darkgreen.dds");
 }
 
