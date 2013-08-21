@@ -5,9 +5,8 @@
 #include <QDebug>
 #include <QPlainTextEdit>
 
-#include "nv_dds/nv_dds.h"
+#include "dds.h"
 
-using nv_dds::CDDSImage;
 using swged::ShaderPreview;
 
 std::string _check_gl_error(const char *file, int line);
@@ -73,24 +72,17 @@ void ShaderPreview::setConsole(QPlainTextEdit* console)
 
 void ShaderPreview::setShader(const QString& shader_name)
 {
-    CDDSImage image;
-    GLuint texobj;
+	try
+	{
+		auto thumbnail = swged::build_dds_thumbnail("grss_long_darkgreen.dds");
+	}
+	catch (std::exception& e)
+	{
+		console_->insertPlainText(QString::fromStdString(e.what()).append("\n"));
+		return;
+	}
 
-    image.load("grss_long_darkgreen.dds");
-
-    if (!image.is_valid())
-    {
-        console_->insertPlainText(QString::fromStdString("What the hoof\n"));
-        return;
-    }
-
-    glGenTextures(1, &texobj);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texobj);
-
-    glCompressedTexImage2DARB(GL_TEXTURE_2D, 0, image.get_format(),
-        image.get_width(), image.get_height(), 0, image.get_size(),
-        image);
+	console_->insertPlainText(QString::fromStdString("So far, so good\n"));
 
 //    auto error = check_gl_error();
 //    console_->insertPlainText(QString::fromStdString(error).append("\n"));

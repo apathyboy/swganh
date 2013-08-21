@@ -15,7 +15,7 @@ class CommandInterface;
 namespace swganh {
 namespace command {
 
-enum ERROR
+enum class ERRORS : uint32_t
 {
 	CANNOT_WHILE_IN_POSTURE = 1,
 	INSUFFICIENT_ABILITY = 2,

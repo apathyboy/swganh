@@ -37,11 +37,11 @@ std::tuple<bool, uint32_t, uint32_t> CommandFilters::TargetCheckFilter(CommandIn
 			}
 			else
 			{
-				error = OUT_OF_RANGE;
+				error = (uint32_t) ERRORS::OUT_OF_RANGE;
 			}
 		}
 		else
-			error = INVALID_TARGET;
+			error = (uint32_t) ERRORS::INVALID_TARGET;
     }
 	// for now if no target return true
 	else
@@ -70,7 +70,7 @@ std::tuple<bool, uint32_t, uint32_t> CommandFilters::PostureCheckFilter(CommandI
 		}
 		else
 		{
-			error = CANNOT_WHILE_IN_POSTURE;
+			error = (uint32_t) ERRORS::CANNOT_WHILE_IN_POSTURE;
 			action = current_posture;
 		}
 	}
@@ -95,7 +95,7 @@ std::tuple<bool, uint32_t, uint32_t> CommandFilters::StateCheckFilter(CommandInt
 		}
 		else
 		{
-			error = CANNOT_WHILE_IN_STATE;
+			error = (uint32_t) ERRORS::CANNOT_WHILE_IN_STATE;
 			action = GetLowestCommonBit(current_state, swg_command->GetAllowedStateBitmask());
 		}
 	}
@@ -122,7 +122,7 @@ std::tuple<bool, uint32_t, uint32_t> CommandFilters::AbilityCheckFilter(CommandI
 		}
 		else
 		{
-			error = INSUFFICIENT_ABILITY;
+			error = (uint32_t) ERRORS::INSUFFICIENT_ABILITY;
 		}
     }
 	// doesn't require ability
@@ -166,7 +166,7 @@ std::tuple<bool, uint32_t, uint32_t> CommandFilters::CombatTargetCheckFilter(Com
         // Action Check?
         check_passed = true;
     }
-    if (!check_passed) error = INVALID_TARGET;
+	if (!check_passed) error = (uint32_t)ERRORS::INVALID_TARGET;
 
     return std::tie (check_passed, error, action);
 }
