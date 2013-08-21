@@ -16,7 +16,7 @@ class QPlainTextEdit;
 namespace swged {
 
 	class ShaderGroupModel;
-	class ShaderPreview;
+	class DDSPreview;
 
 	class ShaderGroupWidget : public QWidget
 	{
@@ -38,7 +38,7 @@ namespace swged {
 
 		std::unique_ptr<QToolBar> toolbar_;
 		std::unique_ptr<QTreeView> family_tree_;
-		std::unique_ptr<ShaderPreview> shader_preview_;
+		std::unique_ptr<DDSPreview> shader_preview_;
 		std::unique_ptr<ShaderGroupModel> model_;
 		QPlainTextEdit* console_;
 	};

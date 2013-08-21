@@ -11,17 +11,17 @@
 #include "swganh/utilities.h"
 
 #include "shader_group_model.h"
-#include "shader_preview.h"
+#include "dds_preview.h"
 
 using swged::ShaderGroupWidget;
 using swged::ShaderGroupModel;
-using swged::ShaderPreview;
+using swged::DDSPreview;
 
 ShaderGroupWidget::ShaderGroupWidget(QWidget* parent)
 	: QWidget(parent)
 	, toolbar_(swganh::make_unique<QToolBar>())
 	, family_tree_(swganh::make_unique<QTreeView>())
-	, shader_preview_(swganh::make_unique<ShaderPreview>())
+	, shader_preview_(swganh::make_unique<DDSPreview>())
 {
 	connect(family_tree_.get(), SIGNAL(clicked(const QModelIndex&)), this, SLOT(itemClicked(const QModelIndex&)));
 
@@ -78,6 +78,6 @@ void ShaderGroupWidget::itemClicked(const QModelIndex& index)
 	msg.append("\n");
 
 	console_->insertPlainText(msg);
-	shader_preview_->setShader(data.toString());
+	shader_preview_->loadDDSFromFile(data.toString());
 }
 
