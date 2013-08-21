@@ -82,7 +82,7 @@ namespace swganh {
             if (extension.compare(".trn") == 0)
             {
                 terrain_editor_ = swganh::make_unique<TerrainEditor>(
-                    swganh::terrain::read_procedural_terrain(resource));
+                    swganh::terrain::read_procedural_terrain(resource), archive_.get());
                 terrain_editor_->show();
             }
             else

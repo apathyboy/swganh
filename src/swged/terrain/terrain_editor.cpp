@@ -7,16 +7,19 @@
 #include <QMessageBox>
 
 #include "swganh/terrain/procedural_terrain.h"
+#include "swganh/tre/tre_archive.h"
 
 #include "layer_model.h"
 
 using swganh::terrain::procedural_terrain;
 using swganh::TerrainEditor;
+using swganh::tre::TreArchive;
 
 
-TerrainEditor::TerrainEditor(std::unique_ptr<procedural_terrain> terrain, QWidget* parent)
+TerrainEditor::TerrainEditor(std::unique_ptr<procedural_terrain> terrain, TreArchive* archive, QWidget* parent)
 	: QMainWindow(parent)
 	, terrain_(std::move(terrain))
+	, archive_(archive)
 {
 	setupUi(this);
 
@@ -24,6 +27,7 @@ TerrainEditor::TerrainEditor(std::unique_ptr<procedural_terrain> terrain, QWidge
     layerTree->setModel(layer_model);
 
     tabShaderGroup->setConsole(consoleEdit);
+	tabShaderGroup->setArchive(archive_);
 	tabShaderGroup->setShaderGroup(&terrain_->shader_group);
 
 }

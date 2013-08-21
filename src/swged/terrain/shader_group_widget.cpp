@@ -9,10 +9,12 @@
 #include <QPlainTextEdit>
 
 #include "swganh/utilities.h"
+#include "swganh/tre/tre_archive.h"
 
 #include "shader_group_model.h"
 #include "dds_preview.h"
 
+using swganh::tre::TreArchive;
 using swged::ShaderGroupWidget;
 using swged::ShaderGroupModel;
 using swged::DDSPreview;
@@ -69,6 +71,11 @@ void ShaderGroupWidget::setConsole(QPlainTextEdit* console)
 	shader_preview_->setConsole(console_);
 }
 
+void ShaderGroupWidget::setArchive(TreArchive* archive)
+{
+	archive_ = archive;
+}
+
 void ShaderGroupWidget::itemClicked(const QModelIndex& index)
 {
 	auto data = index.data(Qt::DisplayRole);
@@ -78,7 +85,9 @@ void ShaderGroupWidget::itemClicked(const QModelIndex& index)
 	if (index.parent().isValid())
 	{
 		console_->insertPlainText(QString::fromStdString("Loading preview for ").append(data.toString()).append("\n"));
-		shader_preview_->loadDDSFromFile("grss_long_darkgreen.dds");
+
+		std::string resource_name = std::string("texture/").append(data.toString().toStdString()).append(".dds");
+		shader_preview_->loadDDSFromBuffer(archive_->GetResource(resource_name));
 	}
 }
 

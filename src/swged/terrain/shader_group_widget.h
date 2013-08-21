@@ -9,6 +9,12 @@
 
 #include "swganh/terrain/procedural_terrain.h"
 
+namespace swganh {
+	namespace tre {
+		class TreArchive;
+	}
+}
+
 class QToolBar;
 class QTreeView;
 class QPlainTextEdit;
@@ -29,6 +35,8 @@ namespace swged {
 
 		void setShaderGroup(swganh::terrain::shader_group_t* shader_group);
 		void setConsole(QPlainTextEdit* console);
+		void setArchive(swganh::tre::TreArchive* archive);
+
 	private slots:
 		void itemClicked(const QModelIndex&);
 
@@ -41,6 +49,8 @@ namespace swged {
 		std::unique_ptr<DDSPreview> shader_preview_;
 		std::unique_ptr<ShaderGroupModel> model_;
 		QPlainTextEdit* console_;
+
+		swganh::tre::TreArchive* archive_;
 	};
 
 }

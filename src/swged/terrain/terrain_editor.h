@@ -10,6 +10,11 @@ namespace terrain {
 		struct procedural_terrain;
 }}
 
+namespace swganh {
+namespace tre {
+	class TreArchive;
+}}
+
 
 namespace swganh {
 	class TerrainEditor : public QMainWindow, private Ui::TerrainEditor
@@ -17,11 +22,12 @@ namespace swganh {
 		Q_OBJECT
 
 	public:
-		explicit TerrainEditor(std::unique_ptr<swganh::terrain::procedural_terrain> terrain, QWidget* parent = nullptr);
+		TerrainEditor(std::unique_ptr<swganh::terrain::procedural_terrain> terrain, swganh::tre::TreArchive* archive, QWidget* parent = nullptr);
 		~TerrainEditor();
 
 	private:
 		std::unique_ptr<swganh::terrain::procedural_terrain> terrain_;
+		swganh::tre::TreArchive* archive_;
 	};
 
 
