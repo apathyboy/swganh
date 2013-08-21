@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QPlainTextEdit>
 
+#include "nv_dds/nv_dds.h"
+
+using nv_dds::CDDSImage;
 using swged::ShaderPreview;
 
 std::string _check_gl_error(const char *file, int line);
@@ -70,34 +73,53 @@ void ShaderPreview::setConsole(QPlainTextEdit* console)
 
 void ShaderPreview::setShader(const QString& shader_name)
 {
-    auto error = check_gl_error();
-    console_->insertPlainText(QString::fromStdString(error).append("\n"));
+    CDDSImage image;
+    GLuint texobj;
+
+    image.load("grss_long_darkgreen.dds");
+
+    if (!image.is_valid())
+    {
+        console_->insertPlainText(QString::fromStdString("What the hoof\n"));
+        return;
+    }
+
+    glGenTextures(1, &texobj);
     glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texobj);
 
-    makeCurrent();
+    glCompressedTexImage2DARB(GL_TEXTURE_2D, 0, image.get_format(),
+        image.get_width(), image.get_height(), 0, image.get_size(),
+        image);
 
-#if defined(QT_OPENGL_ES_2)
-    {
-        console_->insertPlainText(QString::fromStdString("What the hoof\n");
-        return;
-    }
-#endif
-
-    auto texture = bindTexture("grss_long_darkgreen.dds");
-
-    GLint width, height;
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
-
-    if (width == 0 || height == 0)
-    {
-        error = check_gl_error();
-        console_->insertPlainText(QString::fromStdString(error).append("\nSomething went wrong\n"));
-        return;
-    }
-
-    console_->insertPlainText("Something went right!\n");
+//    auto error = check_gl_error();
+//    console_->insertPlainText(QString::fromStdString(error).append("\n"));
+//    glEnable(GL_TEXTURE_2D);
+//
+//    makeCurrent();
+//
+//#if defined(QT_OPENGL_ES_2)
+//    {
+//        console_->insertPlainText(QString::fromStdString("What the hoof\n");
+//        return;
+//    }
+//#endif
+//
+//    auto texture = bindTexture("grss_long_darkgreen.dds");
+//
+//    GLint width, height;
+//    glBindTexture(GL_TEXTURE_2D, texture);
+//    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+//    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+//
+//    if (width == 0 || height == 0)
+//    {
+//        error = check_gl_error();
+//        console_->insertPlainText(QString::fromStdString(error).append("\nSomething went wrong\n"));
+//        return;
+//    }
+//
+//    console_->insertPlainText("Something went right!\n");
 
 }
 
