@@ -21,8 +21,8 @@ ShaderFamilyForm::ShaderFamilyForm(shader_family* family, QWidget* parent)
 		this->childrenList->addItem(new QListWidgetItem(QString::fromStdString(child->name)));
 	}
 
-	connect(surfaceProperties, SIGNAL(textChanged(const QString&)), this, SLOT(surfacePropertiesChanged(const QString&)));
-	connect(featherClampEdit, SIGNAL(textChanged(const QString&)), this, SLOT(featherClampChanged(const QString&)));
+	connect(surfaceProperties, SIGNAL(textChanged(const QString&)), SLOT(surfacePropertiesChanged(const QString&)));
+	connect(featherClampEdit, SIGNAL(textChanged(const QString&)), SLOT(featherClampChanged(const QString&)));
 }
 
 ShaderFamilyForm::~ShaderFamilyForm()

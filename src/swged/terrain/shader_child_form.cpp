@@ -15,6 +15,12 @@ ShaderChildForm::ShaderChildForm(swganh::terrain::shader_family::shader_child* c
 
 	childNameLabel->setText(QString::fromStdString(child_->name));
 	weightEdit->setText(QString::number(child_->weight));
+
+	auto rgbdata = QString::number(child_->parent->r).append(", ")
+		.append(QString::number(child_->parent->g)).append(", ")
+		.append(QString::number(child_->parent->b));
+
+	colorPreview->setStyleSheet(QString::fromStdString("background:rgb(").append(rgbdata).append(");"));
 }
 
 ShaderChildForm::~ShaderChildForm()
