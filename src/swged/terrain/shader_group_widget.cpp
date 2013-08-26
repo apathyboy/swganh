@@ -12,9 +12,14 @@
 #include "swganh/tre/tre_archive.h"
 
 #include "shader_group_model.h"
+#include "shader_family_form.h"
+#include "shader_child_form.h"
 #include "dds_preview.h"
 
 using swganh::tre::TreArchive;
+using swganh::terrain::shader_family;
+using swged::ShaderChildForm;
+using swged::ShaderFamilyForm;
 using swged::ShaderGroupWidget;
 using swged::ShaderGroupModel;
 using swged::DDSPreview;
@@ -82,12 +87,22 @@ void ShaderGroupWidget::itemClicked(const QModelIndex& index)
 
 	console_->insertPlainText(QString::fromStdString("Selected ").append(data.toString()).append("\n"));
 
+	QWidget* property_form = nullptr;
+
 	if (index.parent().isValid())
 	{
 		console_->insertPlainText(QString::fromStdString("Loading preview for ").append(data.toString()).append("\n"));
 
 		std::string resource_name = std::string("texture/").append(data.toString().toStdString()).append(".dds");
 		shader_preview_->loadDDSFromBuffer(archive_->GetResource(resource_name));
+
+		property_form = new ShaderChildForm(index.data(Qt::UserRole).value<shader_family::shader_child*>(), this);
 	}
+	else
+	{
+		property_form = new ShaderFamilyForm(index.data(Qt::UserRole).value<shader_family*>(), this);
+	}
+
+	emit propertiedItemSelected(property_form);
 }
 

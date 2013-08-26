@@ -7,6 +7,9 @@
 
 #include "swganh/terrain/procedural_terrain.h"
 
+Q_DECLARE_METATYPE(swganh::terrain::shader_family*)
+Q_DECLARE_METATYPE(swganh::terrain::shader_family::shader_child*)
+
 namespace swged {
 
 	class ShaderGroupModel : public QAbstractItemModel

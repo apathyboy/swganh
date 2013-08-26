@@ -30,10 +30,20 @@ TerrainEditor::TerrainEditor(std::unique_ptr<procedural_terrain> terrain, TreArc
 	tabShaderGroup->setArchive(archive_);
 	tabShaderGroup->setShaderGroup(&terrain_->shader_group);
 
+	connect(tabShaderGroup, SIGNAL(propertiedItemSelected(QWidget*)), this, SLOT(onPropertiedItemSelected(QWidget*)));
+
+	//
+	//	connect(layerTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+	//		this, SLOT(onLayerClicked(QTreeWidgetItem*, int)));
 }
 
 TerrainEditor::~TerrainEditor()
 {}
+
+void TerrainEditor::onPropertiedItemSelected(QWidget* widget)
+{
+	contextProperties->setWidget(widget);
+}
 
 //// old
 //

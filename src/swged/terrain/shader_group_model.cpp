@@ -73,7 +73,7 @@ int ShaderGroupModel::columnCount(const QModelIndex& parent) const
 
 QVariant ShaderGroupModel::data(const QModelIndex& index, int role) const
 {
-	if (role != Qt::DisplayRole || index.column() != 0)
+	if (index.column() != 0)
 	{
 		return QVariant();
 	}
@@ -81,12 +81,28 @@ QVariant ShaderGroupModel::data(const QModelIndex& index, int role) const
 	if (getIndexType(index) == 0)
 	{
 		auto family = familyFromIndex(index);
-		return QString::fromStdString(family->family_name);
+
+		if (role == Qt::DisplayRole)
+		{
+			return QString::fromStdString(family->family_name);
+		}
+		else if (role == Qt::UserRole)
+		{
+			return QVariant::fromValue(family);
+		}
 	}
 	else
 	{
 		auto child = childFromIndex(index);
-		return QString::fromStdString(child->name);
+
+		if (role == Qt::DisplayRole)
+		{
+			return QString::fromStdString(child->name);
+		}
+		else if (role == Qt::UserRole)
+		{
+			return QVariant::fromValue(child);
+		}
 	}
 
 	return QVariant();

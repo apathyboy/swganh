@@ -37,6 +37,9 @@ namespace swged {
 		void setConsole(QPlainTextEdit* console);
 		void setArchive(swganh::tre::TreArchive* archive);
 
+	signals:
+		void propertiedItemSelected(QWidget*);
+
 	private slots:
 		void itemClicked(const QModelIndex&);
 

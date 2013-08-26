@@ -25,6 +25,9 @@ namespace swganh {
 		TerrainEditor(std::unique_ptr<swganh::terrain::procedural_terrain> terrain, swganh::tre::TreArchive* archive, QWidget* parent = nullptr);
 		~TerrainEditor();
 
+	private slots:
+		void onPropertiedItemSelected(QWidget* widget);
+
 	private:
 		std::unique_ptr<swganh::terrain::procedural_terrain> terrain_;
 		swganh::tre::TreArchive* archive_;
