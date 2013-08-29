@@ -24,7 +24,7 @@ namespace swged {
 
 	private slots:
 		void surfacePropertiesChanged(const QString& properties_file);
-		void featherClampChanged(const QString& new_value);
+		void featherClampChanged(int value);
 	};
 
 }

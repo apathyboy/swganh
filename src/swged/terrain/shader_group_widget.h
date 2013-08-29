@@ -9,6 +9,8 @@
 
 #include "swganh/terrain/procedural_terrain.h"
 
+#include "group_model.h"
+
 namespace swganh {
 	namespace tre {
 		class TreArchive;
@@ -19,9 +21,11 @@ class QToolBar;
 class QTreeView;
 class QPlainTextEdit;
 
+Q_DECLARE_METATYPE(swganh::terrain::shader_family*)
+Q_DECLARE_METATYPE(swganh::terrain::shader_family::shader_child*)
+
 namespace swged {
 
-	class ShaderGroupModel;
 	class DDSPreview;
 
 	class ShaderGroupWidget : public QWidget
@@ -50,6 +54,8 @@ namespace swged {
 		std::unique_ptr<QToolBar> toolbar_;
 		std::unique_ptr<QTreeView> family_tree_;
 		std::unique_ptr<DDSPreview> shader_preview_;
+		//std::unique_ptr<ShaderGroupModel> model_;
+		typedef GroupModel<swganh::terrain::shader_family, swganh::terrain::shader_family::shader_child> ShaderGroupModel;
 		std::unique_ptr<ShaderGroupModel> model_;
 		QPlainTextEdit* console_;
 

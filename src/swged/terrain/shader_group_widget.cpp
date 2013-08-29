@@ -11,7 +11,7 @@
 #include "swganh/utilities.h"
 #include "swganh/tre/tre_archive.h"
 
-#include "shader_group_model.h"
+//#include "shader_group_model.h"
 #include "shader_family_form.h"
 #include "shader_child_form.h"
 #include "dds_preview.h"
@@ -21,7 +21,7 @@ using swganh::terrain::shader_family;
 using swged::ShaderChildForm;
 using swged::ShaderFamilyForm;
 using swged::ShaderGroupWidget;
-using swged::ShaderGroupModel;
+//using swged::ShaderGroupModel;
 using swged::DDSPreview;
 
 ShaderGroupWidget::ShaderGroupWidget(QWidget* parent)

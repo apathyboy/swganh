@@ -13,8 +13,14 @@ ShaderFamilyForm::ShaderFamilyForm(shader_family* family, QWidget* parent)
 	setupUi(this);
 
 	this->surfaceProperties->setText(QString::fromStdString(family_->surface_properties_file));
-	this->featherClampEdit->setText(QString::number(family_->feather_clamp));
+	this->featherClamp->setValue(family_->feather_clamp);
 	this->nameLabel->setText(QString::fromStdString(family_->family_name));
+
+	auto rgbdata = QString::number(family_->r).append(", ")
+		.append(QString::number(family_->g)).append(", ")
+		.append(QString::number(family_->b));
+
+	colorPreview->setStyleSheet(QString::fromStdString("background:rgb(").append(rgbdata).append(");"));
 
 	for (const auto& child : family_->children)
 	{
@@ -22,7 +28,7 @@ ShaderFamilyForm::ShaderFamilyForm(shader_family* family, QWidget* parent)
 	}
 
 	connect(surfaceProperties, SIGNAL(textChanged(const QString&)), SLOT(surfacePropertiesChanged(const QString&)));
-	connect(featherClampEdit, SIGNAL(textChanged(const QString&)), SLOT(featherClampChanged(const QString&)));
+	connect(featherClamp, SIGNAL(valueChanged(int)), SLOT(featherClampChanged(int)));
 }
 
 ShaderFamilyForm::~ShaderFamilyForm()
@@ -34,7 +40,7 @@ void ShaderFamilyForm::surfacePropertiesChanged(const QString& properties_file)
 	family_->surface_properties_file = properties_file.toStdString();
 }
 
-void ShaderFamilyForm::featherClampChanged(const QString& new_value)
+void ShaderFamilyForm::featherClampChanged(int value)
 {
-	family_->feather_clamp = new_value.toFloat();
+	family_->feather_clamp = value;
 }
