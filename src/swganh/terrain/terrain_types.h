@@ -289,7 +289,7 @@ namespace terrain {
 		uint8_t r;
 		uint8_t g;
 		uint8_t b;
-		float unknown1;
+		float shader_size;
 		float feather_clamp;
 
 		std::vector<std::unique_ptr<shader_child>> children;
@@ -304,10 +304,10 @@ namespace terrain {
 		{
 			std::string name;
 			float weight;
-			bool align_to_terrain;
+			bool should_sway;
 			float displacement;
 			float period;
-			bool sway_flora;
+			bool align_to_terrain;
 			bool scale_flora;
 			float min_scale;
 			float max_scale;
@@ -338,11 +338,11 @@ namespace terrain {
 			float distance;
 			float width;
 			float height;
-			bool maintain_aspect_ration;
+			bool should_sway;
 			float displacement;
 			float period;
-			bool sway_flora;
-			int unk9;
+			bool align_to_terrain;
+			int create_plus;
 
 			radial_family* parent;
 		};
@@ -456,7 +456,7 @@ namespace terrain {
 
 		bool invert_boundaries;
 		bool invert_filters;
-		uint32_t unknown1;
+		bool expanded;
 		std::string notes;
 
 		std::vector<base_affector_layer*> affectors;
@@ -568,7 +568,7 @@ namespace terrain {
 		e_affector_type get_type() const { return affector_type; }
 
 		operations operation;
-		float value;
+		float height;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
@@ -593,8 +593,8 @@ namespace terrain {
 		static const e_affector_type affector_type = e_affector_type::height_terrace;
 		e_affector_type get_type() const { return affector_type; }
 
-		float terrace_height;
-		float flat_ratio;
+		float fraction;
+		float height;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);
@@ -823,7 +823,7 @@ namespace terrain {
 		float feather_distance;
 		float low;
 		float high;
-		float step;
+		float scale_y;
 
 		void deserialize(ByteBuffer& buffer);
 		void serialize(ByteBuffer& buffer);

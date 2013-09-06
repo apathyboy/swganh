@@ -129,7 +129,7 @@ void shader_family::deserialize(ByteBuffer& buffer)
 	r = buffer.read<uint8_t>();
 	g = buffer.read<uint8_t>();
 	b = buffer.read<uint8_t>();
-	unknown1 = buffer.read<float>();
+	shader_size = buffer.read<float>();
 	feather_clamp = buffer.read<float>();
 
 	uint32_t child_count = buffer.read<uint32_t>();
@@ -154,7 +154,7 @@ void shader_family::serialize(ByteBuffer& buffer)
 	buffer.write(r);
 	buffer.write(g);
 	buffer.write(b);
-	buffer.write(unknown1);
+	buffer.write(shader_size);
 	buffer.write(feather_clamp);
 	buffer.write(uint32_t(children.size()));
 
@@ -182,10 +182,10 @@ void flora_family::deserialize(ByteBuffer& buffer)
 		auto child = swganh::make_unique<flora_child>();
 		child->name = buffer.read<std::string>(true);
 		child->weight = buffer.read<float>();
-		child->align_to_terrain = buffer.read<uint32_t>() == 1 ? true : false;
+		child->should_sway = buffer.read<uint32_t>() == 1 ? true : false;
 		child->displacement = buffer.read<float>();
 		child->period = buffer.read<float>();
-		child->sway_flora = buffer.read<uint32_t>() == 1 ? true : false;
+		child->align_to_terrain = buffer.read<uint32_t>() == 1 ? true : false;
 		child->scale_flora = buffer.read<uint32_t>() == 1 ? true : false;
 		child->min_scale = buffer.read<float>();
 		child->max_scale = buffer.read<float>();
@@ -212,10 +212,10 @@ void flora_family::serialize(ByteBuffer& buffer)
 		buffer.write(reinterpret_cast<const unsigned char*>(child->name.c_str()), child->name.size());
 		buffer.write(uint8_t(0));
 		buffer.write(child->weight);
-		buffer.write(uint32_t(child->align_to_terrain ? 1 : 0));
+		buffer.write(uint32_t(child->should_sway ? 1 : 0));
 		buffer.write(child->displacement);
 		buffer.write(child->period);
-		buffer.write(uint32_t(child->sway_flora ? 1 : 0));
+		buffer.write(uint32_t(child->align_to_terrain ? 1 : 0));
 		buffer.write(uint32_t(child->scale_flora ? 1 : 0));
 		buffer.write(child->min_scale);
 		buffer.write(child->max_scale);
@@ -240,11 +240,11 @@ void radial_family::deserialize(ByteBuffer& buffer)
 		child->distance = buffer.read<float>();
 		child->width = buffer.read<float>();
 		child->height = buffer.read<float>();
-		child->maintain_aspect_ration = buffer.read<uint32_t>() == 1 ? true : false;
+		child->should_sway = buffer.read<uint32_t>() == 1 ? true : false;
 		child->displacement = buffer.read<float>();
 		child->period = buffer.read<float>();
-		child->sway_flora = buffer.read<uint32_t>() == 1 ? true : false;
-		child->unk9 = buffer.read<uint32_t>();
+		child->align_to_terrain = buffer.read<uint32_t>() == 1 ? true : false;
+		child->create_plus = buffer.read<uint32_t>();
 		child->parent = this;
 
 		children.push_back(std::move(child));
@@ -270,11 +270,11 @@ void radial_family::serialize(ByteBuffer& buffer)
 		buffer.write(child->distance);
 		buffer.write(child->width);
 		buffer.write(child->height);
-		buffer.write(uint32_t(child->maintain_aspect_ration ? 1 : 0));
+		buffer.write(uint32_t(child->should_sway ? 1 : 0));
 		buffer.write(child->displacement);
 		buffer.write(child->period);
-		buffer.write(uint32_t(child->sway_flora ? 1 : 0));
-		buffer.write(child->unk9);
+		buffer.write(uint32_t(child->align_to_terrain ? 1 : 0));
+		buffer.write(child->create_plus);
 	}
 }
 
@@ -626,13 +626,13 @@ void affector_flora_non_collidable_constant::serialize(ByteBuffer& buffer)
 void affector_height_constant::deserialize(ByteBuffer& buffer)
 {
 	operation = static_cast<operations>(buffer.read<uint32_t>());
-	value = buffer.read<float>();
+	height = buffer.read<float>();
 }
 
 void affector_height_constant::serialize(ByteBuffer& buffer)
 {
 	buffer.write(uint32_t(operation));
-	buffer.write(value);
+	buffer.write(height);
 }
 
 void affector_height_fractal::deserialize(ByteBuffer& buffer)
@@ -651,14 +651,14 @@ void affector_height_fractal::serialize(ByteBuffer& buffer)
 
 void affector_height_terrace::deserialize(ByteBuffer& buffer)
 {
-	terrace_height = buffer.read<float>();
-	flat_ratio = buffer.read<float>();
+	fraction = buffer.read<float>();
+	height = buffer.read<float>();
 }
 
 void affector_height_terrace::serialize(ByteBuffer& buffer)
 {
-	buffer.write(terrace_height);
-	buffer.write(flat_ratio);
+	buffer.write(fraction);
+	buffer.write(height);
 }
 
 void affector_radial_far_constant::deserialize(ByteBuffer& buffer)
@@ -710,11 +710,13 @@ void affector_river::deserialize(ByteBuffer& buffer)
 		control_points.push_back(control_point);
 	}
 
-	feathering_distance = buffer.read<float>();
-	feathering_function = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+
+	width = buffer.read<float>();
 	bank_shader = buffer.read<uint32_t>();
 	bottom_shader = buffer.read<uint32_t>();
-	width = buffer.read<float>();
+	feathering_function = static_cast<e_feathering_function>(buffer.read<uint32_t>());
+	feathering_distance = buffer.read<float>();
+
 	trench_depth = buffer.read<float>();
 	velocity = buffer.read<float>();
 	has_water = buffer.read<uint32_t>() == 1 ? true : false;
@@ -734,11 +736,11 @@ void affector_river::serialize(ByteBuffer& buffer)
 		buffer.write(point.y);
 	}
 
-	buffer.write(feathering_distance);
-	buffer.write(uint32_t(feathering_function));
+	buffer.write(width);
 	buffer.write(bank_shader);
 	buffer.write(bottom_shader);
-	buffer.write(width);
+	buffer.write(uint32_t(feathering_function));
+	buffer.write(feathering_distance);
 	buffer.write(trench_depth);
 	buffer.write(velocity);
 	buffer.write<uint32_t>(has_water ? 1 : 0);
@@ -992,7 +994,7 @@ void construction_layer::deserialize(ByteBuffer& buffer)
 {
 	invert_boundaries = buffer.read<uint32_t>() == 1 ? true : false;
 	invert_filters = buffer.read<uint32_t>() == 1 ? true : false;
-	unknown1 = buffer.read<uint32_t>();
+	expanded = buffer.read<uint32_t>() == 1 ? true : false;
 	notes = buffer.read<std::string>(true);
 }
 
@@ -1000,7 +1002,7 @@ void construction_layer::serialize(ByteBuffer& buffer)
 {
 	buffer.write<uint32_t>(invert_boundaries ? 1 : 0);
 	buffer.write<uint32_t>(invert_filters ? 1 : 0);
-	buffer.write(unknown1);
+	buffer.write<uint32_t>(expanded ? 1 : 0);
 	buffer.write(reinterpret_cast<const unsigned char*>(notes.c_str()), notes.size());
 	buffer.write(uint8_t(0));
 }
@@ -1028,7 +1030,7 @@ void filter_fractal::deserialize(ByteBuffer& buffer)
 	feather_distance = buffer.read<float>();
 	low = buffer.read<float>();
 	high = buffer.read<float>();
-	step = buffer.read<float>();
+	scale_y = buffer.read<float>();
 }
 
 void filter_fractal::serialize(ByteBuffer& buffer)
@@ -1038,7 +1040,7 @@ void filter_fractal::serialize(ByteBuffer& buffer)
 	buffer.write(feather_distance);
 	buffer.write(low);
 	buffer.write(high);
-	buffer.write(step);
+	buffer.write(scale_y);
 }
 
 void filter_height::deserialize(ByteBuffer& buffer)
