@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>1267</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -163,7 +163,7 @@
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="documentMode">
         <bool>true</bool>
@@ -182,7 +182,7 @@
          <string>Flora</string>
         </attribute>
        </widget>
-       <widget class="QWidget" name="tabRadialGroup">
+       <widget class="swged::RadialGroupWidget" name="tabRadialGroup">
         <attribute name="title">
          <string>Radial</string>
         </attribute>
@@ -281,6 +281,12 @@
    <class>swged::ShaderGroupWidget</class>
    <extends>QWidget</extends>
    <header>terrain/shader_group_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>swged::RadialGroupWidget</class>
+   <extends>QWidget</extends>
+   <header>terrain/radial_group_widget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -1,10 +1,6 @@
 
 #pragma once
 
-#include <memory>
-
-#include <QImage>
-#include <QString>
 #include <QWidget>
 
 #include "swganh/terrain/procedural_terrain.h"
@@ -21,30 +17,29 @@ class QToolBar;
 class QTreeView;
 class QPlainTextEdit;
 
-Q_DECLARE_METATYPE(swganh::terrain::shader_family*)
-Q_DECLARE_METATYPE(swganh::terrain::shader_family::shader_child*)
+Q_DECLARE_METATYPE(swganh::terrain::radial_family*)
+Q_DECLARE_METATYPE(swganh::terrain::radial_family::radial_child*)
 
 namespace swged {
 
 	class DDSPreview;
-
-	class ShaderGroupWidget : public QWidget
+	
+	class RadialGroupWidget : public QWidget
 	{
 		Q_OBJECT
 
 	public:
+		explicit RadialGroupWidget(QWidget* parent = nullptr);
+		~RadialGroupWidget();
 
-		ShaderGroupWidget(QWidget* parent = nullptr);
-		~ShaderGroupWidget();
-
-		void setShaderGroup(swganh::terrain::shader_group_t* shader_group);
+		void setRadialGroup(swganh::terrain::radial_group_t* radial_group);
 		void setConsole(QPlainTextEdit* console);
 		void setArchive(swganh::tre::TreArchive* archive);
 
 	signals:
 		void propertiedItemSelected(QWidget*);
 
-	private slots:
+		private slots:
 		void itemClicked(const QModelIndex&);
 
 	private:
@@ -55,8 +50,8 @@ namespace swged {
 		std::unique_ptr<QTreeView> family_tree_;
 		std::unique_ptr<DDSPreview> shader_preview_;
 
-		typedef GroupModel<swganh::terrain::shader_family, swganh::terrain::shader_family::shader_child> ShaderGroupModel;
-		std::unique_ptr<ShaderGroupModel> model_;
+		typedef GroupModel<swganh::terrain::radial_family, swganh::terrain::radial_family::radial_child> RadialGroupModel;
+		std::unique_ptr<RadialGroupModel> model_;
 		QPlainTextEdit* console_;
 
 		swganh::tre::TreArchive* archive_;

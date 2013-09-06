@@ -26,9 +26,13 @@ TerrainEditor::TerrainEditor(std::unique_ptr<procedural_terrain> terrain, TreArc
     auto layer_model = new LayerModel(terrain_->layers, layerTree);
     layerTree->setModel(layer_model);
 
-    tabShaderGroup->setConsole(consoleEdit);
-	tabShaderGroup->setArchive(archive_);
-	tabShaderGroup->setShaderGroup(&terrain_->shader_group);
+    //9tabShaderGroup->setConsole(consoleEdit);
+	//9tabShaderGroup->setArchive(archive_);
+	//9tabShaderGroup->setShaderGroup(&terrain_->shader_group);
+
+	tabRadialGroup->setConsole(consoleEdit);
+	tabRadialGroup->setArchive(archive_);
+	tabRadialGroup->setRadialGroup(&terrain_->radial_group);
 
 	connect(tabShaderGroup, SIGNAL(propertiedItemSelected(QWidget*)), this, SLOT(onPropertiedItemSelected(QWidget*)));
 

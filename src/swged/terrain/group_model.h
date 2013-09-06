@@ -48,8 +48,15 @@ namespace swged {
 		{
 			if (parent.isValid())
 			{
-				auto family = typeFromIndex<FamilyT>(parent);
-				return family->children.size();
+				if (isFamily(parent))
+				{
+					auto family = typeFromIndex<FamilyT>(parent);
+					return family->children.size();
+				}
+				else
+				{
+					return 0;
+				}
 			}
 
 			return group_->get_families().size();

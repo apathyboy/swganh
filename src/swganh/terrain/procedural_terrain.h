@@ -11,7 +11,7 @@ namespace terrain {
 
 	typedef terrain_group<shader_family> shader_group_t;
 	typedef terrain_group<flora_family> flora_group_t;
-	typedef terrain_group<radial_family> radial_family_t;
+	typedef terrain_group<radial_family> radial_group_t;
 	typedef terrain_group<environment_family> environment_group_t;
 	typedef terrain_group<fractal_family> fractal_group_t;
 
@@ -28,7 +28,7 @@ namespace terrain {
 
 		shader_group_t shader_group;
 		flora_group_t flora_group;
-		radial_family_t radial_group;
+		radial_group_t radial_group;
 		environment_group_t environment_group;
 		fractal_group_t fractal_group;
 		std::vector<std::unique_ptr<construction_layer>> layers;
